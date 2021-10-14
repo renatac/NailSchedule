@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "405672301565",
+    "project_id": "nailschedule-5deb9",
+    "storage_bucket": "nailschedule-5deb9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405672301565:android:d39c194dba8cbfa4d77f94",
+        "android_client_info": {
+          "package_name": "com.example.nailschedule"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "405672301565-9f3v6ve8koeujba7rbq4pvi8s32to4c4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8Kro_POa_aXWM-lb8mGRBsKo6OaFqnWc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "405672301565-9f3v6ve8koeujba7rbq4pvi8s32to4c4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
