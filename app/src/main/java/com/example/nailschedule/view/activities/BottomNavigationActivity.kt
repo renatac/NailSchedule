@@ -1,14 +1,17 @@
 package com.example.nailschedule.view.activities
 
+import android.net.Uri
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityBottonNavigationBinding
+import com.example.nailschedule.view.activities.LoginActivity.Companion.EXTRA_DISPLAY_NAME
+import com.example.nailschedule.view.activities.LoginActivity.Companion.EXTRA_PHOTO_URL
 
 class BottomNavigationActivity : AppCompatActivity() {
 
@@ -19,6 +22,8 @@ class BottomNavigationActivity : AppCompatActivity() {
 
         binding = ActivityBottonNavigationBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        getExtras()
 
         val navView: BottomNavigationView = binding.navView
 
@@ -32,5 +37,12 @@ class BottomNavigationActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+    }
+
+    private fun getExtras() {
+        val displayName = intent.getBundleExtra(LoginActivity.EXTRA_USER_DATA)
+            ?.getString(EXTRA_DISPLAY_NAME)
+        val photoUrl = Uri.parse(intent.getBundleExtra(LoginActivity.EXTRA_USER_DATA)
+            ?.getString(EXTRA_PHOTO_URL))
     }
 }

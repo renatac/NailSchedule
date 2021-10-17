@@ -1,8 +1,12 @@
 package com.example.nailschedule.view.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.nailschedule.databinding.ActivityMainBinding
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -16,18 +20,26 @@ import com.google.firebase.analytics.FirebaseAnalytics
 class LoginActivity : AppCompatActivity() {
 
     companion object {
-        const val GOOGLE_SIGN_IN = 1
+        const val LOGIN_TYPE_IDENTIFIER = "login_type_identifier"
+        const val GOOGLE_SIGN_IN_VALUE = 1
+        const val EXTRA_USER_DATA = "extra_user_data"
+        const val EXTRA_DISPLAY_NAME = "extra_display_name"
+        const val EXTRA_PHOTO_URL = "extra_photo_url"
     }
 
     private lateinit var analytics: FirebaseAnalytics
     private lateinit var binding: ActivityMainBinding
     private lateinit var mGoogleSignInClient: GoogleSignInClient
 
+    private lateinit var startForResult: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        registerForActivityResult()
 
         binding.btnGoogleSignIn.setOnClickListener {
             googleSignIn()
@@ -38,12 +50,26 @@ class LoginActivity : AppCompatActivity() {
 
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        val gso: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .build()
+        val gso: GoogleSignInOptions =
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build()
 
         // Build a GoogleSignInClient with the options specified by gso.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+    }
+
+    private fun registerForActivityResult() {
+        startForResult =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+            { result: ActivityResult ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                            // The Task returned from this call is always completed, no need to attach
+                            // a listener.
+                            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                            handleSignInResult(task)
+                }
+            }
     }
 
     override fun onStart() {
@@ -55,20 +81,10 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun googleSignIn() {
-        val signInIntent: Intent = mGoogleSignInClient.signInIntent
-        startActivityForResult(signInIntent, GOOGLE_SIGN_IN)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == GOOGLE_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
-            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
-            handleSignInResult(task)
+        val intent : Intent = mGoogleSignInClient.signInIntent.apply {
+            putExtra(LOGIN_TYPE_IDENTIFIER, GOOGLE_SIGN_IN_VALUE)
         }
+        startForResult.launch(intent)
     }
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
@@ -76,7 +92,15 @@ class LoginActivity : AppCompatActivity() {
             val account: GoogleSignInAccount = completedTask.getResult(ApiException::class.java)
             // Signed in successfully, show authenticated UI.
             println(account)
-            val intent =  Intent(this, BottomNavigationActivity::class.java)
+            val bundle = Bundle().apply {
+                putString(EXTRA_DISPLAY_NAME, account.displayName)
+                putString(EXTRA_PHOTO_URL, account.photoUrl?.toString())
+            }
+            val intent =  Intent(
+                this,
+                BottomNavigationActivity::class.java).apply {
+                    putExtra(EXTRA_USER_DATA, bundle)
+                }
             startActivity(intent)
         } catch (e: ApiException) {
             // The ApiException status code indicates the detailed failure reason.
