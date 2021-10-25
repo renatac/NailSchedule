@@ -27,6 +27,15 @@ local.properties
 .idea / vcs.xml
 * .iml
 
+/local.properties
+/.idea/caches
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/build
+/captures
+.externalNativeBuild
+.cxx
+
 # Arquivos específicos do sistema operacional
 .DS_Store
 .DS_Store ?

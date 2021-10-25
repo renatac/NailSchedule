@@ -22,7 +22,6 @@ class LoginActivity : AppCompatActivity() {
     companion object {
         const val LOGIN_TYPE_IDENTIFIER = "login_type_identifier"
         const val GOOGLE_SIGN_IN_VALUE = 1
-        const val EXTRA_USER_DATA = "extra_user_data"
         const val EXTRA_DISPLAY_NAME = "extra_display_name"
         const val EXTRA_PHOTO_URL = "extra_photo_url"
     }
@@ -92,14 +91,11 @@ class LoginActivity : AppCompatActivity() {
             val account: GoogleSignInAccount = completedTask.getResult(ApiException::class.java)
             // Signed in successfully, show authenticated UI.
             println(account)
-            val bundle = Bundle().apply {
-                putString(EXTRA_DISPLAY_NAME, account.displayName)
-                putString(EXTRA_PHOTO_URL, account.photoUrl?.toString())
-            }
             val intent =  Intent(
                 this,
                 BottomNavigationActivity::class.java).apply {
-                    putExtra(EXTRA_USER_DATA, bundle)
+                    putExtra(EXTRA_DISPLAY_NAME, account.displayName)
+                    putExtra(EXTRA_PHOTO_URL, account.photoUrl?.toString())
                 }
             startActivity(intent)
         } catch (e: ApiException) {
