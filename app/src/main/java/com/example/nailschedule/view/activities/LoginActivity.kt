@@ -1,5 +1,6 @@
 package com.example.nailschedule.view.activities
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -17,6 +18,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.firebase.analytics.FirebaseAnalytics
 
+
 class LoginActivity : AppCompatActivity() {
 
     companion object {
@@ -24,11 +26,31 @@ class LoginActivity : AppCompatActivity() {
         const val GOOGLE_SIGN_IN_VALUE = 1
         const val EXTRA_DISPLAY_NAME = "extra_display_name"
         const val EXTRA_PHOTO_URL = "extra_photo_url"
+
+        @SuppressLint("StaticFieldLeak")
+        @Volatile private var INSTANCE: GoogleSignInClient? = null
+
+        fun googleSignInClientGetInstance(activity: Activity): GoogleSignInClient =
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: buildGoogleSignInClient(activity).also { INSTANCE = it }
+            }
+
+        private fun buildGoogleSignInClient(activity: Activity): GoogleSignInClient {
+            // Configure sign-in to request the user's ID, email address, and basic
+            // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+            val gso: GoogleSignInOptions =
+                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .build()
+
+            // Build a GoogleSignInClient with the options specified by gso.
+            return GoogleSignIn.getClient(activity, gso)
+        }
     }
 
     private lateinit var analytics: FirebaseAnalytics
     private lateinit var binding: ActivityMainBinding
-    private lateinit var mGoogleSignInClient: GoogleSignInClient
+    lateinit var mGoogleSignInClient: GoogleSignInClient
 
     private lateinit var startForResult: ActivityResultLauncher<Intent>
 
@@ -47,15 +69,8 @@ class LoginActivity : AppCompatActivity() {
         analytics = FirebaseAnalytics.getInstance(this)
         analytics.logEvent("initialize_firebase_analytics", null)
 
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        val gso: GoogleSignInOptions =
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build()
-
         // Build a GoogleSignInClient with the options specified by gso.
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+        mGoogleSignInClient = googleSignInClientGetInstance(this)
     }
 
     private fun registerForActivityResult() {

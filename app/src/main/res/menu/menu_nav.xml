@@ -21,12 +21,12 @@
 
     <item android:title="Title 1">
         <menu>
-            <item android:id="@+id/nav_item_six"
+            <item android:id="@+id/log_off"
                 android:icon="@android:drawable/ic_menu_camera"
-                android:title="Item 6" />
-            <item android:id="@+id/nav_item_seven"
+                android:title="Log off" />
+            <item android:id="@+id/exit"
                 android:icon="@android:drawable/ic_menu_compass"
-                android:title="Item 7" />
+                android:title="Exit" />
         </menu>
     </item>
 </menu>

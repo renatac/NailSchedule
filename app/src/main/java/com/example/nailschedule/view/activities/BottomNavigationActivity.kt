@@ -17,6 +17,7 @@ import com.example.nailschedule.databinding.ActivityBottomNavigationBinding
 import com.example.nailschedule.databinding.NavHeaderBinding
 import com.example.nailschedule.view.activities.LoginActivity.Companion.EXTRA_DISPLAY_NAME
 import com.example.nailschedule.view.activities.LoginActivity.Companion.EXTRA_PHOTO_URL
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 
@@ -108,11 +109,26 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.create_new -> {
-                Toast.makeText(this, "Menu 1", Toast.LENGTH_SHORT).show()
+            R.id.nav_item_one -> {
+                Toast.makeText(this, "Item 1", Toast.LENGTH_SHORT).show()
             }
-            R.id.open -> {
-                Toast.makeText(this, "Menu 2", Toast.LENGTH_SHORT).show()
+            R.id.nav_item_two -> {
+                Toast.makeText(this, "Item 2", Toast.LENGTH_SHORT).show()
+            }
+            R.id.nav_item_three -> {
+                Toast.makeText(this, "Item 3", Toast.LENGTH_SHORT).show()
+            }
+            R.id.nav_item_four -> {
+                Toast.makeText(this, "Item 4", Toast.LENGTH_SHORT).show()
+            }
+            R.id.nav_item_five-> {
+                Toast.makeText(this, "Item 5", Toast.LENGTH_SHORT).show()
+            }
+            R.id.log_off -> {
+                signOut()
+            }
+            R.id.exit -> {
+                finishAffinity()
             }
             else -> {
                 Toast.makeText(this, "Menu Default", Toast.LENGTH_SHORT).show()
@@ -120,5 +136,12 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
         }
         activityBottomNavigationBinding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun signOut() {
+        LoginActivity.googleSignInClientGetInstance(this).signOut()
+            .addOnCompleteListener(this, OnCompleteListener<Void?> {
+                finish()
+            })
     }
 }
