@@ -3,6 +3,7 @@ package com.example.nailschedule.view.activities.ui.activities
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -13,16 +14,27 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.nailschedule.databinding.ActivityLoginBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferenceHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
-import com.facebook.*
+import com.facebook.AccessToken
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
 import com.facebook.login.LoginResult
+import com.google.android.gms.auth.GoogleAuthException
+import com.google.android.gms.auth.GoogleAuthUtil
+import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.firebase.analytics.FirebaseAnalytics
-import org.json.JSONException
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.FacebookAuthProvider
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import java.io.IOException
 
 
 class LoginActivity : AppCompatActivity() {
@@ -49,6 +61,8 @@ class LoginActivity : AppCompatActivity() {
             // Build a GoogleSignInClient with the options specified by gso.
             return GoogleSignIn.getClient(activity, gso)
         }
+
+        var credential: AuthCredential? = null
     }
 
     private lateinit var analytics: FirebaseAnalytics
@@ -61,7 +75,6 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         initSharedPreferences()
-
         if(GoogleSignIn.getLastSignedInAccount(this) != null || isLoggedInFacebook()) {
             redirectToBottomNavigation()
         }
@@ -92,11 +105,15 @@ class LoginActivity : AppCompatActivity() {
         // CallbackManager to handle like facebook login calls
         callbackManager = CallbackManager.Factory.create()
 
-        binding.btnFacebookSignIn.setReadPermissions("email")
+        binding.btnFacebookSignIn.setReadPermissions("email", "public_profile")
 
         // Callback registration
         binding.btnFacebookSignIn.registerCallback(callbackManager, object : FacebookCallback<LoginResult?> {
             override fun onSuccess(loginResult: LoginResult?) {
+                SharedPreferenceHelper.write(
+                    SharedPreferenceHelper.FACEBOOK_ACCESS_TOKEN,
+                    loginResult?.accessToken.toString()
+                )
                 loadUserProfile(loginResult?.accessToken)
                 Toast.makeText(applicationContext,"SUCESSO AO LOGAR PELO FACE!",
                     Toast.LENGTH_LONG).show()
@@ -119,11 +136,6 @@ class LoginActivity : AppCompatActivity() {
 
     private fun initSharedPreferences() {
         SharedPreferenceHelper.init(applicationContext)
-
-        /*
-        sharedPref = getSharedPreferences("Preferences", Context.MODE_PRIVATE)
-        editor = sharedPref.edit()
-        */
     }
 
     private fun registerForActivityResult() {
@@ -131,10 +143,67 @@ class LoginActivity : AppCompatActivity() {
             registerForActivityResult(ActivityResultContracts.StartActivityForResult())
             { result: ActivityResult ->
                 if (result.resultCode == Activity.RESULT_OK) {
-                            // The Task returned from this call is always completed, no need to attach
-                            // a listener.
-                            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                            handleSignInResult(task)
+                    // The Task returned from this call is always completed, no need to attach
+                    // a listener.
+                    val task: Task<GoogleSignInAccount> =
+                        GoogleSignIn.getSignedInAccountFromIntent(result.data)
+
+                    SharedPreferenceHelper.write(
+                        SharedPreferenceHelper.GOOGLE_TOKEN_ID,
+                        task.result.idToken
+                    )
+
+                    ///////////////////////////////////////////////////////////////////////////
+
+                    val resultOkay = Auth.GoogleSignInApi.getSignInResultFromIntent(result.data!!)
+                    if (resultOkay.isSuccess) {
+                        val account: GoogleSignInAccount? = resultOkay.signInAccount
+
+                        val runnable = Runnable {
+                            try {
+                                val scope = "oauth2:" + Scopes.EMAIL + " " + Scopes.PROFILE
+                                val accessToken = GoogleAuthUtil.getToken(
+                                    applicationContext,
+                                    account?.account,
+                                    scope,
+                                    Bundle()
+                                )
+                                SharedPreferenceHelper.write(
+                                    SharedPreferenceHelper.GOOGLE_ACCESS_TOKEN,
+                                    accessToken
+                                )
+                                ///////////////////////////////////////////////////////////////////////////
+
+                                val accountGoogle = GoogleSignIn.getSignedInAccountFromIntent(result.data).result
+                                accountGoogle?.let { conta ->
+                                    credential = GoogleAuthProvider.getCredential(conta.idToken, accessToken)
+                                }
+
+                                Log.d("teste", "accessToken:$accessToken")
+                                //Login With Google
+                                FirebaseAuth.getInstance()
+                                    .signInWithCredential(
+                                        credential!!
+                                        /* GoogleAuthProvider.getCredential(
+                                              SharedPreferenceHelper.read(
+                                                 SharedPreferenceHelper.GOOGLE_TOKEN_ID, ""),
+                                             SharedPreferenceHelper.read(
+                                                 SharedPreferenceHelper.GOOGLE_ACCESS_TOKEN, "")
+                                       ) */
+                                    ).addOnSuccessListener {
+                                        handleSignInResult(task)
+                                    }.addOnFailureListener {
+                                        println(it)
+                                    }
+
+                            } catch (e: IOException) {
+                                e.printStackTrace();
+                            } catch (e: GoogleAuthException) {
+                                e.printStackTrace()
+                            }
+                        }
+                        AsyncTask.execute(runnable)
+                    }
                 }
             }
     }
@@ -170,11 +239,33 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         callbackManager.onActivityResult(requestCode, resultCode, data)
+        // Pass the activity result back to the Facebook SDK
         super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun loadUserProfile(newAccessToken: AccessToken?) {
-        val request = GraphRequest.newMeRequest(
+        val credential = FacebookAuthProvider.getCredential(newAccessToken?.token ?: "" )
+        FirebaseAuth.getInstance().signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d("test", "signInWithCredential:success")
+                    val user = FirebaseAuth.getInstance().currentUser
+                    val name = user?.displayName
+                    val imageUrl = user?.photoUrl.toString()
+                    SharedPreferenceHelper.write(SharedPreferenceHelper.EXTRA_DISPLAY_NAME, name)
+                    SharedPreferenceHelper.write(SharedPreferenceHelper.EXTRA_PHOTO_URL, imageUrl)
+                    redirectToBottomNavigation()
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w("test", "signInWithCredential:failure", task.exception)
+                    Toast.makeText(baseContext, "Authentication failed.",
+                        Toast.LENGTH_SHORT).show()
+                    //updateUI(null)
+                }
+            }
+
+        /*val request = GraphRequest.newMeRequest(
             newAccessToken
         ) { `object`, _ ->
             try {
@@ -197,5 +288,6 @@ class LoginActivity : AppCompatActivity() {
             request.parameters = parameters
             request.executeAsync()
         }
+         */
     }
 }

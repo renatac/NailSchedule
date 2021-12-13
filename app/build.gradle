@@ -67,6 +67,9 @@ dependencies {
     // Firebase Authentication library
     implementation 'com.google.firebase:firebase-auth-ktx'
 
+    // Firebase Cloud Storage (Kotlin)
+    implementation 'com.google.firebase:firebase-storage-ktx'
+
     // Google Play services library
     implementation 'com.google.android.gms:play-services-auth:19.2.0'
 }

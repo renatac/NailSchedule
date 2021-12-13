@@ -9,6 +9,9 @@ object SharedPreferenceHelper {
     private var mSharedPref: SharedPreferences? = null
     const val EXTRA_DISPLAY_NAME = "extra_display_name"
     const val EXTRA_PHOTO_URL = "extra_photo_url"
+    const val GOOGLE_ACCESS_TOKEN = "google_access_token"
+    const val GOOGLE_TOKEN_ID = "google_token_id"
+    const val FACEBOOK_ACCESS_TOKEN = "facebook_access_token"
 
     fun init(context: Context) {
         if (mSharedPref == null) mSharedPref =
@@ -16,13 +19,13 @@ object SharedPreferenceHelper {
     }
 
     fun read(key: String?, defValue: String?): String? {
-        return mSharedPref!!.getString(key, defValue)
+        return mSharedPref?.getString(key, defValue)
     }
 
     fun write(key: String?, value: String?) {
-        val prefsEditor = mSharedPref!!.edit()
-        prefsEditor.putString(key, value)
-        prefsEditor.apply()
+        val prefsEditor = mSharedPref?.edit()
+        prefsEditor?.putString(key, value)
+        prefsEditor?.apply()
     }
 
     fun read(key: String?, defValue: Boolean): Boolean {
