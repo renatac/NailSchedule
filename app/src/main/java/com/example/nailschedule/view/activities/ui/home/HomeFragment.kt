@@ -19,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.nailschedule.databinding.FragmentHomeBinding
 import com.facebook.FacebookSdk.getApplicationContext
 import com.google.firebase.ktx.Firebase
@@ -28,7 +29,7 @@ import java.util.*
 
 class HomeFragment : Fragment() {
 
-    private lateinit var homeViewModel: HomeViewModel
+    //private lateinit var homeViewModel: HomeViewModel
     private var _binding: FragmentHomeBinding? = null
 
     lateinit var storage: FirebaseStorage
@@ -40,6 +41,10 @@ class HomeFragment : Fragment() {
     private lateinit var startForResult: ActivityResultLauncher<Intent>
 
     private var selectedUri: Uri? = null
+
+    private val homeAdapter: HomeAdapter by lazy {
+        HomeAdapter()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -137,21 +142,30 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
+        /* homeViewModel =
+            ViewModelProvider(this).get(HomeViewModel::class.java) */
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner, Observer {
+        /*homeViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
-        })
+        }) */
 
         binding.btnSelectPhoto.setOnClickListener {
             selectPhoto()
         }
+
+        setupAdapter()
+
         return root
+    }
+
+    private fun setupAdapter() {
+        binding.recyclerHome.layoutManager =
+            GridLayoutManager(requireContext(), 3)
+        binding.recyclerHome.adapter = homeAdapter
     }
 
     override fun onDestroyView() {
@@ -183,23 +197,35 @@ class HomeFragment : Fragment() {
                                     getApplicationContext().contentResolver,
                                     selectedUri
                                 )
-                                binding.ivPhoto.setImageBitmap(bitmap)
                             } else {
                                 val source = ImageDecoder.createSource(getApplicationContext().contentResolver,
                                     selectedUri!!
                                 )
                                 bitmap = ImageDecoder.decodeBitmap(source)
-                                binding.ivPhoto.setImageBitmap(bitmap)
                             }
                             saveUserInFirebase()
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
-                    binding.ivPhoto.setImageBitmap(bitmap)
-                    binding.btnSelectPhoto.alpha = 0f
+                    bitmap?.let {
+                        hideEmptyState()
+                        showRecyclerView()
+                        homeAdapter.setItemList(arrayListOf(it))
+                    }
                 }
             }
+    }
+
+    private fun showRecyclerView() {
+        binding.recyclerHome.visibility = View.VISIBLE
+    }
+
+    private fun hideEmptyState() {
+        with(binding) {
+            btnSelectPhoto.visibility = View.GONE
+            textHome.visibility = View.GONE
+        }
     }
 
     private fun saveUserInFirebase() {
