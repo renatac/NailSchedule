@@ -157,6 +157,10 @@ class HomeFragment : Fragment() {
             selectPhoto()
         }
 
+        binding.btnAddPhotos.setOnClickListener {
+            selectPhoto()
+        }
+
         setupAdapter()
 
         return root
@@ -164,7 +168,7 @@ class HomeFragment : Fragment() {
 
     private fun setupAdapter() {
         binding.recyclerHome.layoutManager =
-            GridLayoutManager(requireContext(), 3)
+            GridLayoutManager(requireContext(), 2)
         binding.recyclerHome.adapter = homeAdapter
     }
 
@@ -211,18 +215,22 @@ class HomeFragment : Fragment() {
                     bitmap?.let {
                         hideEmptyState()
                         showRecyclerView()
-                        homeAdapter.setItemList(arrayListOf(it))
+                        homeAdapter.setItemList(it)
                     }
                 }
             }
     }
 
     private fun showRecyclerView() {
-        binding.recyclerHome.visibility = View.VISIBLE
+        with(binding){
+            btnAddPhotos.visibility = View.VISIBLE
+            recyclerHome.visibility = View.VISIBLE
+        }
     }
 
     private fun hideEmptyState() {
         with(binding) {
+            title.visibility = View.GONE
             btnSelectPhoto.visibility = View.GONE
             textHome.visibility = View.GONE
         }

@@ -6,6 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".view.activities.ui.home.HomeFragment">
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/gallery_message"
+        android:layout_margin="@dimen/margin_20dp"
+        android:textSize="@dimen/_22sp"
+        android:textStyle="italic|bold"
+        android:textColor="@color/purple_700"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <LinearLayout
         android:id="@+id/ll_home"
         android:layout_width="match_parent"
@@ -21,38 +34,52 @@
             android:id="@+id/text_home"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="@string/add_photo"
             android:textAlignment="center"
             android:textAllCaps="false"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:text="@string/add_photo" />
+            android:textColor="@color/purple_500"
+            android:textSize="@dimen/_20sp" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_select_photo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_width="200dp"
+            android:shadowRadius="23"
+            android:background="@color/purple_500"
             android:text="@string/choose_photos"
             android:textAlignment="center"
             android:textAllCaps="false"
-            android:textSize="20sp" />
+            android:textSize="@dimen/_20sp"
+            android:textColor="@color/white"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="8dp" />
 
     </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_add_photos"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="@string/add_more_photos"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_marginTop="@dimen/margin_16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_home"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:visibility="gone"
         android:layout_marginStart="@dimen/margin_8dp"
-        android:layout_marginTop="@dimen/margin_8dp"
+        android:layout_marginVertical="@dimen/margin_8dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_add_photos"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:itemCount="7"
         tools:listitem="@layout/item_list_home" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

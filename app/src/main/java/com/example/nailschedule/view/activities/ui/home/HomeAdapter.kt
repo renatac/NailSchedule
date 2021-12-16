@@ -8,7 +8,7 @@ import com.example.nailschedule.databinding.ItemListHomeBinding
 
 class HomeAdapter: RecyclerView.Adapter<HomeAdapter.MyViewHolder>() {
 
-    private var bitmapList: ArrayList<Bitmap>? = arrayListOf()
+    private var bitmapList: MutableList<Bitmap>? = arrayListOf()
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -26,8 +26,8 @@ class HomeAdapter: RecyclerView.Adapter<HomeAdapter.MyViewHolder>() {
 
     override fun getItemCount() = bitmapList?.size ?: 0
 
-    fun setItemList(itemList: ArrayList<Bitmap>?) {
-        bitmapList = itemList
+    fun setItemList(itemList: Bitmap) {
+        bitmapList?.add(itemList)
         notifyDataSetChanged()
     }
 
