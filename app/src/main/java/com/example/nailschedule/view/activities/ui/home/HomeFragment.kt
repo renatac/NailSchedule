@@ -13,12 +13,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.nailschedule.databinding.FragmentHomeBinding
 import com.facebook.FacebookSdk.getApplicationContext
@@ -42,8 +41,10 @@ class HomeFragment : Fragment() {
 
     private var selectedUri: Uri? = null
 
+    private var bitmapClicked: Bitmap? = null
+
     private val homeAdapter: HomeAdapter by lazy {
-        HomeAdapter()
+        HomeAdapter(::onShortClick, ::hideTrash)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -153,12 +154,18 @@ class HomeFragment : Fragment() {
             textView.text = it
         }) */
 
-        binding.btnSelectPhoto.setOnClickListener {
-            selectPhoto()
-        }
+        with(binding) {
+            btnSelectPhoto.setOnClickListener {
+                selectPhoto()
+            }
 
-        binding.btnAddPhotos.setOnClickListener {
-            selectPhoto()
+            btnAddPhotos.setOnClickListener {
+                selectPhoto()
+            }
+
+            ivDelete.setOnClickListener {
+                homeAdapter.clickToRemove(root.context)
+            }
         }
 
         setupAdapter()
@@ -196,8 +203,8 @@ class HomeFragment : Fragment() {
                     var bitmap: Bitmap? = null
                     try {
                         selectedUri?.let {
-                            if(Build.VERSION.SDK_INT < 28) {
-                                bitmap = MediaStore.Images.Media.getBitmap(
+                            bitmap = if(Build.VERSION.SDK_INT < 28) {
+                                MediaStore.Images.Media.getBitmap(
                                     getApplicationContext().contentResolver,
                                     selectedUri
                                 )
@@ -205,7 +212,7 @@ class HomeFragment : Fragment() {
                                 val source = ImageDecoder.createSource(getApplicationContext().contentResolver,
                                     selectedUri!!
                                 )
-                                bitmap = ImageDecoder.decodeBitmap(source)
+                                ImageDecoder.decodeBitmap(source)
                             }
                             saveUserInFirebase()
                         }
@@ -216,6 +223,7 @@ class HomeFragment : Fragment() {
                         hideEmptyState()
                         showRecyclerView()
                         homeAdapter.setItemList(it)
+                        bitmapClicked = bitmap
                     }
                 }
             }
@@ -224,6 +232,7 @@ class HomeFragment : Fragment() {
     private fun showRecyclerView() {
         with(binding){
             btnAddPhotos.visibility = View.VISIBLE
+            ivDelete.visibility = View.VISIBLE
             recyclerHome.visibility = View.VISIBLE
         }
     }
@@ -247,5 +256,13 @@ class HomeFragment : Fragment() {
                     }
                 }
         }
+    }
+
+    private fun onShortClick(bitmap: Bitmap) {
+        Toast.makeText(requireContext(), "", Toast.LENGTH_LONG).show()
+    }
+
+    private fun hideTrash() {
+        binding.ivDelete.visibility = View.GONE
     }
 }

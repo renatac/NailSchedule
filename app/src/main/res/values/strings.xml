@@ -15,5 +15,7 @@
     <string name="gallery_message">Que tal preencher esta Galeria com suas fotos de unhas prediletas?</string>
     <string name="choose_photos">Escolher fotos</string>
     <string name="add_more_photos">Adicione mais Fotos</string>
+    <string name="trash">lixeira</string>
+    <string name="no_selected_photo">Não há fotos selecionadas</string>
 
 </resources>
