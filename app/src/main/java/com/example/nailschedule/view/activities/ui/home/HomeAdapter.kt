@@ -1,22 +1,23 @@
 package com.example.nailschedule.view.activities.ui.home
 
 import android.content.Context
-import android.graphics.Bitmap
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ItemListHomeBinding
 
-class HomeAdapter(private val onShortClick: (Bitmap) -> Unit,
+class HomeAdapter(private val onShortClick: (Uri) -> Unit,
                   private val hideTrash: () -> Unit) :
     RecyclerView.Adapter<HomeAdapter.MyViewHolder>() {
 
-    private var bitmapList: MutableList<Bitmap>? = arrayListOf()
+    private var uriList: ArrayList<Uri>? = arrayListOf()
     private var hasLongClick = false
-    private var selectedBitmapList: ArrayList<Bitmap> = arrayListOf()
+    private var selectedUriList: ArrayList<Uri> = arrayListOf()
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -29,36 +30,63 @@ class HomeAdapter(private val onShortClick: (Bitmap) -> Unit,
     )
 
     override fun onBindViewHolder(holder: HomeAdapter.MyViewHolder, position: Int) {
-        holder.bind(bitmapList?.get(position))
+        holder.bind(uriList?.get(position))
     }
 
-    override fun getItemCount() = bitmapList?.size ?: 0
+    override fun getItemCount() = uriList?.size ?: 0
 
-    fun setItemList(itemList: Bitmap) {
-        bitmapList?.add(itemList)
+    fun setItemList(uri: Uri) {
+        uriList?.add(uri)
         notifyDataSetChanged()
     }
 
-    private fun addBitmapSelected(bitmap: Bitmap?) {
-        bitmap?.let { selectedBitmapList.add(bitmap) }
+    private fun addBitmapSelected(uri: Uri?) {
+        uri?.let { selectedUriList.add(uri) }
     }
 
-    private fun removeBitmapSelected(bitmap: Bitmap?) {
-        bitmap?.let { selectedBitmapList.remove(bitmap) }
-        if(selectedBitmapList.isEmpty()) { hideTrash.invoke()}
+    private fun removeBitmapSelected(uri: Uri?) {
+        uri?.let { selectedUriList.remove(uri) }
+        if(uriList?.isEmpty() == true) { hideTrash.invoke()}
     }
 
     fun clickToRemove(context: Context) {
-        if(selectedBitmapList.isEmpty()) {
-            Toast.makeText(context,context.getString(R.string.no_selected_photo),Toast.LENGTH_LONG).show()
-        }
-        bitmapList?.removeAll(selectedBitmapList)
+        printMessageAboutExclusion(context)
+        uriList?.removeAll(selectedUriList)
+        selectedUriList.clear()
         notifyDataSetChanged()
+        if (uriList?.isEmpty() == true) {
+            hideTrash.invoke()
+        }
     }
 
-    private fun ensureAppearance(bitmap: Bitmap?, binding: ItemListHomeBinding) {
+    private fun printMessageAboutExclusion(context: Context) {
+        when {
+            selectedUriList.isEmpty() -> {
+                showToast(context, R.string.no_selected_photo)
+            }
+            selectedUriList.size == 1 -> {
+                showToast(context, R.string.photo_deleted)
+            }
+            uriList?.size == selectedUriList.size -> {
+                showToast(context, R.string.all_photos_deleted)
+            }
+            else -> {
+                showToast(context, R.string.photos_deleted)
+            }
+        }
+    }
+
+    private fun showToast(context: Context, stringId: Int) {
+        Toast.makeText(
+            context,
+            context.getString(stringId),
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
+    private fun ensureAppearance(uri: Uri?, binding: ItemListHomeBinding) {
         with(binding) {
-            if (selectedBitmapList.contains(bitmap)) {
+            if (selectedUriList.contains(uri)) {
                 item.setBackgroundResource(R.color.purple_200)
             } else {
                 item.setBackgroundColor(
@@ -71,47 +99,48 @@ class HomeAdapter(private val onShortClick: (Bitmap) -> Unit,
         }
     }
 
-    private fun onLongClick(bitmap: Bitmap?, binding: ItemListHomeBinding) {
+    private fun onLongClick(uri: Uri?, binding: ItemListHomeBinding) {
         with(binding) {
-            if (selectedBitmapList.contains(bitmap)) {
+            if (selectedUriList.contains(uri)) {
                     item.setBackgroundColor(
                         ContextCompat.getColor(
                             item.rootView.context,
                             R.color.transparent
                         )
                     )
-                removeBitmapSelected(bitmap)
+                removeBitmapSelected(uri)
             } else {
                 item.setBackgroundResource(R.color.purple_200)
-                addBitmapSelected(bitmap)
+                addBitmapSelected(uri)
             }
         }
-        if(selectedBitmapList.isEmpty()) { hasLongClick = false }
+        if(selectedUriList.isEmpty()) { hasLongClick = false }
     }
 
-    private fun shortClick(bitmap: Bitmap?) {
-        bitmap?.let { onShortClick.invoke(bitmap) }
+    private fun shortClick(uri: Uri?) {
+        uri?.let { onShortClick.invoke(uri) }
     }
 
     inner class MyViewHolder(private val binding: ItemListHomeBinding) :
         RecyclerView.ViewHolder(binding.root) {
-            fun bind(bitmap: Bitmap?) = binding.apply {
-                ensureAppearance(bitmap, binding)
+            fun bind(uri: Uri?) = binding.apply {
+                ensureAppearance(uri, binding)
                 with(item) {
                     setOnLongClickListener {
                         hasLongClick = true
-                        onLongClick(bitmap, binding)
+                        onLongClick(uri, binding)
                         return@setOnLongClickListener true
                     }
                     setOnClickListener {
                         if(hasLongClick) {
-                            onLongClick(bitmap, binding)
+                            onLongClick(uri, binding)
                         } else {
-                            shortClick(bitmap)
+                            shortClick(uri)
                         }
                     }
                 }
-                ivItem.setImageBitmap(bitmap)
+                //Setting the image to imageView using Glide Library
+                Glide.with(item.rootView.context).load(uri.toString()).into(ivItem)
             }
         }
 }

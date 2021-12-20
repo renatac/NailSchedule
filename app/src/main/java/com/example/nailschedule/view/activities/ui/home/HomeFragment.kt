@@ -2,12 +2,8 @@ package com.example.nailschedule.view.activities.ui.home
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -20,18 +16,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.nailschedule.databinding.FragmentHomeBinding
-import com.facebook.FacebookSdk.getApplicationContext
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import java.util.*
+
 
 class HomeFragment : Fragment() {
 
     //private lateinit var homeViewModel: HomeViewModel
     private var _binding: FragmentHomeBinding? = null
 
-    lateinit var storage: FirebaseStorage
+    private lateinit var storage: StorageReference
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -41,8 +38,6 @@ class HomeFragment : Fragment() {
 
     private var selectedUri: Uri? = null
 
-    private var bitmapClicked: Bitmap? = null
-
     private val homeAdapter: HomeAdapter by lazy {
         HomeAdapter(::onShortClick, ::hideTrash)
     }
@@ -50,7 +45,22 @@ class HomeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerForActivityResult()
-        storage = Firebase.storage
+        storage = Firebase.storage.reference
+        doPhotosDownload()
+    }
+
+    private fun doPhotosDownload() {
+        storage.child("/images").listAll().addOnSuccessListener { listResult ->
+            listResult.items.forEach {
+                it.downloadUrl.addOnSuccessListener { uri ->
+                    homeAdapter.setItemList(uri)
+                }.addOnFailureListener { exception ->
+                    print(exception)
+                }
+            }
+            hideEmptyState()
+            showRecyclerView()
+        }
     }
 
     /* private fun includesForCreateReference() {
@@ -200,37 +210,22 @@ class HomeFragment : Fragment() {
                     selectedUri = result.data?.data
                     Log.i("Teste", selectedUri.toString())
 
-                    var bitmap: Bitmap? = null
                     try {
                         selectedUri?.let {
-                            bitmap = if(Build.VERSION.SDK_INT < 28) {
-                                MediaStore.Images.Media.getBitmap(
-                                    getApplicationContext().contentResolver,
-                                    selectedUri
-                                )
-                            } else {
-                                val source = ImageDecoder.createSource(getApplicationContext().contentResolver,
-                                    selectedUri!!
-                                )
-                                ImageDecoder.decodeBitmap(source)
-                            }
+                            homeAdapter.setItemList(it)
+                            hideEmptyState()
+                            showRecyclerView()
                             saveUserInFirebase()
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
-                    }
-                    bitmap?.let {
-                        hideEmptyState()
-                        showRecyclerView()
-                        homeAdapter.setItemList(it)
-                        bitmapClicked = bitmap
                     }
                 }
             }
     }
 
     private fun showRecyclerView() {
-        with(binding){
+        with(binding) {
             btnAddPhotos.visibility = View.VISIBLE
             ivDelete.visibility = View.VISIBLE
             recyclerHome.visibility = View.VISIBLE
@@ -250,15 +245,10 @@ class HomeFragment : Fragment() {
         val ref = FirebaseStorage.getInstance().getReference("images/${filename}")
         selectedUri?.let {
             ref.putFile(it)
-                .addOnSuccessListener {
-                    ref.downloadUrl.addOnSuccessListener {
-                        Log.i("Teste", it.toString())
-                    }
-                }
         }
     }
 
-    private fun onShortClick(bitmap: Bitmap) {
+    private fun onShortClick(uri: Uri) {
         Toast.makeText(requireContext(), "", Toast.LENGTH_LONG).show()
     }
 

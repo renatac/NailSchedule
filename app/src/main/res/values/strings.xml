@@ -17,5 +17,8 @@
     <string name="add_more_photos">Adicione mais Fotos</string>
     <string name="trash">lixeira</string>
     <string name="no_selected_photo">Não há fotos selecionadas</string>
+    <string name="photo_deleted">Foto apagada</string>
+    <string name="photos_deleted">Fotos apagadas</string>
+    <string name="all_photos_deleted">Todas as fotos foram apagadas</string>
 
 </resources>
