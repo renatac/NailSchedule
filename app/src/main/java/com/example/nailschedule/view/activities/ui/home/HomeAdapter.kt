@@ -4,15 +4,16 @@ import android.content.Context
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ItemListHomeBinding
+import com.example.nailschedule.view.activities.utils.showToast
 
 class HomeAdapter(private val onShortClick: (Uri) -> Unit,
-                  private val hideTrash: () -> Unit) :
+                  private val hideTrash: () -> Unit,
+                  private val deletePhotosFromCloudStorage: () -> Unit) :
     RecyclerView.Adapter<HomeAdapter.MyViewHolder>() {
 
     private var uriList: ArrayList<Uri>? = arrayListOf()
@@ -40,11 +41,11 @@ class HomeAdapter(private val onShortClick: (Uri) -> Unit,
         notifyDataSetChanged()
     }
 
-    private fun addBitmapSelected(uri: Uri?) {
+    private fun addUriSelected(uri: Uri?) {
         uri?.let { selectedUriList.add(uri) }
     }
 
-    private fun removeBitmapSelected(uri: Uri?) {
+    private fun removeUriSelected(uri: Uri?) {
         uri?.let { selectedUriList.remove(uri) }
         if(uriList?.isEmpty() == true) { hideTrash.invoke()}
     }
@@ -57,6 +58,7 @@ class HomeAdapter(private val onShortClick: (Uri) -> Unit,
         if (uriList?.isEmpty() == true) {
             hideTrash.invoke()
         }
+        deletePhotosFromCloudStorage.invoke()
     }
 
     private fun printMessageAboutExclusion(context: Context) {
@@ -74,14 +76,6 @@ class HomeAdapter(private val onShortClick: (Uri) -> Unit,
                 showToast(context, R.string.photos_deleted)
             }
         }
-    }
-
-    private fun showToast(context: Context, stringId: Int) {
-        Toast.makeText(
-            context,
-            context.getString(stringId),
-            Toast.LENGTH_LONG
-        ).show()
     }
 
     private fun ensureAppearance(uri: Uri?, binding: ItemListHomeBinding) {
@@ -108,10 +102,10 @@ class HomeAdapter(private val onShortClick: (Uri) -> Unit,
                             R.color.transparent
                         )
                     )
-                removeBitmapSelected(uri)
+                removeUriSelected(uri)
             } else {
                 item.setBackgroundResource(R.color.purple_200)
-                addBitmapSelected(uri)
+                addUriSelected(uri)
             }
         }
         if(selectedUriList.isEmpty()) { hasLongClick = false }

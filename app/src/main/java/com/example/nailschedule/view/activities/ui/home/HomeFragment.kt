@@ -39,17 +39,17 @@ class HomeFragment : Fragment() {
     private var selectedUri: Uri? = null
 
     private val homeAdapter: HomeAdapter by lazy {
-        HomeAdapter(::onShortClick, ::hideTrash)
+        HomeAdapter(::onShortClick, ::hideTrash, ::deletePhotosFromCloudStorage)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerForActivityResult()
         storage = Firebase.storage.reference
-        doPhotosDownload()
+        downloadPhotosFromCloudStorage()
     }
 
-    private fun doPhotosDownload() {
+    private fun downloadPhotosFromCloudStorage() {
         storage.child("/images").listAll().addOnSuccessListener { listResult ->
             listResult.items.forEach {
                 it.downloadUrl.addOnSuccessListener { uri ->
@@ -215,7 +215,7 @@ class HomeFragment : Fragment() {
                             homeAdapter.setItemList(it)
                             hideEmptyState()
                             showRecyclerView()
-                            saveUserInFirebase()
+                            uploadPhotoToCloudStorage()
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -240,7 +240,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun saveUserInFirebase() {
+    private fun uploadPhotoToCloudStorage() {
         val filename = UUID.randomUUID().toString()
         val ref = FirebaseStorage.getInstance().getReference("images/${filename}")
         selectedUri?.let {
@@ -254,5 +254,14 @@ class HomeFragment : Fragment() {
 
     private fun hideTrash() {
         binding.ivDelete.visibility = View.GONE
+    }
+
+    private fun deletePhotosFromCloudStorage() {
+        storage.child("/images").listAll().addOnSuccessListener { listResult ->
+            listResult.items.forEach {
+                it.delete().addOnSuccessListener { uri ->
+                }
+            }
+        }
     }
 }
