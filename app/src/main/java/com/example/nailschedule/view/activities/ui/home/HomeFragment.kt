@@ -46,13 +46,14 @@ class HomeFragment : Fragment() {
         super.onCreate(savedInstanceState)
         registerForActivityResult()
         storage = Firebase.storage.reference
-        downloadPhotosFromCloudStorage()
     }
 
     private fun downloadPhotosFromCloudStorage() {
+        //var hasPhotos = false
         storage.child("/images").listAll().addOnSuccessListener { listResult ->
             listResult.items.forEach {
                 it.downloadUrl.addOnSuccessListener { uri ->
+                    //hasPhotos = true
                     homeAdapter.setItemList(uri)
                 }.addOnFailureListener { exception ->
                     print(exception)
@@ -61,6 +62,10 @@ class HomeFragment : Fragment() {
             hideEmptyState()
             showRecyclerView()
         }
+        /*if(!hasPhotos) {
+            showEmptyState()
+            //hideRecyclerView()
+        }*/
     }
 
     /* private fun includesForCreateReference() {
@@ -164,6 +169,8 @@ class HomeFragment : Fragment() {
             textView.text = it
         }) */
 
+        downloadPhotosFromCloudStorage()
+
         with(binding) {
             btnSelectPhoto.setOnClickListener {
                 selectPhoto()
@@ -232,6 +239,22 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun hideRecyclerView() {
+        with(binding) {
+            btnAddPhotos.visibility = View.GONE
+            ivDelete.visibility = View.GONE
+            recyclerHome.visibility = View.GONE
+        }
+    }
+
+    private fun showEmptyState() {
+        with(binding) {
+            title.visibility = View.VISIBLE
+            btnSelectPhoto.visibility = View.VISIBLE
+            textHome.visibility = View.VISIBLE
+        }
+    }
+
     private fun hideEmptyState() {
         with(binding) {
             title.visibility = View.GONE
@@ -256,11 +279,22 @@ class HomeFragment : Fragment() {
         binding.ivDelete.visibility = View.GONE
     }
 
-    private fun deletePhotosFromCloudStorage() {
-        storage.child("/images").listAll().addOnSuccessListener { listResult ->
-            listResult.items.forEach {
-                it.delete().addOnSuccessListener { uri ->
+    private fun deletePhotosFromCloudStorage(uriList: List<Uri>, areAllItems: Boolean) {
+        if(areAllItems) {
+            storage.child("/images").listAll().addOnSuccessListener { listResult ->
+                listResult.items.forEach {
+                    it.delete().addOnSuccessListener {
+                    }
                 }
+            }
+        } else {
+            uriList.forEach { uri ->
+                val uriString = uri.toString()
+                val initialIndex = uriString.indexOf("F")
+                val finalIndex = uriString.indexOf("?")
+                val filename = uriString.substring(initialIndex + 1, finalIndex)
+                print(filename)
+                storage.child("/images/$filename").delete()
             }
         }
     }

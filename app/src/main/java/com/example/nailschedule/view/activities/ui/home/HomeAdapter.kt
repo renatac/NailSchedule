@@ -11,9 +11,11 @@ import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ItemListHomeBinding
 import com.example.nailschedule.view.activities.utils.showToast
 
-class HomeAdapter(private val onShortClick: (Uri) -> Unit,
-                  private val hideTrash: () -> Unit,
-                  private val deletePhotosFromCloudStorage: () -> Unit) :
+class HomeAdapter(
+    private val onShortClick: (Uri) -> Unit,
+    private val hideTrash: () -> Unit,
+    private val deletePhotosFromCloudStorage: (List<Uri>, areAllItems: Boolean) -> Unit
+) :
     RecyclerView.Adapter<HomeAdapter.MyViewHolder>() {
 
     private var uriList: ArrayList<Uri>? = arrayListOf()
@@ -41,6 +43,8 @@ class HomeAdapter(private val onShortClick: (Uri) -> Unit,
         notifyDataSetChanged()
     }
 
+    fun getList() = uriList
+
     private fun addUriSelected(uri: Uri?) {
         uri?.let { selectedUriList.add(uri) }
     }
@@ -53,12 +57,13 @@ class HomeAdapter(private val onShortClick: (Uri) -> Unit,
     fun clickToRemove(context: Context) {
         printMessageAboutExclusion(context)
         uriList?.removeAll(selectedUriList)
-        selectedUriList.clear()
-        notifyDataSetChanged()
         if (uriList?.isEmpty() == true) {
             hideTrash.invoke()
         }
-        deletePhotosFromCloudStorage.invoke()
+        val areAllItems = uriList?.size == selectedUriList.size
+        deletePhotosFromCloudStorage.invoke(selectedUriList, areAllItems)
+        selectedUriList.clear()
+        notifyDataSetChanged()
     }
 
     private fun printMessageAboutExclusion(context: Context) {
