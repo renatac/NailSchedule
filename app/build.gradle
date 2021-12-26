@@ -73,6 +73,9 @@ dependencies {
     // Firebase Cloud Storage (Kotlin)
     implementation 'com.google.firebase:firebase-storage-ktx'
 
+    // Cloud Firestore library
+    implementation 'com.google.firebase:firebase-firestore-ktx'
+
     // Google Play services library
     implementation 'com.google.android.gms:play-services-auth:19.2.0'
 

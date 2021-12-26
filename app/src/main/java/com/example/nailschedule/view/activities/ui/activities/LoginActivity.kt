@@ -114,6 +114,7 @@ class LoginActivity : AppCompatActivity() {
                     SharedPreferenceHelper.FACEBOOK_ACCESS_TOKEN,
                     loginResult?.accessToken.toString()
                 )
+                SharedPreferenceHelper.write(SharedPreferenceHelper.GOOGLE_ID, loginResult?.accessToken?.userId)
                 loadUserProfile(loginResult?.accessToken)
                 Toast.makeText(applicationContext,"SUCESSO AO LOGAR PELO FACE!",
                     Toast.LENGTH_LONG).show()
@@ -158,6 +159,7 @@ class LoginActivity : AppCompatActivity() {
                     val resultOkay = Auth.GoogleSignInApi.getSignInResultFromIntent(result.data!!)
                     if (resultOkay.isSuccess) {
                         val account: GoogleSignInAccount? = resultOkay.signInAccount
+                        SharedPreferenceHelper.write(SharedPreferenceHelper.GOOGLE_ID, account?.id)
 
                         val runnable = Runnable {
                             try {

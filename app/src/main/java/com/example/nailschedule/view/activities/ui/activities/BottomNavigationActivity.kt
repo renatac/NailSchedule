@@ -52,7 +52,7 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+                R.id.navigation_gallery, R.id.navigation_scheduling, R.id.navigation_scheduled
             ),
             activityBottomNavigationBinding.drawerLayout
         )

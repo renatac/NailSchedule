@@ -12,6 +12,12 @@ object SharedPreferenceHelper {
     const val GOOGLE_ACCESS_TOKEN = "google_access_token"
     const val GOOGLE_TOKEN_ID = "google_token_id"
     const val FACEBOOK_ACCESS_TOKEN = "facebook_access_token"
+    const val GOOGLE_ID = "google_id"
+    const val FACEBOOK_ID = "facebook_id"
+    const val NAME = "name"
+    const val SERVICE = "service"
+    const val DATE = "date"
+    const val TIME = "time"
 
     fun init(context: Context) {
         if (mSharedPref == null) mSharedPref =

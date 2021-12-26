@@ -1,4 +1,4 @@
-package com.example.nailschedule.view.activities.ui.home
+package com.example.nailschedule.view.activities.ui.gallery
 
 import android.content.Context
 import android.net.Uri
@@ -11,12 +11,12 @@ import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ItemListHomeBinding
 import com.example.nailschedule.view.activities.utils.showToast
 
-class HomeAdapter(
+class GalleryAdapter(
     private val onShortClick: (Uri) -> Unit,
     private val hideTrash: () -> Unit,
     private val deletePhotosFromCloudStorage: (List<Uri>, areAllItems: Boolean) -> Unit
 ) :
-    RecyclerView.Adapter<HomeAdapter.MyViewHolder>() {
+    RecyclerView.Adapter<GalleryAdapter.MyViewHolder>() {
 
     private var uriList: ArrayList<Uri>? = arrayListOf()
     private var hasLongClick = false
@@ -25,14 +25,14 @@ class HomeAdapter(
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): HomeAdapter.MyViewHolder = MyViewHolder(
+    ): GalleryAdapter.MyViewHolder = MyViewHolder(
         ItemListHomeBinding.inflate(
             LayoutInflater.from(parent.context),
             parent, false
         )
     )
 
-    override fun onBindViewHolder(holder: HomeAdapter.MyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: GalleryAdapter.MyViewHolder, position: Int) {
         holder.bind(uriList?.get(position))
     }
 
@@ -42,6 +42,8 @@ class HomeAdapter(
         uriList?.add(uri)
         notifyDataSetChanged()
     }
+
+    fun clearList() = uriList?.clear()
 
     fun getList() = uriList
 

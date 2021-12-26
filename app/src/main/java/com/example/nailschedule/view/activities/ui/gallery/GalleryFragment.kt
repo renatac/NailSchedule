@@ -1,4 +1,4 @@
-package com.example.nailschedule.view.activities.ui.home
+package com.example.nailschedule.view.activities.ui.gallery
 
 import android.app.Activity
 import android.content.Intent
@@ -8,14 +8,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
-import com.example.nailschedule.databinding.FragmentHomeBinding
+import com.example.nailschedule.databinding.FragmentGalleryBinding
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -23,10 +23,12 @@ import com.google.firebase.storage.ktx.storage
 import java.util.*
 
 
-class HomeFragment : Fragment() {
+class GalleryFragment : Fragment() {
 
     //private lateinit var homeViewModel: HomeViewModel
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentGalleryBinding? = null
+
+    private lateinit var galleryViewModel: GalleryViewModel
 
     private lateinit var storage: StorageReference
 
@@ -38,34 +40,16 @@ class HomeFragment : Fragment() {
 
     private var selectedUri: Uri? = null
 
-    private val homeAdapter: HomeAdapter by lazy {
-        HomeAdapter(::onShortClick, ::hideTrash, ::deletePhotosFromCloudStorage)
+    private val galleryAdapter: GalleryAdapter by lazy {
+        GalleryAdapter(::onShortClick, ::hideTrash, ::deletePhotosFromCloudStorage)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerForActivityResult()
         storage = Firebase.storage.reference
-    }
-
-    private fun downloadPhotosFromCloudStorage() {
-        //var hasPhotos = false
-        storage.child("/images").listAll().addOnSuccessListener { listResult ->
-            listResult.items.forEach {
-                it.downloadUrl.addOnSuccessListener { uri ->
-                    //hasPhotos = true
-                    homeAdapter.setItemList(uri)
-                }.addOnFailureListener { exception ->
-                    print(exception)
-                }
-            }
-            hideEmptyState()
-            showRecyclerView()
-        }
-        /*if(!hasPhotos) {
-            showEmptyState()
-            //hideRecyclerView()
-        }*/
+        galleryViewModel =
+            ViewModelProvider(this).get(GalleryViewModel::class.java)
     }
 
     /* private fun includesForCreateReference() {
@@ -158,18 +142,17 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        /* homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java) */
 
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentGalleryBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textHome
-        /*homeViewModel.text.observe(viewLifecycleOwner, Observer {
+        showProgress()
+        galleryAdapter.clearList()
+        downloadPhotosFromCloudStorage()
+        /* val textView: TextView = binding.textHome
+        homeViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         }) */
-
-        downloadPhotosFromCloudStorage()
 
         with(binding) {
             btnSelectPhoto.setOnClickListener {
@@ -181,7 +164,7 @@ class HomeFragment : Fragment() {
             }
 
             ivDelete.setOnClickListener {
-                homeAdapter.clickToRemove(root.context)
+                galleryAdapter.clickToRemove(root.context)
             }
         }
 
@@ -190,10 +173,35 @@ class HomeFragment : Fragment() {
         return root
     }
 
+    private fun downloadPhotosFromCloudStorage() {
+        galleryViewModel.hasPhoto.observe(viewLifecycleOwner, {
+            hideProgress()
+            if(galleryViewModel.hasPhoto.value!!) {
+                hideEmptyState()
+                showRecyclerView()
+            } else {
+                showEmptyState()
+                hideRecyclerView()
+            }
+        })
+        //galleryViewModel.hasPhoto.value = false
+        storage.child("/images").listAll().addOnSuccessListener { listResult ->
+            listResult.items.forEach {
+                it.downloadUrl.addOnSuccessListener { uri ->
+                    galleryViewModel.hasPhoto.value = true
+                    galleryAdapter.setItemList(uri)
+                }.
+                addOnFailureListener { exception ->
+                    print(exception)
+                }
+            }
+        }
+    }
+
     private fun setupAdapter() {
         binding.recyclerHome.layoutManager =
             GridLayoutManager(requireContext(), 2)
-        binding.recyclerHome.adapter = homeAdapter
+        binding.recyclerHome.adapter = galleryAdapter
     }
 
     override fun onDestroyView() {
@@ -219,7 +227,7 @@ class HomeFragment : Fragment() {
 
                     try {
                         selectedUri?.let {
-                            homeAdapter.setItemList(it)
+                            galleryAdapter.setItemList(it)
                             hideEmptyState()
                             showRecyclerView()
                             uploadPhotoToCloudStorage()
@@ -229,13 +237,14 @@ class HomeFragment : Fragment() {
                     }
                 }
             }
+
     }
 
     private fun showRecyclerView() {
         with(binding) {
+            recyclerHome.visibility = View.VISIBLE
             btnAddPhotos.visibility = View.VISIBLE
             ivDelete.visibility = View.VISIBLE
-            recyclerHome.visibility = View.VISIBLE
         }
     }
 
@@ -250,16 +259,14 @@ class HomeFragment : Fragment() {
     private fun showEmptyState() {
         with(binding) {
             title.visibility = View.VISIBLE
-            btnSelectPhoto.visibility = View.VISIBLE
-            textHome.visibility = View.VISIBLE
+            llHome.visibility = View.VISIBLE
         }
     }
 
     private fun hideEmptyState() {
         with(binding) {
             title.visibility = View.GONE
-            btnSelectPhoto.visibility = View.GONE
-            textHome.visibility = View.GONE
+            llHome.visibility = View.GONE
         }
     }
 
@@ -275,12 +282,20 @@ class HomeFragment : Fragment() {
         Toast.makeText(requireContext(), "", Toast.LENGTH_LONG).show()
     }
 
+    private fun showProgress() {
+        binding.progressGallery.visibility = View.VISIBLE
+    }
+
+    private fun hideProgress() {
+        binding.progressGallery.visibility = View.GONE
+    }
+
     private fun hideTrash() {
         binding.ivDelete.visibility = View.GONE
     }
 
     private fun deletePhotosFromCloudStorage(uriList: List<Uri>, areAllItems: Boolean) {
-        if(areAllItems) {
+        if (areAllItems) {
             storage.child("/images").listAll().addOnSuccessListener { listResult ->
                 listResult.items.forEach {
                     it.delete().addOnSuccessListener {
