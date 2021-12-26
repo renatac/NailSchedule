@@ -3,7 +3,12 @@
 <dimen name="margin_16dp">16dp</dimen>
 <dimen name="margin_20dp">20dp</dimen>
 
+<dimen name="_4dp">4dp</dimen>
+<dimen name="_5dp">5dp</dimen>
+<dimen name="_50dp">50dp</dimen>
+
 <dimen name="_16sp">16sp</dimen>
+<dimen name="_18sp">18sp</dimen>
 <dimen name="_20sp">20sp</dimen>
 <dimen name="_22sp">22sp</dimen>
 </resources>

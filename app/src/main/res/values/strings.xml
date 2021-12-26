@@ -22,7 +22,7 @@
     <string name="photos_deleted">Fotos apagadas</string>
     <string name="all_photos_deleted">Todas as fotos foram apagadas</string>
 
-    <!-- Schedule Fragment-->
+    <!-- Scheduling Fragment-->
     <string name="scheduled_date">Seu data foi agendada - %d/%d/%d.</string>
     <string name="service">Digite o Serviço</string>
     <string name="scheduled_time">Horário agendado: %s</string>
@@ -35,5 +35,12 @@
     <string name="empty_date">Preencha a Data</string>
     <string name="empty_time">Preencha a Hora</string>
     <string name="your_name_and_surname">Digite seu nome e sobrenome</string>
+
+    <!-- Scheduled Fragment-->
+    <string name="mark">mark</string>
+    <string name="lb_client"><b>Cliente:</b> %s</string>
+    <string name="lb_service"><b>Servico:</b> %s</string>
+    <string name="lb_date"><b>Data:</b> %s</string>
+    <string name="lb_time"><b>Hora:</b> %s</string>
 
 </resources>

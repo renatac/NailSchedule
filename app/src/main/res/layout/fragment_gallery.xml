@@ -102,11 +102,14 @@
         android:visibility="gone"
         android:layout_marginStart="@dimen/margin_8dp"
         android:layout_marginVertical="@dimen/margin_8dp"
+        android:scrollbarSize="4dp"
+        android:scrollbarThumbVertical="@android:color/darker_gray"
+        android:scrollbars="vertical"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/btn_add_photos"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/item_list_home" />
+        tools:listitem="@layout/item_list_gallery" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

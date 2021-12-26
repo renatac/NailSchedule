@@ -8,7 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.nailschedule.R
-import com.example.nailschedule.databinding.ItemListHomeBinding
+import com.example.nailschedule.databinding.ItemListGalleryBinding
 import com.example.nailschedule.view.activities.utils.showToast
 
 class GalleryAdapter(
@@ -26,7 +26,7 @@ class GalleryAdapter(
         parent: ViewGroup,
         viewType: Int
     ): GalleryAdapter.MyViewHolder = MyViewHolder(
-        ItemListHomeBinding.inflate(
+        ItemListGalleryBinding.inflate(
             LayoutInflater.from(parent.context),
             parent, false
         )
@@ -85,7 +85,7 @@ class GalleryAdapter(
         }
     }
 
-    private fun ensureAppearance(uri: Uri?, binding: ItemListHomeBinding) {
+    private fun ensureAppearance(uri: Uri?, binding: ItemListGalleryBinding) {
         with(binding) {
             if (selectedUriList.contains(uri)) {
                 item.setBackgroundResource(R.color.purple_200)
@@ -100,7 +100,7 @@ class GalleryAdapter(
         }
     }
 
-    private fun onLongClick(uri: Uri?, binding: ItemListHomeBinding) {
+    private fun onLongClick(uri: Uri?, binding: ItemListGalleryBinding) {
         with(binding) {
             if (selectedUriList.contains(uri)) {
                     item.setBackgroundColor(
@@ -122,7 +122,7 @@ class GalleryAdapter(
         uri?.let { onShortClick.invoke(uri) }
     }
 
-    inner class MyViewHolder(private val binding: ItemListHomeBinding) :
+    inner class MyViewHolder(private val binding: ItemListGalleryBinding) :
         RecyclerView.ViewHolder(binding.root) {
             fun bind(uri: Uri?) = binding.apply {
                 ensureAppearance(uri, binding)
