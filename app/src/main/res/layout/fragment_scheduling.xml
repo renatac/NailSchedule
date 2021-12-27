@@ -8,6 +8,9 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:scrollbarSize="4dp"
+        android:scrollbarThumbVertical="@android:color/darker_gray"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

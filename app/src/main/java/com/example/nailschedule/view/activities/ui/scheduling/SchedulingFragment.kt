@@ -117,15 +117,7 @@ class SchedulingFragment : Fragment() {
                     && (service != null)
                     && (date != null) && (time != null)) {
                     val user = User(name = name!!, service = service!!, date = date!!, time = time!!)
-                    FirebaseFirestore.getInstance().collection("users").document(googleId!!)
-                    .set(user) //add the data if it doesn't already exist and update it if it already exists
-                    .addOnSuccessListener {
-                        showToast(requireContext(), R.string.successful_scheduling)
-                    }
-                    .addOnFailureListener {
-                        print(it)
-                        showToast(requireContext(), R.string.error_scheduling)
-                    }
+                    addOrUpdateFirestoreDatabase(user, googleId!!)
                 } else {
                     when {
                         name.isNullOrEmpty() -> {
@@ -146,6 +138,19 @@ class SchedulingFragment : Fragment() {
         }
 
         return root
+    }
+
+    //Firestore Database - Cloud Firestore
+    private fun addOrUpdateFirestoreDatabase(user: User, googleId: String) {
+        FirebaseFirestore.getInstance().collection("users").document(googleId)
+            .set(user) //add the data if it doesn't already exist and update it if it already exists
+            .addOnSuccessListener {
+                showToast(requireContext(), R.string.successful_scheduling)
+            }
+            .addOnFailureListener {
+                print(it)
+                showToast(requireContext(), R.string.error_scheduling)
+            }
     }
 
     override fun onPause() {
