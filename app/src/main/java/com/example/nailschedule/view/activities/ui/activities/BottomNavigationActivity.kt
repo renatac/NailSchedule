@@ -16,7 +16,7 @@ import androidx.navigation.ui.NavigationUI
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityBottomNavigationBinding
 import com.example.nailschedule.databinding.NavHeaderBinding
-import com.example.nailschedule.view.activities.utils.SharedPreferenceHelper
+import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
 import com.facebook.login.LoginManager
 import com.google.android.gms.tasks.OnCompleteListener
@@ -97,11 +97,11 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
     }
 
     private fun getExtras() {
-        displayName = SharedPreferenceHelper.read(
-            SharedPreferenceHelper.EXTRA_DISPLAY_NAME, "")
+        displayName = SharedPreferencesHelper.read(
+            SharedPreferencesHelper.EXTRA_DISPLAY_NAME, "")
         photoUrl = Uri.parse(
-            SharedPreferenceHelper.read(
-            SharedPreferenceHelper.EXTRA_PHOTO_URL, ""))
+            SharedPreferencesHelper.read(
+            SharedPreferencesHelper.EXTRA_PHOTO_URL, ""))
     }
 
     private fun setupNavHeaderElements() {

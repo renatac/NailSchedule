@@ -38,10 +38,12 @@
 
     <!-- Scheduled Fragment-->
     <string name="mark">mark</string>
-    <string name="lb_client"><b>Cliente:</b> %s</string>
-    <string name="lb_service"><b>Serviço:</b> %s</string>
-    <string name="lb_date"><b>Data:</b> %s</string>
-    <string name="lb_time"><b>Hora:</b> %s</string>
+    <string name="lb_client">Cliente</string>
+    <string name="lb_service">Serviço:</string>
+    <string name="lb_date">Data:</string>
+    <string name="lb_time">Horário:</string>
+    <string name="edit">Editar</string>
     <string name="no_schedules">Você não possui horários agendados.</string>
+    <string name="add_or_update">Observação: Caso já possua um agendamento, estará atualizando o mesmo.</string>
 
 </resources>

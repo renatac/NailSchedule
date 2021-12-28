@@ -12,7 +12,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.nailschedule.databinding.ActivityLoginBinding
-import com.example.nailschedule.view.activities.utils.SharedPreferenceHelper
+import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
@@ -110,11 +110,11 @@ class LoginActivity : AppCompatActivity() {
         // Callback registration
         binding.btnFacebookSignIn.registerCallback(callbackManager, object : FacebookCallback<LoginResult?> {
             override fun onSuccess(loginResult: LoginResult?) {
-                SharedPreferenceHelper.write(
-                    SharedPreferenceHelper.FACEBOOK_ACCESS_TOKEN,
+                SharedPreferencesHelper.write(
+                    SharedPreferencesHelper.FACEBOOK_ACCESS_TOKEN,
                     loginResult?.accessToken.toString()
                 )
-                SharedPreferenceHelper.write(SharedPreferenceHelper.GOOGLE_ID, loginResult?.accessToken?.userId)
+                SharedPreferencesHelper.write(SharedPreferencesHelper.GOOGLE_ID, loginResult?.accessToken?.userId)
                 loadUserProfile(loginResult?.accessToken)
                 Toast.makeText(applicationContext,"SUCESSO AO LOGAR PELO FACE!",
                     Toast.LENGTH_LONG).show()
@@ -136,7 +136,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun initSharedPreferences() {
-        SharedPreferenceHelper.init(applicationContext)
+        SharedPreferencesHelper.init(applicationContext)
     }
 
     private fun registerForActivityResult() {
@@ -149,8 +149,8 @@ class LoginActivity : AppCompatActivity() {
                     val task: Task<GoogleSignInAccount> =
                         GoogleSignIn.getSignedInAccountFromIntent(result.data)
 
-                    SharedPreferenceHelper.write(
-                        SharedPreferenceHelper.GOOGLE_TOKEN_ID,
+                    SharedPreferencesHelper.write(
+                        SharedPreferencesHelper.GOOGLE_TOKEN_ID,
                         task.result.idToken
                     )
 
@@ -159,7 +159,7 @@ class LoginActivity : AppCompatActivity() {
                     val resultOkay = Auth.GoogleSignInApi.getSignInResultFromIntent(result.data!!)
                     if (resultOkay.isSuccess) {
                         val account: GoogleSignInAccount? = resultOkay.signInAccount
-                        SharedPreferenceHelper.write(SharedPreferenceHelper.GOOGLE_ID, account?.id)
+                        SharedPreferencesHelper.write(SharedPreferencesHelper.GOOGLE_ID, account?.id)
 
                         val runnable = Runnable {
                             try {
@@ -170,8 +170,8 @@ class LoginActivity : AppCompatActivity() {
                                     scope,
                                     Bundle()
                                 )
-                                SharedPreferenceHelper.write(
-                                    SharedPreferenceHelper.GOOGLE_ACCESS_TOKEN,
+                                SharedPreferencesHelper.write(
+                                    SharedPreferencesHelper.GOOGLE_ACCESS_TOKEN,
                                     accessToken
                                 )
                                 ///////////////////////////////////////////////////////////////////////////
@@ -222,8 +222,8 @@ class LoginActivity : AppCompatActivity() {
             val account: GoogleSignInAccount = completedTask.getResult(ApiException::class.java)
             // Signed in successfully, show authenticated UI.
             println(account)
-            SharedPreferenceHelper.write(SharedPreferenceHelper.EXTRA_DISPLAY_NAME, account.displayName)
-            SharedPreferenceHelper.write(SharedPreferenceHelper.EXTRA_PHOTO_URL, account.photoUrl?.toString())
+            SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_DISPLAY_NAME, account.displayName)
+            SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_PHOTO_URL, account.photoUrl?.toString())
             redirectToBottomNavigation()
         } catch (e: ApiException) {
             // The ApiException status code indicates the detailed failure reason.
@@ -255,8 +255,8 @@ class LoginActivity : AppCompatActivity() {
                     val user = FirebaseAuth.getInstance().currentUser
                     val name = user?.displayName
                     val imageUrl = user?.photoUrl.toString()
-                    SharedPreferenceHelper.write(SharedPreferenceHelper.EXTRA_DISPLAY_NAME, name)
-                    SharedPreferenceHelper.write(SharedPreferenceHelper.EXTRA_PHOTO_URL, imageUrl)
+                    SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_DISPLAY_NAME, name)
+                    SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_PHOTO_URL, imageUrl)
                     redirectToBottomNavigation()
                 } else {
                     // If sign in fails, display a message to the user.

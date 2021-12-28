@@ -9,19 +9,18 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentScheduledBinding
 import com.example.nailschedule.view.activities.data.model.User
+import com.example.nailschedule.view.activities.ui.scheduling.SchedulingFragment
+import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showToast
 import com.google.firebase.firestore.FirebaseFirestore
+
 
 class ScheduledFragment : Fragment() {
 
     private lateinit var scheduledViewModel: ScheduledViewModel
     private var _binding: FragmentScheduledBinding? = null
 
-    private var userList = arrayListOf<User>()
-
-    private val scheduledAdapter: ScheduledAdapter by lazy {
-        ScheduledAdapter(::onClick)
-    }
+    private var user: User? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -34,24 +33,23 @@ class ScheduledFragment : Fragment() {
 
     //Firestore Database - Cloud Firestore
     private fun getDocumentsFromFirestoreDatabase() {
-        FirebaseFirestore.getInstance().collection("users").get()
-            .addOnSuccessListener {
-                it.documents.forEach { documentSnapshot ->
+        val googleId = SharedPreferencesHelper.read(
+            SharedPreferencesHelper.GOOGLE_ID, "")
+        FirebaseFirestore.getInstance().collection("users").document(googleId!!).get()
+            .addOnSuccessListener { documentSnapshot ->
                     with(documentSnapshot.data) {
-                        userList.add(
-                            User(
+                        user = User(
                                 this?.get("name") as String,
                                 this["service"] as String,
                                 this["date"] as String,
                                 this["time"] as String
                             )
-                        )
-                    }
+
                 }
-                if(userList.isEmpty()){
+                if(user == null){
                     showEmptyState()
                 } else {
-                    setupAdapter()
+                    setupFields()
                     hideEmptyState()
                 }
             }
@@ -61,14 +59,39 @@ class ScheduledFragment : Fragment() {
             }
     }
 
+    private fun setupFields() = binding.apply {
+        tvName.text =  user?.name
+        tvServiceValue.text = user?.service
+        tvDateValue.text = user?.date
+        tvTimeValue.text = user?.time
+        btnEdit.setOnClickListener {
+            redirectToSchedulingFragment()
+        }
+    }
+
+    private fun redirectToSchedulingFragment() {
+        saveAtSharedPreferences()
+        parentFragmentManager
+            .beginTransaction()
+            .add(R.id.container_scheduled, SchedulingFragment.newInstance(), "schedulingFragment")
+            .commit()
+    }
+
+    private fun saveAtSharedPreferences() = binding.apply {
+        SharedPreferencesHelper.write(SchedulingFragment.NAME, tvName.text.toString().trim())
+        SharedPreferencesHelper.write(SchedulingFragment.SERVICE, tvServiceValue.text.toString().trim())
+        SharedPreferencesHelper.write(SchedulingFragment.DATE, tvDateValue.text.toString())
+        SharedPreferencesHelper.write(SchedulingFragment.TIME, tvTimeValue.text.toString())
+    }
+
     private fun showEmptyState() = binding.apply {
         noScheduled.visibility = View.VISIBLE
-        recyclerScheduled.visibility = View.GONE
+        containerScheduled.visibility = View.GONE
     }
 
     private fun hideEmptyState() = binding.apply {
         noScheduled.visibility = View.GONE
-        recyclerScheduled.visibility = View.VISIBLE
+        containerScheduled.visibility = View.VISIBLE
     }
 
     override fun onCreateView(
@@ -88,17 +111,8 @@ class ScheduledFragment : Fragment() {
         return root
     }
 
-    private fun setupAdapter() {
-        binding.recyclerScheduled.adapter = scheduledAdapter
-        scheduledAdapter.setItemScheduledList(userList)
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun onClick(user: User) {
-        print(user)
     }
 }

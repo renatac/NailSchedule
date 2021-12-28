@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentSchedulingBinding
 import com.example.nailschedule.view.activities.data.model.User
-import com.example.nailschedule.view.activities.utils.SharedPreferenceHelper
+import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
@@ -37,6 +37,8 @@ class SchedulingFragment : Fragment() {
         const val SERVICE = "service"
         const val DATE = "date"
         const val TIME = "time"
+
+        fun newInstance() = SchedulingFragment()
     }
 
     override fun onCreateView(
@@ -55,14 +57,14 @@ class SchedulingFragment : Fragment() {
             textView.text = it
         }) */
 
-        name = SharedPreferenceHelper.read(
-            SharedPreferenceHelper.NAME, "")
-        service = SharedPreferenceHelper.read(
-            SharedPreferenceHelper.SERVICE, "")
-        date = SharedPreferenceHelper.read(
-            SharedPreferenceHelper.DATE, "")
-        time = SharedPreferenceHelper.read(
-            SharedPreferenceHelper.TIME, "")
+        name = SharedPreferencesHelper.read(
+            SharedPreferencesHelper.NAME, "")
+        service = SharedPreferencesHelper.read(
+            SharedPreferencesHelper.SERVICE, "")
+        date = SharedPreferencesHelper.read(
+            SharedPreferencesHelper.DATE, "")
+        time = SharedPreferencesHelper.read(
+            SharedPreferencesHelper.TIME, "")
 
         with(binding) {
             if(name?.isNotEmpty()==true && name != null) {
@@ -106,8 +108,8 @@ class SchedulingFragment : Fragment() {
             }
 
             btnSave.setOnClickListener {
-                val googleId = SharedPreferenceHelper.read(
-                    SharedPreferenceHelper.GOOGLE_ID, "")
+                val googleId = SharedPreferencesHelper.read(
+                    SharedPreferencesHelper.GOOGLE_ID, "")
                 //val facebookId = SharedPreferenceHelper.read(
                 //    SharedPreferenceHelper.FACEBOOK_ID, "")
 
@@ -156,10 +158,10 @@ class SchedulingFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         with(binding) {
-            SharedPreferenceHelper.write(NAME, txtName.editText?.text.toString().trim())
-            SharedPreferenceHelper.write(SERVICE, txtService.editText?.text.toString().trim())
-            SharedPreferenceHelper.write(DATE, tvSelectedDate.text.toString())
-            SharedPreferenceHelper.write(TIME, tvSelectedTime.text.toString())
+            SharedPreferencesHelper.write(NAME, txtName.editText?.text.toString().trim())
+            SharedPreferencesHelper.write(SERVICE, txtService.editText?.text.toString().trim())
+            SharedPreferencesHelper.write(DATE, tvSelectedDate.text.toString())
+            SharedPreferencesHelper.write(TIME, tvSelectedTime.text.toString())
         }
     }
 
