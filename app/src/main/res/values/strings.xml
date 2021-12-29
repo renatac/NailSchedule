@@ -30,11 +30,16 @@
     <string name="successful_scheduling">Agendamento salvo com sucesso!!!</string>
     <string name="error_scheduling">Erro ao tentar salvar o usuário. Por favor, tente novamente.</string>
     <string name="save">Salvar</string>
+    <string name="take_a_picture">Tirar foto</string>
+    <string name="phone_gallery">Galeria do celular</string>
+    <string name="app_gallery">Galeria do App</string>
     <string name="empty_name">Preencha o Nome</string>
     <string name="empty_service">Preencha o Serviço</string>
     <string name="empty_date">Preencha a Data</string>
     <string name="empty_time">Preencha a Hora</string>
+    <string name="empty_photo">Selecione a foto</string>
     <string name="your_name_and_surname">Digite seu nome e sobrenome</string>
+    <string name="information_photo_change">Caso queira trocar a foto, então clique nela:</string>
 
     <!-- Scheduled Fragment-->
     <string name="mark">mark</string>
@@ -45,5 +50,6 @@
     <string name="edit">Editar</string>
     <string name="no_schedules">Você não possui horários agendados.</string>
     <string name="add_or_update">Observação: Caso já possua um agendamento, estará atualizando o mesmo.</string>
+    <string name="explanation_about_choose_photo">Deixe-me ver a foto do serviço que você quer realizar. Escolha um dos métodos abaixo para obter a foto:</string>
 
 </resources>

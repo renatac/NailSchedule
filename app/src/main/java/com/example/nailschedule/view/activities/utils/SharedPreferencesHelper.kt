@@ -18,6 +18,7 @@ object SharedPreferencesHelper {
     const val SERVICE = "service"
     const val DATE = "date"
     const val TIME = "time"
+    const val URI_STRING = "uri_string"
 
     fun init(context: Context) {
         if (mSharedPref == null) mSharedPref =

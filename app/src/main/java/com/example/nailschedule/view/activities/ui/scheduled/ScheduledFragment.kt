@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentScheduledBinding
 import com.example.nailschedule.view.activities.data.model.User
@@ -42,7 +43,8 @@ class ScheduledFragment : Fragment() {
                                 this?.get("name") as String,
                                 this["service"] as String,
                                 this["date"] as String,
-                                this["time"] as String
+                                this["time"] as String,
+                                this["uriString"] as String,
                             )
 
                 }
@@ -64,12 +66,14 @@ class ScheduledFragment : Fragment() {
         tvServiceValue.text = user?.service
         tvDateValue.text = user?.date
         tvTimeValue.text = user?.time
+        Glide.with(requireContext()).load(user?.uriString).into(ivNail)
         btnEdit.setOnClickListener {
             redirectToSchedulingFragment()
         }
     }
 
     private fun redirectToSchedulingFragment() {
+        binding.btnEdit.visibility = View.GONE
         saveAtSharedPreferences()
         parentFragmentManager
             .beginTransaction()
@@ -82,6 +86,7 @@ class ScheduledFragment : Fragment() {
         SharedPreferencesHelper.write(SchedulingFragment.SERVICE, tvServiceValue.text.toString().trim())
         SharedPreferencesHelper.write(SchedulingFragment.DATE, tvDateValue.text.toString())
         SharedPreferencesHelper.write(SchedulingFragment.TIME, tvTimeValue.text.toString())
+        SharedPreferencesHelper.write(SchedulingFragment.URI_STRING, user?.uriString)
     }
 
     private fun showEmptyState() = binding.apply {
@@ -98,7 +103,7 @@ class ScheduledFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         scheduledViewModel =
             ViewModelProvider(this).get(ScheduledViewModel::class.java)
 
