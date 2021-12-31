@@ -56,5 +56,8 @@
     <string name="title">Serviço que será realizado</string>
     <string name="photo">Visualização de foto</string>
 
+    <!-- Menu nav -->
+    <string name="logout">Deslogar</string>
+    <string name="get_out">Sair</string>
 
 </resources>

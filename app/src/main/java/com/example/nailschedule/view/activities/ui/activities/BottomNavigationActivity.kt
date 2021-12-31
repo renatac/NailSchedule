@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -106,36 +105,18 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
 
     private fun setupNavHeaderElements() {
         navHeaderBinding.apply {
-            navHeaderTextView.text = displayName
-            navHeaderImageView.setImageURI(photoUrl)
+            navHeaderTv.text = displayName
+            navHeaderIv.setImageURI(photoUrl)
         }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.nav_item_one -> {
-                Toast.makeText(this, "Item 1", Toast.LENGTH_SHORT).show()
-            }
-            R.id.nav_item_two -> {
-                Toast.makeText(this, "Item 2", Toast.LENGTH_SHORT).show()
-            }
-            R.id.nav_item_three -> {
-                Toast.makeText(this, "Item 3", Toast.LENGTH_SHORT).show()
-            }
-            R.id.nav_item_four -> {
-                Toast.makeText(this, "Item 4", Toast.LENGTH_SHORT).show()
-            }
-            R.id.nav_item_five-> {
-                Toast.makeText(this, "Item 5", Toast.LENGTH_SHORT).show()
-            }
             R.id.log_off -> {
                 signOut()
             }
-            R.id.exit -> {
-                finishAffinity()
-            }
             else -> {
-                Toast.makeText(this, "Menu Default", Toast.LENGTH_SHORT).show()
+                finishAffinity()
             }
         }
         activityBottomNavigationBinding.drawerLayout.closeDrawer(GravityCompat.START)

@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/item"
-    android:layout_marginEnd="@dimen/margin_8dp"
-    android:layout_marginBottom="@dimen/margin_8dp">
+    android:layout_marginEnd="@dimen/_8dp"
+    android:layout_marginBottom="@dimen/_8dp">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/iv_item"

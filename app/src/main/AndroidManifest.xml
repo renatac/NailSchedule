@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NailSchedule">
         <activity android:name=".view.activities.ui.activities.PhotoActivity"
-            android:label="@string/title" />
+            android:label="@string/photo"/>
         <activity
             android:name=".view.activities.ui.activities.BottomNavigationActivity"
             android:label="@string/title_activity_botton_navigation" />
