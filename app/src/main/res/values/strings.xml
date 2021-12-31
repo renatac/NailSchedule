@@ -52,4 +52,9 @@
     <string name="add_or_update">Observação: Caso já possua um agendamento, estará atualizando o mesmo.</string>
     <string name="explanation_about_choose_photo">Deixe-me ver a foto do serviço que você quer realizar. Escolha um dos métodos abaixo para obter a foto:</string>
 
+    <!-- Photo Activity-->
+    <string name="title">Serviço que será realizado</string>
+    <string name="photo">Visualização de foto</string>
+
+
 </resources>

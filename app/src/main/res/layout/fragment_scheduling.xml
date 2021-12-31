@@ -198,14 +198,6 @@
                     android:textColor="@color/white"
                     android:textSize="@dimen/_16sp"/>
 
-                <Button
-                    android:id="@+id/btn_choose_app_gallery"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/app_gallery"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/_16sp"/>
 
             </LinearLayout>
 
