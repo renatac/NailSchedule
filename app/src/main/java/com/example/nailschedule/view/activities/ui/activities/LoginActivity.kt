@@ -160,6 +160,9 @@ class LoginActivity : AppCompatActivity() {
                     if (resultOkay.isSuccess) {
                         val account: GoogleSignInAccount? = resultOkay.signInAccount
                         SharedPreferencesHelper.write(SharedPreferencesHelper.GOOGLE_ID, account?.id)
+                        SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_DISPLAY_NAME, account?.displayName)
+                        SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_PHOTO_URL, account?.photoUrl.toString())
+                        SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_EMAIL, account?.email)
 
                         val runnable = Runnable {
                             try {
@@ -222,9 +225,7 @@ class LoginActivity : AppCompatActivity() {
             val account: GoogleSignInAccount = completedTask.getResult(ApiException::class.java)
             // Signed in successfully, show authenticated UI.
             println(account)
-            SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_DISPLAY_NAME, account.displayName)
-            SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_PHOTO_URL, account.photoUrl?.toString())
-            redirectToBottomNavigation()
+          redirectToBottomNavigation()
         } catch (e: ApiException) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.

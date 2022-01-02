@@ -52,7 +52,6 @@ class ScheduledFragment : Fragment() {
                                 this["time"] as String,
                                 this["uriString"] as String
                             )
-
                 }
                 if(user == null){
                     showEmptyState()

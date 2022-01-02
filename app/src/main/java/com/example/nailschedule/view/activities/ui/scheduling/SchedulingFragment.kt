@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
@@ -23,7 +22,6 @@ import com.example.nailschedule.databinding.FragmentSchedulingBinding
 import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.StorageReference
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -44,9 +42,6 @@ class SchedulingFragment : Fragment() {
     private var date: String? = null
     private var time: String? = null
     private var uriString: String? = null
-
-    private lateinit var storage: StorageReference
-    private var uriList: MutableList<Uri> = mutableListOf()
 
     companion object {
         const val NAME = "name"

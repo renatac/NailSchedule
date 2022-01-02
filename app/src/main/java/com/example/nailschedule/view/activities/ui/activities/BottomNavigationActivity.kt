@@ -5,6 +5,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -12,6 +14,7 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
+import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityBottomNavigationBinding
 import com.example.nailschedule.databinding.NavHeaderBinding
@@ -32,6 +35,7 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
 
     private var photoUrl: Uri? = null
     private var displayName: String? = null
+    private var email: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,7 +71,6 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
         toggle.syncState()
 
         getExtras()
-        setupNavHeaderElements()
 
         //Set the appBarConfiguration
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
@@ -77,6 +80,8 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
         NavigationUI.setupWithNavController(bottomNavigationView, navController)
         //setupActionBarWithNavController(navController, appBarConfiguration)
         //bottomNavigationView.setupWithNavController(navController)
+
+        setupNavHeaderElements()
     }
 
     override fun onBackPressed() {
@@ -101,13 +106,21 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
         photoUrl = Uri.parse(
             SharedPreferencesHelper.read(
             SharedPreferencesHelper.EXTRA_PHOTO_URL, ""))
+        email = SharedPreferencesHelper.read(
+            SharedPreferencesHelper.EXTRA_EMAIL, "")
     }
 
     private fun setupNavHeaderElements() {
-        navHeaderBinding.apply {
-            navHeaderTv.text = displayName
-            navHeaderIv.setImageURI(photoUrl)
-        }
+            val headerView = activityBottomNavigationBinding.navView.getHeaderView(0)
+            val navHeaderTvName = headerView.findViewById(R.id.nav_header_tv_name) as TextView
+            displayName?.let { navHeaderTvName.text = displayName }
+            val navHeaderIv = headerView.findViewById(R.id.nav_header_iv) as ImageView
+            //Setting the image to imageView using Glide Library
+            photoUrl?.let {
+                Glide.with(this@BottomNavigationActivity).load(photoUrl).into(navHeaderIv)
+            }
+            val navHeaderTvEmail = headerView.findViewById(R.id.nav_header_tv_email) as TextView
+            email?.let { navHeaderTvEmail.text = email }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
