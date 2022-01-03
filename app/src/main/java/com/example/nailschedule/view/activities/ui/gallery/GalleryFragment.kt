@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.nailschedule.databinding.FragmentGalleryBinding
+import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -24,6 +25,8 @@ import java.util.*
 
 
 class GalleryFragment : Fragment() {
+
+    private var email: String? = null
 
     //private lateinit var homeViewModel: HomeViewModel
     private var _binding: FragmentGalleryBinding? = null
@@ -50,6 +53,8 @@ class GalleryFragment : Fragment() {
         storage = Firebase.storage.reference
         galleryViewModel =
             ViewModelProvider(this).get(GalleryViewModel::class.java)
+        email = SharedPreferencesHelper.read(
+            SharedPreferencesHelper.EXTRA_EMAIL, "")
     }
 
     /* private fun includesForCreateReference() {
@@ -185,17 +190,25 @@ class GalleryFragment : Fragment() {
             }
         })
         //galleryViewModel.hasPhoto.value = false
-        storage.child("/images").listAll().addOnSuccessListener { listResult ->
-            listResult.items.forEach {
-                it.downloadUrl.addOnSuccessListener { uri ->
-                    galleryViewModel.hasPhoto.value = true
-                    galleryAdapter.setItemList(uri)
-                }.
-                addOnFailureListener { exception ->
-                    print(exception)
+        storage.child("/images").child("/$email").listAll()
+            .addOnSuccessListener { listResult ->
+                if (listResult.items.size != 0) {
+                    listResult.items.forEach {
+                            it.downloadUrl.addOnSuccessListener { uri ->
+                                galleryViewModel.hasPhoto.value = true
+                                galleryAdapter.setItemList(uri)
+                            }.addOnFailureListener { exception ->
+                                print(exception)
+                            }
+                    }
+                } else {
+                    hideProgress()
+                    showEmptyState()
+                    hideRecyclerView()
                 }
+            }.addOnFailureListener {
+                print(it)
             }
-        }
     }
 
     private fun setupAdapter() {
@@ -271,8 +284,9 @@ class GalleryFragment : Fragment() {
     }
 
     private fun uploadPhotoToCloudStorage() {
-        val filename = UUID.randomUUID().toString()
-        val ref = FirebaseStorage.getInstance().getReference("images/${filename}")
+        val filename = "_${UUID.randomUUID()}"
+        val ref = FirebaseStorage.getInstance()
+            .getReference("images/${email}/${filename}")
         selectedUri?.let {
             ref.putFile(it)
         }
@@ -296,20 +310,21 @@ class GalleryFragment : Fragment() {
 
     private fun deletePhotosFromCloudStorage(uriList: List<Uri>, areAllItems: Boolean) {
         if (areAllItems) {
-            storage.child("/images").listAll().addOnSuccessListener { listResult ->
-                listResult.items.forEach {
-                    it.delete().addOnSuccessListener {
+            storage.child("/images").child("/$email")
+                .listAll().addOnSuccessListener { listResult ->
+                    listResult.items.forEach {
+                        it.delete()
                     }
                 }
-            }
+            showEmptyState()
+            hideRecyclerView()
         } else {
             uriList.forEach { uri ->
                 val uriString = uri.toString()
-                val initialIndex = uriString.indexOf("F")
+                val initialIndex = uriString.indexOf("_")
                 val finalIndex = uriString.indexOf("?")
-                val filename = uriString.substring(initialIndex + 1, finalIndex)
-                print(filename)
-                storage.child("/images/$filename").delete()
+                val filename = uriString.substring(initialIndex, (finalIndex))
+                storage.child("/images").child("/$email/$filename").delete()
             }
         }
     }

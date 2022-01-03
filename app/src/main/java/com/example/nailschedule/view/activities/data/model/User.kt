@@ -5,5 +5,5 @@ data class User(
     val service: String,
     val date: String,
     val time: String,
-    val uriString: String
+    val uriString: String,
 )

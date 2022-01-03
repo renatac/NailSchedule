@@ -30,9 +30,7 @@
     <string name="successful_scheduling">Agendamento salvo com sucesso!!!</string>
     <string name="error_scheduling">Erro ao tentar salvar o usuário. Por favor, tente novamente.</string>
     <string name="save">Salvar</string>
-    <string name="take_a_picture">Tirar foto</string>
-    <string name="phone_gallery">Galeria do celular</string>
-    <string name="app_gallery">Galeria do App</string>
+    <string name="choose_photo">Escolher foto</string>
     <string name="empty_name">Preencha o Nome</string>
     <string name="empty_service">Preencha o Serviço</string>
     <string name="empty_date">Preencha a Data</string>
@@ -40,6 +38,7 @@
     <string name="empty_photo">Selecione a foto</string>
     <string name="your_name_and_surname">Digite seu nome e sobrenome</string>
     <string name="information_photo_change">Caso queira trocar a foto, então clique nela:</string>
+    <string name="select_date_that_wish_to_mark">Selecione a data que deseja marcar:</string>
 
     <!-- Scheduled Fragment-->
     <string name="mark">mark</string>

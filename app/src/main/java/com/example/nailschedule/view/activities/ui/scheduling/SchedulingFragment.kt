@@ -31,7 +31,7 @@ class SchedulingFragment : Fragment() {
     private lateinit var schedulingViewModel: SchedulingViewModel
     private var _binding: FragmentSchedulingBinding? = null
 
-    private lateinit var startForResult: ActivityResultLauncher<Intent>
+    private lateinit var galleryStartForResult: ActivityResultLauncher<Intent>
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -41,6 +41,7 @@ class SchedulingFragment : Fragment() {
     private var service: String? = null
     private var date: String? = null
     private var time: String? = null
+
     private var uriString: String? = null
 
     companion object {
@@ -140,50 +141,24 @@ class SchedulingFragment : Fragment() {
         }
 
         btnSave.setOnClickListener {
-            val googleId = SharedPreferencesHelper.read(
-                SharedPreferencesHelper.GOOGLE_ID, ""
-            )
-            //val facebookId = SharedPreferenceHelper.read(
-            //    SharedPreferenceHelper.FACEBOOK_ID, "")
-
             name = txtName.editText?.text.toString().trim()
             service = txtService.editText?.text.toString().trim()
-            if ((name != null)
-                && (service != null)
-                && (date != null) && (time != null)
+
+            if (isNotEmptyField(name) && isNotEmptyField(service) && isNotEmptyField(date) &&
+                isNotEmptyField(time) && isNotEmptyField(uriString)
             ) {
                 val user = User(
                     name = name!!, service = service!!, date = date!!,
                     time = time!!, uriString = uriString!!
                 )
-                addOrUpdateFirestoreDatabase(user, googleId!!)
+                addOrUpdateFirestoreDatabase(user)
+                clearFields()
             } else {
-                when {
-                    name.isNullOrEmpty() -> {
-                        showToast(requireContext(), R.string.empty_name)
-                    }
-                    service.isNullOrEmpty() -> {
-                        showToast(requireContext(), R.string.empty_service)
-                    }
-                    date.isNullOrEmpty() -> {
-                        showToast(requireContext(), R.string.empty_date)
-                    }
-                    time.isNullOrEmpty() -> {
-                        showToast(requireContext(), R.string.empty_time)
-                    }
-                    uriString.isNullOrEmpty() -> {
-                        showToast(requireContext(), R.string.empty_photo)
-                    }
-
-                }
+                printEmptyField()
             }
         }
 
         registerForActivityResult()
-
-        btnTakeAPicture.setOnClickListener {
-            selectPhotoFromCamera()
-        }
 
         btnChoosePhoneGallery.setOnClickListener {
             selectPhotoFromGallery()
@@ -194,28 +169,64 @@ class SchedulingFragment : Fragment() {
         }
     }
 
-    private fun selectPhotoFromCamera() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        startForResult.launch(intent)
+    private fun clearFields() = binding.apply {
+        txtName.editText?.setText("")
+        txtService.editText?.setText("")
+        calendar.clearFocus()
+        tvSelectedDate.text = ""
+        tvSelectedTime.text = ""
+        uriString = null
+        showOptionsToSelectPhoto()
+        //Setting the image to imageView using Glide Library*/
+        //Glide.with(requireContext()).load(null).into(ivPhoto)
+    }
+
+    private fun printEmptyField() {
+        when {
+            isEmptyField(name) -> {
+                showToast(requireContext(), R.string.empty_name)
+            }
+            isEmptyField(service) -> {
+                showToast(requireContext(), R.string.empty_service)
+            }
+            isEmptyField(date) -> {
+                showToast(requireContext(), R.string.empty_date)
+            }
+            isEmptyField(time) -> {
+                showToast(requireContext(), R.string.empty_time)
+            }
+            isEmptyField(uriString) -> {
+                showToast(requireContext(), R.string.empty_photo)
+            }
+        }
+    }
+
+    private fun isNotEmptyField(field: String?): Boolean {
+        return field != null && field.isNotBlank() && field.isNotEmpty()
+    }
+
+    private fun isEmptyField(field: String?): Boolean {
+        return field == null || field.isBlank() || field.isEmpty()
     }
 
     private fun selectPhotoFromGallery() {
-        val intent = Intent(Intent.ACTION_PICK,
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        val intent = Intent(
+            Intent.ACTION_PICK,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        )
         intent.type = "image/*"
-        startForResult.launch(intent)
+        galleryStartForResult.launch(intent)
     }
 
     private fun registerForActivityResult() = binding.apply {
-        startForResult =
+        galleryStartForResult =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult())
             { result: ActivityResult ->
                 if (result.resultCode == Activity.RESULT_OK) {
                     // The Task returned from this call is always completed, no need to attach
-                    // a listener.
+                    // a listener
                     uriString = result.data?.data.toString()
-                    //Setting the image to imageView using Glide Library
+                    //Setting the image to imageView using Glide Library*/
                     Glide.with(requireContext()).load(uriString).into(ivPhoto)
                     showPhoto()
                 }
@@ -223,7 +234,7 @@ class SchedulingFragment : Fragment() {
     }
 
     private fun showPhoto() = binding.apply {
-        linearLayout.visibility = View.GONE
+        btnChoosePhoneGallery.visibility = View.GONE
         tvInformationPhotoChange.visibility = View.VISIBLE
         ivPhoto.visibility = View.VISIBLE
     }
@@ -231,7 +242,7 @@ class SchedulingFragment : Fragment() {
     private fun showOptionsToSelectPhoto() = binding.apply {
         tvInformationPhotoChange.visibility = View.GONE
         ivPhoto.visibility = View.GONE
-        linearLayout.visibility = View.VISIBLE
+        btnChoosePhoneGallery.visibility = View.VISIBLE
     }
 
     private fun getSharedPreferencesDatas() {
@@ -253,8 +264,11 @@ class SchedulingFragment : Fragment() {
     }
 
     //Firestore Database - Cloud Firestore
-    private fun addOrUpdateFirestoreDatabase(user: User, googleId: String) {
-        FirebaseFirestore.getInstance().collection("users").document(googleId)
+    private fun addOrUpdateFirestoreDatabase(user: User) {
+        val email = SharedPreferencesHelper.read(
+            SharedPreferencesHelper.EXTRA_EMAIL, ""
+        )
+        FirebaseFirestore.getInstance().collection("users").document(email!!)
             .set(user) //add the data if it doesn't already exist and update it if it already exists
             .addOnSuccessListener {
                 showToast(requireContext(), R.string.successful_scheduling)
@@ -268,12 +282,25 @@ class SchedulingFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         with(binding) {
-            SharedPreferencesHelper.write(NAME, txtName.editText?.text.toString().trim())
-            SharedPreferencesHelper.write(SERVICE, txtService.editText?.text.toString().trim())
-            SharedPreferencesHelper.write(DATE, tvSelectedDate.text.toString())
-            SharedPreferencesHelper.write(TIME, tvSelectedTime.text.toString())
-            SharedPreferencesHelper.write(URI_STRING, uriString)
+            fillInAllSharedPreferencesFields(
+                name = txtName.editText?.text.toString().trim(),
+                service = txtService.editText?.text.toString().trim(),
+                date = tvSelectedDate.text.toString(),
+                time = tvSelectedTime.text.toString(),
+                uriString = uriString ?: ""
+            )
         }
+    }
+
+    private fun fillInAllSharedPreferencesFields(
+        name: String, service: String,
+        date: String, time: String, uriString: String
+    ) {
+        SharedPreferencesHelper.write(NAME, name)
+        SharedPreferencesHelper.write(SERVICE, service)
+        SharedPreferencesHelper.write(DATE, date)
+        SharedPreferencesHelper.write(TIME, time)
+        SharedPreferencesHelper.write(URI_STRING, uriString)
     }
 
     override fun onDestroyView() {

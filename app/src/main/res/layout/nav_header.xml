@@ -14,19 +14,33 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_marginVertical="@dimen/_100dp"
-        android:src="@drawable/ic_florist_24dp"
+        tools:src="@drawable/com_facebook_profile_picture_blank_square"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/nav_header_tv"
+        android:id="@+id/nav_header_tv_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingVertical="@dimen/_16dp"
-        android:text="Nome Sobrenome"
+        android:paddingTop="@dimen/_16dp"
+        tools:text="Nome Sobrenome"
         android:textStyle="bold"
+        android:textColor="@color/white"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/nav_header_iv"/>
+
+    <TextView
+        android:id="@+id/nav_header_tv_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/_8dp"
+        android:paddingBottom="@dimen/_16dp"
+        tools:text="renata@gmail.com"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/nav_header_tv_name"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

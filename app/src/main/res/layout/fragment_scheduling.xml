@@ -32,7 +32,7 @@
                 android:textSize="@dimen/_20sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/txt_name"
@@ -78,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_16dp"
                 android:layout_marginTop="@dimen/_16dp"
-                android:text="Selecione a data que deseja marcar:"
+                android:text="@string/select_date_that_wish_to_mark"
                 android:textColor="@color/black"
                 android:textSize="@dimen/_20sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -110,8 +110,8 @@
                 android:id="@+id/btn_schedule"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_16dp"
                 android:layout_marginHorizontal="@dimen/_16dp"
+                android:layout_marginTop="@dimen/_16dp"
                 android:text="@string/select_the_hour"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
@@ -125,13 +125,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_16dp"
-                tools:text="@string/scheduled_time"
+                android:layout_marginTop="@dimen/_16dp"
                 android:textColor="@color/purple_500"
                 android:textSize="@dimen/_20sp"
-                android:layout_marginTop="@dimen/_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btn_schedule"/>
+                app:layout_constraintTop_toBottomOf="@id/btn_schedule"
+                tools:text="@string/scheduled_time" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tv_information_photo_change"
@@ -142,10 +142,10 @@
                 android:textColor="@color/black"
                 android:textSize="@dimen/_20sp"
                 android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/iv_photo"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_selected_time"
-                app:layout_constraintBottom_toTopOf="@id/iv_photo"/>
+                app:layout_constraintTop_toBottomOf="@id/tv_selected_time" />
 
             <ImageView
                 android:id="@+id/iv_photo"
@@ -153,69 +153,39 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/_16dp"
                 android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_selected_time"
-                app:layout_constraintBottom_toTopOf="@id/btn_save"/>
-
-            <LinearLayout
-                android:id="@+id/linear_layout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/_16dp"
-                android:layout_marginHorizontal="@dimen/_16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toTopOf="@id/btn_save"
-                app:layout_constraintTop_toBottomOf="@id/tv_selected_time"
-                android:orientation="vertical">
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_selected_time" />
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/tv_choose_photo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/explanation_about_choose_photo"
-                    android:textColor="@color/black"
-                    android:textSize="@dimen/_20sp"/>
-
-                <Button
-                    android:id="@+id/btn_take_a_picture"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textAllCaps="false"
-                    android:layout_marginTop="@dimen/_16dp"
-                    android:layout_marginEnd="@dimen/_8dp"
-                    android:text="@string/take_a_picture"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/_20sp" />
-
-                <Button
-                    android:id="@+id/btn_choose_phone_gallery"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="@dimen/_8dp"
-                    android:textAllCaps="false"
-                    android:text="@string/phone_gallery"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/_20sp" />
-
-            </LinearLayout>
+            <Button
+                android:id="@+id/btn_choose_phone_gallery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_16dp"
+                android:layout_weight="1"
+                android:text="@string/choose_photo"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_20sp"
+                app:layout_constraintBottom_toTopOf="@id/btn_save"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_selected_time" />
 
             <Button
                 android:id="@+id/btn_save"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_16dp"
+                android:layout_marginBottom="@dimen/_100dp"
                 android:text="@string/save"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:textSize="@dimen/_20sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginBottom="@dimen/_100dp" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

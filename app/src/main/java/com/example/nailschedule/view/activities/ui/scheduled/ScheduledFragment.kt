@@ -40,17 +40,19 @@ class ScheduledFragment : Fragment() {
 
     //Firestore Database - Cloud Firestore
     private fun getDocumentsFromFirestoreDatabase() {
-        val googleId = SharedPreferencesHelper.read(
-            SharedPreferencesHelper.GOOGLE_ID, "")
-        FirebaseFirestore.getInstance().collection("users").document(googleId!!).get()
+        val email = SharedPreferencesHelper.read(
+            SharedPreferencesHelper.EXTRA_EMAIL, "")
+        FirebaseFirestore.getInstance().collection("users").document(email!!).get()
             .addOnSuccessListener { documentSnapshot ->
-                    with(documentSnapshot.data) {
+
+                documentSnapshot.data?.let {
+                        print(this)
                         user = User(
-                                this?.get("name") as String,
-                                this["service"] as String,
-                                this["date"] as String,
-                                this["time"] as String,
-                                this["uriString"] as String
+                                it["name"] as String,
+                                it["service"] as String,
+                                it["date"] as String,
+                                it["time"] as String,
+                                it["uriString"] as String
                             )
                 }
                 if(user == null){
@@ -63,6 +65,7 @@ class ScheduledFragment : Fragment() {
             }
             .addOnFailureListener {
                 print(it)
+                showEmptyState()
                 showToast(requireContext(), R.string.error_scheduling)
             }
     }

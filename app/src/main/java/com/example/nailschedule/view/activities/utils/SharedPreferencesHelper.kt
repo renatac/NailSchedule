@@ -13,8 +13,6 @@ object SharedPreferencesHelper {
     const val GOOGLE_ACCESS_TOKEN = "google_access_token"
     const val GOOGLE_TOKEN_ID = "google_token_id"
     const val FACEBOOK_ACCESS_TOKEN = "facebook_access_token"
-    const val GOOGLE_ID = "google_id"
-    const val FACEBOOK_ID = "facebook_id"
     const val NAME = "name"
     const val SERVICE = "service"
     const val DATE = "date"
@@ -26,31 +24,23 @@ object SharedPreferencesHelper {
             context.getSharedPreferences(context.packageName, Activity.MODE_PRIVATE)
     }
 
-    fun read(key: String?, defValue: String?): String? {
+    fun read(key: String, defValue: String?): String? {
         return mSharedPref?.getString(key, defValue)
     }
 
-    fun write(key: String?, value: String?) {
+    fun write(key: String, value: String?) {
         val prefsEditor = mSharedPref?.edit()
         prefsEditor?.putString(key, value)
         prefsEditor?.apply()
     }
 
-    fun read(key: String?, defValue: Boolean): Boolean {
-        return mSharedPref!!.getBoolean(key, defValue)
-    }
-
-    fun write(key: String?, value: Boolean) {
+    fun write(key: String, value: Boolean) {
         val prefsEditor = mSharedPref!!.edit()
         prefsEditor.putBoolean(key, value)
         prefsEditor.apply()
     }
 
-    fun read(key: String?, defValue: Int): Int {
-        return mSharedPref!!.getInt(key, defValue)
-    }
-
-    fun write(key: String?, value: Int?) {
+    fun write(key: String, value: Int?) {
         val prefsEditor = mSharedPref!!.edit()
         prefsEditor.putInt(key, value!!).apply()
     }

@@ -114,7 +114,6 @@ class LoginActivity : AppCompatActivity() {
                     SharedPreferencesHelper.FACEBOOK_ACCESS_TOKEN,
                     loginResult?.accessToken.toString()
                 )
-                SharedPreferencesHelper.write(SharedPreferencesHelper.GOOGLE_ID, loginResult?.accessToken?.userId)
                 loadUserProfile(loginResult?.accessToken)
                 Toast.makeText(applicationContext,"SUCESSO AO LOGAR PELO FACE!",
                     Toast.LENGTH_LONG).show()
@@ -154,16 +153,13 @@ class LoginActivity : AppCompatActivity() {
                         task.result.idToken
                     )
 
-                    ///////////////////////////////////////////////////////////////////////////
-
                     val resultOkay = Auth.GoogleSignInApi.getSignInResultFromIntent(result.data!!)
                     if (resultOkay.isSuccess) {
                         val account: GoogleSignInAccount? = resultOkay.signInAccount
-                        SharedPreferencesHelper.write(SharedPreferencesHelper.GOOGLE_ID, account?.id)
-                        SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_DISPLAY_NAME, account?.displayName)
-                        SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_PHOTO_URL, account?.photoUrl.toString())
-                        SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_EMAIL, account?.email)
-
+                        saveHeaderNavDatasInSharedPreferences(
+                            account?.displayName.toString(),
+                            account?.photoUrl.toString(),
+                            account?.email.toString())
                         val runnable = Runnable {
                             try {
                                 val scope = "oauth2:" + Scopes.EMAIL + " " + Scopes.PROFILE
@@ -177,7 +173,6 @@ class LoginActivity : AppCompatActivity() {
                                     SharedPreferencesHelper.GOOGLE_ACCESS_TOKEN,
                                     accessToken
                                 )
-                                ///////////////////////////////////////////////////////////////////////////
 
                                 val accountGoogle = GoogleSignIn.getSignedInAccountFromIntent(result.data).result
                                 accountGoogle?.let { conta ->
@@ -187,15 +182,8 @@ class LoginActivity : AppCompatActivity() {
                                 Log.d("teste", "accessToken:$accessToken")
                                 //Login With Google
                                 FirebaseAuth.getInstance()
-                                    .signInWithCredential(
-                                        credential!!
-                                        /* GoogleAuthProvider.getCredential(
-                                              SharedPreferenceHelper.read(
-                                                 SharedPreferenceHelper.GOOGLE_TOKEN_ID, ""),
-                                             SharedPreferenceHelper.read(
-                                                 SharedPreferenceHelper.GOOGLE_ACCESS_TOKEN, "")
-                                       ) */
-                                    ).addOnSuccessListener {
+                                    .signInWithCredential(credential!!)
+                                    .addOnSuccessListener {
                                         handleSignInResult(task)
                                     }.addOnFailureListener {
                                         println(it)
@@ -211,6 +199,12 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
             }
+    }
+
+    private fun saveHeaderNavDatasInSharedPreferences(name: String, photoUrl: String, email: String) {
+        SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_DISPLAY_NAME, name)
+        SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_PHOTO_URL, photoUrl)
+        SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_EMAIL, email)
     }
 
     private fun googleSignIn() {
@@ -254,43 +248,17 @@ class LoginActivity : AppCompatActivity() {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d("test", "signInWithCredential:success")
                     val user = FirebaseAuth.getInstance().currentUser
-                    val name = user?.displayName
-                    val imageUrl = user?.photoUrl.toString()
-                    SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_DISPLAY_NAME, name)
-                    SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_PHOTO_URL, imageUrl)
+                    saveHeaderNavDatasInSharedPreferences(
+                        user?.displayName.toString(),
+                        user?.photoUrl.toString(),
+                        user?.email.toString())
                     redirectToBottomNavigation()
-                } else {
-                    // If sign in fails, display a message to the user.
-                    Log.w("test", "signInWithCredential:failure", task.exception)
-                    Toast.makeText(baseContext, "Authentication failed.",
-                        Toast.LENGTH_SHORT).show()
-                    //updateUI(null)
                 }
+            }.addOnFailureListener {
+                // If sign in fails, display a message to the user.
+                Log.w("test", "signInWithCredential:failure", it)
+                Toast.makeText(baseContext, "Authentication failed.",
+                    Toast.LENGTH_SHORT).show()
             }
-
-        /*val request = GraphRequest.newMeRequest(
-            newAccessToken
-        ) { `object`, _ ->
-            try {
-                //edit.putBoolean(IS_SIGNED, true)
-                val name = `object`.getString("first_name") +
-                        `object`.getString("last_name")
-                val imageUrl = "https://graph.facebook.com/" +
-                        `object`.getString("id").toString() + "/picture?type=normal"
-                SharedPreferenceHelper.write(SharedPreferenceHelper.EXTRA_DISPLAY_NAME, name)
-                SharedPreferenceHelper.write(SharedPreferenceHelper.EXTRA_PHOTO_URL, imageUrl)
-                redirectToBottomNavigation()
-
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        }
-        if(newAccessToken != null) {
-            val parameters = Bundle()
-            parameters.putString("fields", "first_name, last_name, email, id")
-            request.parameters = parameters
-            request.executeAsync()
-        }
-         */
     }
 }

@@ -58,11 +58,11 @@ class GalleryAdapter(
 
     fun clickToRemove(context: Context) {
         printMessageAboutExclusion(context)
+        val areAllItems = uriList?.size == selectedUriList.size
         uriList?.removeAll(selectedUriList)
         if (uriList?.isEmpty() == true) {
             hideTrash.invoke()
         }
-        val areAllItems = uriList?.size == selectedUriList.size
         deletePhotosFromCloudStorage.invoke(selectedUriList, areAllItems)
         selectedUriList.clear()
         notifyDataSetChanged()
