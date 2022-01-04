@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">NailSchedule</string>
-    <string name="title_activity_botton_navigation">MainActivity</string>
+    <string name="app_name">Nails Schedule</string>
+    <string name="title_activity_bottom_navigation">MainActivity</string>
     <string name="title_gallery">Galeria de Unhas</string>
     <string name="gallery">Galeria</string>
     <string name="title_schedule">Agendamento</string>
@@ -55,8 +55,12 @@
     <string name="title">Serviço que será realizado</string>
     <string name="photo">Visualização de foto</string>
 
+    <!--Login Activity -->
+    <string name="login_failed">Falha ao logar. Tente novamente, por favor.</string>
+
     <!-- Menu nav -->
     <string name="logout">Deslogar</string>
     <string name="get_out">Sair</string>
+    <string name="login_title">Agende horários e guarde as fotos de suas unhas favoritas.\nCom o App Nails schedule não existe mais dúvidas de quais horários estão disponíveis e de qual serviço você vai querer que seja realizado.</string>
 
 </resources>

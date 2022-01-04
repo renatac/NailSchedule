@@ -7,11 +7,14 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <permission android:name="android.permission.CAMERA" />
+
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
-    <uses-feature android:name="android.hardware.camera"
+
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="true" />
 
     <application
@@ -20,18 +23,25 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.NailSchedule">
-        <activity android:name=".view.activities.ui.activities.PhotoActivity"
-            android:label="@string/photo"/>
-        <activity
-            android:name=".view.activities.ui.activities.BottomNavigationActivity"
-            android:label="@string/title_activity_botton_navigation" />
-        <activity android:name=".view.activities.ui.activities.LoginActivity">
+
+        <activity android:name=".view.activities.ui.activities.SplashActivity"
+            android:theme="@style/Theme.Design.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".view.activities.ui.activities.LoginActivity"/>
+
+        <activity
+            android:name=".view.activities.ui.activities.PhotoActivity"
+            android:label="@string/photo" />
+
+        <activity
+            android:name=".view.activities.ui.activities.BottomNavigationActivity"
+            android:label="@string/title_activity_bottom_navigation" />
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -41,6 +51,7 @@
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name" />
+
         <activity
             android:name="com.facebook.CustomTabActivity"
             android:exported="true">
@@ -53,6 +64,7 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

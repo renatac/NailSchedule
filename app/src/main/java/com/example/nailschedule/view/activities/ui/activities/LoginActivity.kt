@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityLoginBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
@@ -115,8 +116,6 @@ class LoginActivity : AppCompatActivity() {
                     loginResult?.accessToken.toString()
                 )
                 loadUserProfile(loginResult?.accessToken)
-                Toast.makeText(applicationContext,"SUCESSO AO LOGAR PELO FACE!",
-                    Toast.LENGTH_LONG).show()
             }
 
             override fun onCancel() {
@@ -257,7 +256,7 @@ class LoginActivity : AppCompatActivity() {
             }.addOnFailureListener {
                 // If sign in fails, display a message to the user.
                 Log.w("test", "signInWithCredential:failure", it)
-                Toast.makeText(baseContext, "Authentication failed.",
+                Toast.makeText(baseContext, getString(R.string.login_failed),
                     Toast.LENGTH_SHORT).show()
             }
     }
