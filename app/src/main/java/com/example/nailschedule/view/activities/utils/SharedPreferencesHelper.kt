@@ -18,6 +18,9 @@ object SharedPreferencesHelper {
     const val DATE = "date"
     const val TIME = "time"
     const val URI_STRING = "uri_string"
+    const val YEAR = "year"
+    const val MONTH = "month"
+    const val DAY = "day"
 
     fun init(context: Context) {
         if (mSharedPref == null) mSharedPref =
@@ -26,6 +29,10 @@ object SharedPreferencesHelper {
 
     fun read(key: String, defValue: String?): String? {
         return mSharedPref?.getString(key, defValue)
+    }
+
+    fun read(key: String, defValue: Int): Int? {
+        return mSharedPref?.getInt(key, defValue)
     }
 
     fun write(key: String, value: String?) {

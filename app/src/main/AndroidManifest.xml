@@ -24,7 +24,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NailSchedule">
 
-        <activity android:name=".view.activities.ui.activities.SplashActivity"
+        <activity android:name=".view.activities.view.activities.SplashActivity"
             android:theme="@style/Theme.Design.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,14 +33,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".view.activities.ui.activities.LoginActivity"/>
+        <activity android:name=".view.activities.view.activities.LoginActivity"/>
 
         <activity
-            android:name=".view.activities.ui.activities.PhotoActivity"
+            android:name=".view.activities.view.activities.PhotoActivity"
             android:label="@string/photo" />
 
         <activity
-            android:name=".view.activities.ui.activities.BottomNavigationActivity"
+            android:name=".view.activities.view.activities.BottomNavigationActivity"
             android:label="@string/title_activity_bottom_navigation" />
 
         <meta-data
