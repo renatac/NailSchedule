@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/navigation_gallery"
-        android:name="com.example.nailschedule.view.activities.ui.gallery.GalleryFragment"
+        android:name="com.example.nailschedule.view.activities.view.gallery.GalleryFragment"
         android:label="@string/title_gallery"
         tools:layout="@layout/fragment_gallery" />
 
     <fragment
         android:id="@+id/navigation_scheduling"
-        android:name="com.example.nailschedule.view.activities.ui.scheduling.SchedulingFragment"
+        android:name="com.example.nailschedule.view.activities.view.scheduling.SchedulingFragment"
         android:label="@string/title_schedule"
         tools:layout="@layout/fragment_scheduling" />
 
     <fragment
         android:id="@+id/navigation_scheduled"
-        android:name="com.example.nailschedule.view.activities.ui.scheduled.ScheduledFragment"
+        android:name="com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment"
         android:label="@string/title_scheduled"
         tools:layout="@layout/fragment_scheduled" />
 </navigation>

@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "405672301565",
+    "firebase_url": "https://nailschedule-5deb9-default-rtdb.firebaseio.com",
     "project_id": "nailschedule-5deb9",
     "storage_bucket": "nailschedule-5deb9.appspot.com"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "405672301565-831rgubb5sha4st663ml0al41dh94gl8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nailschedule",
+            "certificate_hash": "a71562fabf4f6d9b30f9cc8188f2f48d88da21b8"
+          }
+        },
         {
           "client_id": "405672301565-9f3v6ve8koeujba7rbq4pvi8s32to4c4.apps.googleusercontent.com",
           "client_type": 3

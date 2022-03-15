@@ -23,13 +23,15 @@
     <string name="all_photos_deleted">Todas as fotos foram apagadas</string>
 
     <!-- Scheduling Fragment-->
-    <string name="scheduled_date">Data agendada - %d/%d/%d.</string>
     <string name="service">Digite o Serviço</string>
     <string name="scheduled_time">Horário agendado: %s</string>
-    <string name="select_the_hour">Selecione a hora</string>
+    <string name="select_the_hour">->Selecione a hora</string>
     <string name="successful_scheduling">Agendamento salvo com sucesso!!!</string>
     <string name="error_scheduling">Erro ao tentar salvar o usuário. Por favor, tente novamente.</string>
     <string name="save">Salvar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="message_about_remark">Você já possui uma data e horário agendado(%s h do dia %s). Deseja remarcar?</string>
     <string name="choose_photo">Escolher foto</string>
     <string name="empty_name">Preencha o Nome</string>
     <string name="empty_service">Preencha o Serviço</string>
@@ -39,6 +41,10 @@
     <string name="your_name_and_surname">Digite seu nome e sobrenome</string>
     <string name="information_photo_change">Caso queira trocar a foto, então clique nela:</string>
     <string name="select_date_that_wish_to_mark">Selecione a data que deseja marcar:</string>
+    <string name="you_are_rebooking">"Você está refazendo a marcação"</string>
+    <string name="you_are_another_rebooking">"Você está fazendo outra marcação"</string>
+    <string name="unavailable_time">"Este horário não está mais disponível. Por favor selecione outro."</string>
+    <string name="select_time">"Selecione o Horário"</string>
 
     <!-- Scheduled Fragment-->
     <string name="mark">mark</string>

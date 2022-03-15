@@ -1,4 +1,4 @@
-package com.example.nailschedule.view.activities.ui.gallery
+package com.example.nailschedule.view.activities.view.gallery
 
 import android.content.Context
 import android.net.Uri
@@ -44,8 +44,6 @@ class GalleryAdapter(
     }
 
     fun clearList() = uriList?.clear()
-
-    fun getList() = uriList
 
     private fun addUriSelected(uri: Uri?) {
         uri?.let { selectedUriList.add(uri) }
