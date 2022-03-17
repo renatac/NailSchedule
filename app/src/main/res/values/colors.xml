@@ -12,6 +12,7 @@
     <color name="lilac">#C8A2C8</color>
     <color name="colorPrimary">#039BE5</color>
     <color name="colorPrimaryDark">#0288D1</color>
+    <color name="colorPrimaryBright">#FF02BCD1</color>
     <color name="colorAccent">#FFA000</color>
     <color name="transparent">@android:color/transparent</color>
 </resources>

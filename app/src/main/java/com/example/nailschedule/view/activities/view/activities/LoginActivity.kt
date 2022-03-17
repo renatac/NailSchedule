@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -15,6 +16,7 @@ import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityLoginBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
+import com.example.nailschedule.view.activities.view.owner.OwnerActivity
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
@@ -92,8 +94,25 @@ class LoginActivity : AppCompatActivity() {
             registerGoogleSignInClickListener()
             registerFacebookSignInCallback()
 
+            setListeners()
+
             setFirebaseAnalytics()
         }
+    }
+
+    private fun setListeners() = binding.apply {
+        btnClient.setOnClickListener {
+            setClientOrOwnerGroupVisibility(View.GONE)
+            setBtnsLoginGroupVisibility(View.VISIBLE)
+        }
+        btnOwner.setOnClickListener {
+            redirectOwnerFlow()
+        }
+        tvClientOrOwnerAgain.setOnClickListener {
+            setBtnsLoginGroupVisibility(View.GONE)
+            setClientOrOwnerGroupVisibility(View.VISIBLE)
+        }
+
     }
 
     private fun registerGoogleSignInClickListener() {
@@ -226,6 +245,13 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun redirectOwnerFlow() {
+        val intent =  Intent(
+            this,
+            OwnerActivity::class.java)
+        startActivity(intent)
+    }
+
     private fun redirectToBottomNavigation() {
         val intent =  Intent(
             this,
@@ -259,5 +285,14 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(baseContext, getString(R.string.login_failed),
                     Toast.LENGTH_SHORT).show()
             }
+    }
+
+
+    private fun setBtnsLoginGroupVisibility(typeVisibility: Int) {
+        binding.btnsLoginGroup.visibility = typeVisibility
+    }
+
+    private fun setClientOrOwnerGroupVisibility(typeVisibility: Int) {
+        binding.clientOrOwnerGroup.visibility= typeVisibility
     }
 }

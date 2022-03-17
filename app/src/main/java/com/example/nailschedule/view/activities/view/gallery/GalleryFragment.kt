@@ -178,14 +178,14 @@ class GalleryFragment : Fragment() {
 
     private fun showEmptyState() {
         with(binding) {
-            title.visibility = View.VISIBLE
+            bottomDescription.visibility = View.VISIBLE
             llHome.visibility = View.VISIBLE
         }
     }
 
     private fun hideEmptyState() {
         with(binding) {
-            title.visibility = View.GONE
+            bottomDescription.visibility = View.GONE
             llHome.visibility = View.GONE
         }
     }

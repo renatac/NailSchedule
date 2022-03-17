@@ -63,6 +63,15 @@
 
     <!--Login Activity -->
     <string name="login_failed">Falha ao logar. Tente novamente, por favor.</string>
+    <string name="btn_client">Cliente</string>
+    <string name="btn_owner">Proprietário</string>
+    <string name="description">Antes de lhe apresentar as opções de login, deixe-me saber que tipo de usuário do App é você:</string>
+    <string name="client_or_owner_again"><u>Escolha novamente se você é cliente ou proprietário.</u></string>
+
+    <!--Owner Activity -->
+    <string name="owner_title">Clique no dia que quiser e veja os horários:</string>
+    <string name="available">Disponível</string>
+    <string name="unavailable">Indisponível</string>
 
     <!-- Menu nav -->
     <string name="logout">Deslogar</string>

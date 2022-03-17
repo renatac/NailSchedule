@@ -36,7 +36,6 @@ import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.UR
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 
 class SchedulingFragment : Fragment() {
@@ -92,9 +91,6 @@ class SchedulingFragment : Fragment() {
     }
 
     private fun deleteFirebaseFirestoreAllDates(previousMinDate: String) {
-        FirebaseFirestore.getInstance().collection("schedules")
-            .document(previousMinDate)
-            .delete()
         FirebaseFirestore.getInstance().collection("calendarField")
             .document(previousMinDate)
             .delete()
@@ -393,21 +389,6 @@ class SchedulingFragment : Fragment() {
         FirebaseFirestore.getInstance().collection("users")
             .document(email!!)
             .set(user) //add the data if it doesn't already exist and update it if it already exists
-            .addOnSuccessListener {
-                showToast(requireContext(), R.string.successful_scheduling)
-            }
-            .addOnFailureListener {
-                print(it)
-                showToast(requireContext(), R.string.error_scheduling)
-            }
-
-        val example: MutableMap<String, User> = HashMap()
-        example[user.time] = user
-        example[user.time] = user
-
-        FirebaseFirestore.getInstance().collection("schedules")
-            .document(date!!)
-            .set(example) //add the data if it doesn't already exist and update it if it already exists
             .addOnSuccessListener {
                 showToast(requireContext(), R.string.successful_scheduling)
             }
