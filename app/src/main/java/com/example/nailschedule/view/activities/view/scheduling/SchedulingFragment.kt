@@ -19,11 +19,10 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentSchedulingBinding
-import com.example.nailschedule.view.activities.data.model.TimeOk
+import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.DATE
@@ -40,7 +39,6 @@ import java.util.*
 
 class SchedulingFragment : Fragment() {
 
-    private lateinit var schedulingViewModel: SchedulingViewModel
     private var _binding: FragmentSchedulingBinding? = null
 
     private lateinit var galleryStartForResult: ActivityResultLauncher<Intent>
@@ -50,6 +48,8 @@ class SchedulingFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var arrayAdapter: ArrayAdapter<String>
+
+    private var timeListOk = mutableListOf<String>()
 
     private var name: String? = null
     private var service: String? = null
@@ -70,24 +70,28 @@ class SchedulingFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        schedulingViewModel =
-            ViewModelProvider(this).get(SchedulingViewModel::class.java)
         _binding = FragmentSchedulingBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        arrayAdapter = ArrayAdapter(
-            requireContext(),
-            R.layout.support_simple_spinner_dropdown_item,
-            listOf(requireContext().getString(R.string.select_the_hour)
-            )
-        )
-        email = SharedPreferencesHelper.read(
-            SharedPreferencesHelper.EXTRA_EMAIL, ""
-        )
+        initializeAdapter(listOf(requireContext().getString(R.string.select_the_hour)))
+        initializeEmail()
         setupCalendarViewDatesMinAndMax()
         saveMinDateAtSharedPreferences()
         hideSpinner()
         setupListeners()
         return root
+    }
+
+    private fun initializeEmail() {
+        email = SharedPreferencesHelper.read(
+            SharedPreferencesHelper.EXTRA_EMAIL, ""
+        )
+    }
+
+    private fun initializeAdapter(list: List<String>) {
+        arrayAdapter = ArrayAdapter(
+            requireContext(),
+            R.layout.support_simple_spinner_dropdown_item,
+            list)
     }
 
     private fun deleteFirebaseFirestoreAllDates(previousMinDate: String) {
@@ -149,11 +153,13 @@ class SchedulingFragment : Fragment() {
             val monthOk = month + 1
             date = if(monthOk <= 9) { "$dayOfMonth-0${monthOk}-$year"}
                else { "$dayOfMonth-${monthOk}-$year" }
+            timeListOk.clear()
         }
 
         spinner.adapter = arrayAdapter
         spinner.setOnTouchListener { v, event ->
             if (event.action == MotionEvent.ACTION_UP) {
+                timeListOk.clear()
                 setupSpinnerWithFirebaseFirestoreDownload()
             }
             false
@@ -187,11 +193,12 @@ class SchedulingFragment : Fragment() {
                     name = name!!, service = service!!, date = date!!,
                     time = time!!, uriString = uriString!!
                 )
+                val currentDate = SimpleDateFormat("dd-MM-yyyy").format(Date())
                 val currentHour = SimpleDateFormat("HH:mm").format(Date())
                 val currentHourToLong = currentHour.toString().substring(0,2).toLong()
                 val timeToLong = time!!.substring(0,2).toLong()
 
-                if(timeToLong < currentHourToLong + 2) {
+                if(currentDate== date && timeToLong < currentHourToLong + 2) {
                     showToast(requireContext(), R.string.unavailable_time)
                 } else {
                     downloadForFirebaseFirestore(date!!, user)
@@ -237,7 +244,6 @@ class SchedulingFragment : Fragment() {
     }
 
     private fun setupSpinnerWithFirebaseFirestoreDownload() {
-        var timeListOk = mutableListOf<String>()
         FirebaseFirestore.getInstance().collection("calendarField")
             .document(date!!).get().addOnSuccessListener { documentSnapshot ->
                 documentSnapshot.data?.let {
@@ -250,17 +256,15 @@ class SchedulingFragment : Fragment() {
                         requireContext().getString(R.string.select_the_hour),
                         "08:00", "10:00", "12:00", "14:00", "16:00", "18:00")
                     timeListOk.addAll(originalList)
-                    addOrUpdateCalendarFieldFirestoreDatabase(originalList, date!!)
                 }
-                timeListOk = deleteCurrentDayHour(timeListOk)
-                addOrUpdateCalendarFieldFirestoreDatabase(timeListOk, date!!)
-                arrayAdapter =
-                    ArrayAdapter(
-                        requireContext(),
-                        R.layout.support_simple_spinner_dropdown_item,
-                        timeListOk
-                    )
-                binding.spinner.adapter = arrayAdapter
+                if(timeListOk.size == 1) {
+                    showToast(requireContext(), R.string.data_without_available_hour)
+                } else {
+                    timeListOk = deleteCurrentDayHour(timeListOk)
+                    addOrUpdateCalendarFieldFirestoreDatabase(timeListOk, date!!)
+                    initializeAdapter(timeListOk)
+                    binding.spinner.adapter = arrayAdapter
+                }
             }.addOnFailureListener {
                 print(it)
             }
@@ -296,7 +300,7 @@ class SchedulingFragment : Fragment() {
                     clearFields()
                     setBottomVisibility(GONE)
                     setBtnSaveVisibility(VISIBLE)
-                    clearSharedPreferencesDatas()
+                   // clearSharedPreferencesDatas()
                 }
             }
     }
@@ -331,7 +335,6 @@ class SchedulingFragment : Fragment() {
                                 } ?: run {
                                     addOrUpdateFirestoreDatabase(actualTimeList, user)
                                     clearFields()
-                                    clearSharedPreferencesDatas()
                                 }
                             }
                     } else {
@@ -344,7 +347,6 @@ class SchedulingFragment : Fragment() {
 
                     binding.btnCancel.setOnClickListener {
                         clearFields()
-                        clearSharedPreferencesDatas()
                         setBottomVisibility(GONE)
                         setBtnSaveVisibility(VISIBLE)
                     }
@@ -376,10 +378,10 @@ class SchedulingFragment : Fragment() {
 
     private fun addOrUpdateCalendarFieldFirestoreDatabase(
         hourList: List<String>,
-        dateOk: String) {
-        val time = TimeOk(hourList)
+        date: String) {
+        val time = Time(hourList)
         FirebaseFirestore.getInstance().collection("calendarField")
-            .document(dateOk).set(time)
+            .document(date).set(time)
     }
 
     //Firestore Database - Cloud Firestore
@@ -421,7 +423,11 @@ class SchedulingFragment : Fragment() {
                 showToast(requireContext(), R.string.empty_date)
             }
             isEmptyField(time) -> {
-                showToast(requireContext(), R.string.empty_time)
+                if(timeListOk.size == 1) {
+                    showToast(requireContext(), R.string.data_without_available_hour)
+                } else {
+                    showToast(requireContext(), R.string.empty_time)
+                }
             }
             isEmptyField(uriString) -> {
                 showToast(requireContext(), R.string.empty_photo)
@@ -483,7 +489,7 @@ class SchedulingFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        with(binding) {
+       /* with(binding) {
             fillInAllSharedPreferencesFields(
                 name = txtName.editText?.text.toString().trim(),
                 service = txtService.editText?.text.toString().trim(),
@@ -492,7 +498,7 @@ class SchedulingFragment : Fragment() {
                 position = pos,
                 uriString = uriString ?: ""
             )
-        }
+        } */
     }
 
     private fun fillInAllSharedPreferencesFields(

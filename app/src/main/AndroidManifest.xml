@@ -25,6 +25,8 @@
         android:theme="@style/Theme.NailSchedule">
 
         <activity android:name=".view.activities.view.owner.OwnerActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:parentActivityName=".view.activities.view.activities.LoginActivity"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".view.activities.view.activities.SplashActivity"

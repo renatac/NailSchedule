@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -61,7 +60,7 @@ class GalleryFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -143,7 +142,6 @@ class GalleryFragment : Fragment() {
                     // The Task returned from this call is always completed, no need to attach
                     // a listener.
                     selectedUri = result.data?.data
-                    Log.i("Teste", selectedUri.toString())
 
                     try {
                         selectedUri?.let {
@@ -191,7 +189,8 @@ class GalleryFragment : Fragment() {
     }
 
     private fun uploadPhotoToCloudStorage() {
-        val filename = "_${UUID.randomUUID()}"
+        //val filename = "_${UUID.randomUUID().toString().substring(0,6)}_"
+        val filename = "_${Date()}_"
         val ref = FirebaseStorage.getInstance()
             .getReference("images/${email}/${filename}")
         selectedUri?.let {
@@ -229,9 +228,12 @@ class GalleryFragment : Fragment() {
             uriList.forEach { uri ->
                 val uriString = uri.toString()
                 val initialIndex = uriString.indexOf("_")
-                val finalIndex = uriString.indexOf("?")
-                val filename = uriString.substring(initialIndex, (finalIndex))
-                storage.child("/images").child("/$email/$filename").delete()
+                //val finalIndexOk = initialIndex + 8
+                val finalIndexOk = uriString.lastIndexOf("_")
+                if (initialIndex != -1 && finalIndexOk != -1) {
+                    val filename = uriString.substring(initialIndex, finalIndexOk)
+                    storage.child("/images").child("/$email/$filename").delete()
+                }
             }
         }
     }

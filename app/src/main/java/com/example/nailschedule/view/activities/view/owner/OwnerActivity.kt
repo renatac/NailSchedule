@@ -2,7 +2,9 @@ package com.example.nailschedule.view.activities.view.owner
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityOwnerBinding
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -19,9 +21,17 @@ class OwnerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityOwnerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setupToolbar()
         setupAdapter()
         setupCalendarViewDatesMinAndMax()
         setCalendarListener()
+    }
+
+    private fun setupToolbar() = binding.apply {
+        toolbar.title = getString(R.string.general_schedule)
+        setSupportActionBar(toolbar)
+        toolbar.setTitleTextColor(ContextCompat.getColor(this@OwnerActivity, R.color.white))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun setCalendarListener() {
@@ -59,7 +69,9 @@ class OwnerActivity : AppCompatActivity() {
                 documentSnapshot.data?.let {
                     val timeList = it["timeList"] as List<*>
                     timeList.forEach { time ->
-                        availableTimeList.add(Pair(time.toString(), true))
+                        time?.let {
+                            availableTimeList.add(Pair(it.toString(), true))
+                        }
                     }
                     //Removing the item "Selecione a hora"
                     availableTimeList.removeAt(0)

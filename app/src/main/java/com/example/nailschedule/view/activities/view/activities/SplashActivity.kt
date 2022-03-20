@@ -14,7 +14,10 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        createAnimation()
+    }
 
+    private fun createAnimation() {
         Handler(Looper.getMainLooper()).postDelayed({
             showLoginScreen()}, 4000)
 

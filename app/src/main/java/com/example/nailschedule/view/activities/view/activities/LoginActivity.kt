@@ -32,7 +32,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
@@ -68,7 +67,6 @@ class LoginActivity : AppCompatActivity() {
         var credential: AuthCredential? = null
     }
 
-    private lateinit var analytics: FirebaseAnalytics
     private lateinit var binding: ActivityLoginBinding
     private lateinit var mGoogleSignInClient: GoogleSignInClient
     private lateinit var startForResult: ActivityResultLauncher<Intent>
@@ -88,15 +86,11 @@ class LoginActivity : AppCompatActivity() {
             // Build a GoogleSignInClient with the options specified by gso.
             mGoogleSignInClient = googleSignInClientGetInstance(this)
 
-            //If loggin through Google the return is in registerForActivityResult
+            //If login through Google the return is in registerForActivityResult
             registerForActivityResult()
-
             registerGoogleSignInClickListener()
             registerFacebookSignInCallback()
-
             setListeners()
-
-            setFirebaseAnalytics()
         }
     }
 
@@ -147,11 +141,6 @@ class LoginActivity : AppCompatActivity() {
         })
     }
 
-    private fun setFirebaseAnalytics() {
-        analytics = FirebaseAnalytics.getInstance(this)
-        analytics.logEvent("initialize_firebase_analytics", null)
-    }
-
     private fun initSharedPreferences() {
         SharedPreferencesHelper.init(applicationContext)
     }
@@ -171,9 +160,9 @@ class LoginActivity : AppCompatActivity() {
                         task.result.idToken
                     )
 
-                    val resultOkay = Auth.GoogleSignInApi.getSignInResultFromIntent(result.data!!)
-                    if (resultOkay.isSuccess) {
-                        val account: GoogleSignInAccount? = resultOkay.signInAccount
+                    val googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(result.data!!)
+                    if (googleSignInResult.isSuccess) {
+                        val account: GoogleSignInAccount? = googleSignInResult.signInAccount
                         saveHeaderNavDatasInSharedPreferences(
                             account?.displayName.toString(),
                             account?.photoUrl.toString(),
@@ -197,7 +186,6 @@ class LoginActivity : AppCompatActivity() {
                                     credential = GoogleAuthProvider.getCredential(conta.idToken, accessToken)
                                 }
 
-                                Log.d("teste", "accessToken:$accessToken")
                                 //Login With Google
                                 FirebaseAuth.getInstance()
                                     .signInWithCredential(credential!!)
@@ -271,7 +259,6 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
-                    Log.d("test", "signInWithCredential:success")
                     val user = FirebaseAuth.getInstance().currentUser
                     saveHeaderNavDatasInSharedPreferences(
                         user?.displayName.toString(),
@@ -281,7 +268,6 @@ class LoginActivity : AppCompatActivity() {
                 }
             }.addOnFailureListener {
                 // If sign in fails, display a message to the user.
-                Log.w("test", "signInWithCredential:failure", it)
                 Toast.makeText(baseContext, getString(R.string.login_failed),
                     Toast.LENGTH_SHORT).show()
             }

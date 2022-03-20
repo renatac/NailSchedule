@@ -17,7 +17,6 @@ import androidx.navigation.ui.NavigationUI
 import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityBottomNavigationBinding
-import com.example.nailschedule.databinding.NavHeaderBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
 import com.facebook.login.LoginManager
@@ -29,7 +28,6 @@ import com.google.android.material.navigation.NavigationView
 class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var activityBottomNavigationBinding: ActivityBottomNavigationBinding
-    private lateinit var navHeaderBinding: NavHeaderBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
@@ -39,9 +37,7 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         activityBottomNavigationBinding = ActivityBottomNavigationBinding.inflate(layoutInflater)
-        navHeaderBinding = NavHeaderBinding.inflate(layoutInflater)
         setContentView(activityBottomNavigationBinding.root)
 
         val bottomNavigationView: BottomNavigationView = activityBottomNavigationBinding.bottomNavView
@@ -74,12 +70,9 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
 
         //Set the appBarConfiguration
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration)
-        //NavigationUI.setupWithNavController(binding.navView, navController)
 
         //Enable BottomNavigationView Click
         NavigationUI.setupWithNavController(bottomNavigationView, navController)
-        //setupActionBarWithNavController(navController, appBarConfiguration)
-        //bottomNavigationView.setupWithNavController(navController)
 
         setupNavHeaderElements()
     }
@@ -137,8 +130,8 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
     }
 
     private fun signOut() {
+        //It separates if it's Facebook or Google
         if(isLoggedInFacebook()) {
-            //Separar se é google ou facebook
             LoginManager.getInstance().logOut()
             redirectToLoginActivity()
         } else {

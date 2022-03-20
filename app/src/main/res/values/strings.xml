@@ -43,8 +43,9 @@
     <string name="select_date_that_wish_to_mark">Selecione a data que deseja marcar:</string>
     <string name="you_are_rebooking">"Você está refazendo a marcação"</string>
     <string name="you_are_another_rebooking">"Você está fazendo outra marcação"</string>
-    <string name="unavailable_time">"Este horário não está mais disponível. Por favor selecione outro."</string>
-    <string name="select_time">"Selecione o Horário"</string>
+    <string name="unavailable_time">Este horário não está mais disponível. Por favor selecione outro.</string>
+    <string name="select_time">Selecione o Horário</string>
+    <string name="data_without_available_hour">Por favor <b>escolha outra data</b>, pois essa não possui horários disponíveis.</string>
 
     <!-- Scheduled Fragment-->
     <string name="mark">mark</string>
@@ -72,10 +73,11 @@
     <string name="owner_title">Clique no dia que quiser e veja os horários:</string>
     <string name="available">Disponível</string>
     <string name="unavailable">Indisponível</string>
+    <string name="general_schedule">Agenda Geral</string>
 
     <!-- Menu nav -->
     <string name="logout">Deslogar</string>
     <string name="get_out">Sair</string>
-    <string name="login_title">Agende horários e guarde as fotos de suas unhas favoritas.\nCom o App Nails schedule não existe mais dúvidas de quais horários estão disponíveis e de qual serviço você vai querer que seja realizado.</string>
+    <string name="login_title">Agende horários e guarde as fotos de suas unhas favoritas.\nCom o App Nails schedule não existem mais dúvidas de quais horários estão disponíveis e de qual serviço você vai querer que seja realizado.</string>
 
 </resources>

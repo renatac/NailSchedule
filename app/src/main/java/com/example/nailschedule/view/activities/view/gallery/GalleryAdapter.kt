@@ -39,7 +39,10 @@ class GalleryAdapter(
     override fun getItemCount() = uriList?.size ?: 0
 
     fun setItemList(uri: Uri) {
-        uriList?.add(uri)
+        uriList?.apply {
+            add(uri)
+            sort()
+        }
         notifyDataSetChanged()
     }
 

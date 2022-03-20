@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentScheduledBinding
@@ -20,7 +19,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class ScheduledFragment : Fragment() {
 
-    private lateinit var scheduledViewModel: ScheduledViewModel
     private var _binding: FragmentScheduledBinding? = null
 
     private var user: User? = null
@@ -125,16 +123,8 @@ class ScheduledFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        scheduledViewModel =
-            ViewModelProvider(this).get(ScheduledViewModel::class.java)
-
         _binding = FragmentScheduledBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-        /* val textView: TextView = binding.textNotifications
-        scheduledViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        }) */
-        return root
+        return binding.root
     }
 
     override fun onDestroyView() {

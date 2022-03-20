@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 
-
 object SharedPreferencesHelper {
     private var mSharedPref: SharedPreferences? = null
     const val EXTRA_DISPLAY_NAME = "extra_display_name"
