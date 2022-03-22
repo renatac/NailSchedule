@@ -54,7 +54,7 @@
     <string name="lb_date">Data:</string>
     <string name="lb_time">Horário:</string>
     <string name="edit">Editar</string>
-    <string name="no_schedules">Você não possui horários agendados.</string>
+    <string name="no_schedules">Você não possui horário agendado.</string>
     <string name="add_or_update">Observação: Caso já possua um agendamento, estará atualizando o mesmo.</string>
     <string name="explanation_about_choose_photo">Deixe-me ver a foto do serviço que você quer realizar. Escolha um dos métodos abaixo para obter a foto:</string>
 
@@ -65,7 +65,7 @@
     <!--Login Activity -->
     <string name="login_failed">Falha ao logar. Tente novamente, por favor.</string>
     <string name="btn_client">Cliente</string>
-    <string name="btn_owner">Proprietário</string>
+    <string name="btn_owner">Profissional</string>
     <string name="description">Antes de lhe apresentar as opções de login, deixe-me saber que tipo de usuário do App é você:</string>
     <string name="client_or_owner_again"><u>Escolha novamente se você é cliente ou proprietário.</u></string>
 
