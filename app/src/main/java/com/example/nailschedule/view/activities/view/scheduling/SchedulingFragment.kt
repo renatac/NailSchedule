@@ -25,13 +25,7 @@ import com.example.nailschedule.databinding.FragmentSchedulingBinding
 import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
-import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.DATE
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.MIN_DATE
-import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.NAME
-import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.POSITION
-import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.SERVICE
-import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.TIME
-import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.URI_STRING
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
@@ -91,42 +85,50 @@ class SchedulingFragment : Fragment() {
         arrayAdapter = ArrayAdapter(
             requireContext(),
             R.layout.support_simple_spinner_dropdown_item,
-            list)
+            list
+        )
     }
 
-    private fun deleteFirebaseFirestoreAllDates(previousMinDate: String) {
-        FirebaseFirestore.getInstance().collection("calendarField")
-            .document(previousMinDate)
-            .delete()
+    @SuppressLint("SimpleDateFormat")
+    private fun deleteFirebaseFirestoreAllDates() {
+        for (i in 1 until 10) {
+            val now = Calendar.getInstance()
+            val f = SimpleDateFormat("dd-MM-yyyy")
+            val number = "-$i".toInt()
+            now.add(Calendar.DAY_OF_MONTH, number)
+            val dtMinusOne = f.format(now.time)
+            FirebaseFirestore.getInstance().collection("calendarField")
+                .document(dtMinusOne)
+                .delete()
 
-        FirebaseFirestore.getInstance().collection("users")
-            .document(email!!).get().addOnSuccessListener { documentSnapshot ->
-                documentSnapshot.data?.let {
-                    val userDate = it["date"] as String
-                    if(userDate == previousMinDate) {
-                        FirebaseFirestore.getInstance().collection("users")
-                            .document(email!!).delete()
+            FirebaseFirestore.getInstance().collection("users")
+                .document(email!!).get().addOnSuccessListener { documentSnapshot ->
+                    documentSnapshot.data?.let {
+                        val userDate = it["date"] as String
+                        if (userDate == dtMinusOne) {
+                            FirebaseFirestore.getInstance().collection("users")
+                                .document(email!!).delete()
+                        }
                     }
                 }
-            }
-
+        }
     }
 
     @SuppressLint("SimpleDateFormat")
     private fun saveMinDateAtSharedPreferences() {
         val previousMinDate: String? =
-            SharedPreferencesHelper.read(MIN_DATE,"")
+            SharedPreferencesHelper.read(MIN_DATE, "")
 
         val currentDateAndHour = Date()
         val currentDate = SimpleDateFormat("dd-MM-yyyy").format(currentDateAndHour)
 
         //Don't have any minDate saved before
-        if(previousMinDate.isNullOrEmpty()) {
+        if (previousMinDate.isNullOrEmpty()) {
             SharedPreferencesHelper.write(MIN_DATE, currentDate)
-        // Tne minDate changed
-        } else if(previousMinDate != currentDate) {
+            // Tne minDate changed
+        } else if (previousMinDate != currentDate) {
             SharedPreferencesHelper.write(MIN_DATE, currentDate)
-            deleteFirebaseFirestoreAllDates(previousMinDate)
+            deleteFirebaseFirestoreAllDates()
         }
     }
 
@@ -151,8 +153,11 @@ class SchedulingFragment : Fragment() {
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             showSpinner()
             val monthOk = month + 1
-            date = if(monthOk <= 9) { "$dayOfMonth-0${monthOk}-$year"}
-               else { "$dayOfMonth-${monthOk}-$year" }
+            date = if (monthOk <= 9) {
+                "$dayOfMonth-0${monthOk}-$year"
+            } else {
+                "$dayOfMonth-${monthOk}-$year"
+            }
             timeListOk.clear()
         }
 
@@ -173,11 +178,13 @@ class SchedulingFragment : Fragment() {
                 id: Long
             ) {
                 if (spinner.selectedItem.toString() != requireContext()
-                        .getString(R.string.select_the_hour)) {
+                        .getString(R.string.select_the_hour)
+                ) {
                     pos = position
                     time = spinner.selectedItem.toString()
                 }
             }
+
             override fun onNothingSelected(parentView: AdapterView<*>?) {
             }
         }
@@ -195,10 +202,10 @@ class SchedulingFragment : Fragment() {
                 )
                 val currentDate = SimpleDateFormat("dd-MM-yyyy").format(Date())
                 val currentHour = SimpleDateFormat("HH:mm").format(Date())
-                val currentHourToLong = currentHour.toString().substring(0,2).toLong()
-                val timeToLong = time!!.substring(0,2).toLong()
+                val currentHourToLong = currentHour.toString().substring(0, 2).toLong()
+                val timeToLong = time!!.substring(0, 2).toLong()
 
-                if(currentDate== date && timeToLong < currentHourToLong + 2) {
+                if (currentDate == date && timeToLong < currentHourToLong + 2) {
                     showToast(requireContext(), R.string.unavailable_time)
                 } else {
                     downloadForFirebaseFirestore(date!!, user)
@@ -221,19 +228,20 @@ class SchedulingFragment : Fragment() {
 
     @SuppressLint("SimpleDateFormat")
     private fun deleteCurrentDayHour(
-        timeList: MutableList<String>)
-    : MutableList<String> {
+        timeList: MutableList<String>
+    )
+            : MutableList<String> {
         val currentDateAndHour = Date()
         val currentDate = SimpleDateFormat("dd-MM-yyyy").format(currentDateAndHour)
         val currentHour = SimpleDateFormat("HH:mm").format(currentDateAndHour)
 
         val hoursLessThan2 = mutableListOf<String>()
-        if(date == currentDate) {
+        if (date == currentDate) {
             timeList.forEachIndexed { index, hour ->
-                if(index != 0) {
-                    val currentHourToLong = currentHour.toString().substring(0,2).toLong()
-                    val hourToLong = hour.substring(0,2).toLong()
-                    if(hourToLong < currentHourToLong + 2) {
+                if (index != 0) {
+                    val currentHourToLong = currentHour.toString().substring(0, 2).toLong()
+                    val hourToLong = hour.substring(0, 2).toLong()
+                    if (hourToLong < currentHourToLong + 2) {
                         hoursLessThan2.add(hour)
                     }
                 }
@@ -254,10 +262,11 @@ class SchedulingFragment : Fragment() {
                 } ?: run {
                     val originalList = mutableListOf(
                         requireContext().getString(R.string.select_the_hour),
-                        "08:00", "10:00", "12:00", "14:00", "16:00", "18:00")
+                        "08:00", "10:00", "12:00", "14:00", "16:00", "18:00"
+                    )
                     timeListOk.addAll(originalList)
                 }
-                if(timeListOk.size == 1) {
+                if (timeListOk.size == 1) {
                     showToast(requireContext(), R.string.data_without_available_hour)
                 } else {
                     timeListOk = deleteCurrentDayHour(timeListOk)
@@ -274,7 +283,8 @@ class SchedulingFragment : Fragment() {
         previousDate: String,
         previousTime: String,
         actualTimeList: MutableList<String>,
-        user: User) {
+        user: User
+    ) {
         val previousTimeList = mutableListOf<String>()
         FirebaseFirestore.getInstance().collection("calendarField")
             .document(previousDate).get().addOnSuccessListener { documentSnapshot ->
@@ -287,7 +297,7 @@ class SchedulingFragment : Fragment() {
                         add(previousTime)
                         sort()
                     }
-                    if(user.date == previousDate) {
+                    if (user.date == previousDate) {
                         actualTimeList.apply {
                             add(previousTime)
                             sort()
@@ -300,7 +310,6 @@ class SchedulingFragment : Fragment() {
                     clearFields()
                     setBottomVisibility(GONE)
                     setBtnSaveVisibility(VISIBLE)
-                   // clearSharedPreferencesDatas()
                 }
             }
     }
@@ -342,7 +351,12 @@ class SchedulingFragment : Fragment() {
                     }
 
                     binding.btnConfirm.setOnClickListener {
-                        getFirebaseFirestoreCalendarField(previousDate, previousTime, actualTimeList, user)
+                        getFirebaseFirestoreCalendarField(
+                            previousDate,
+                            previousTime,
+                            actualTimeList,
+                            user
+                        )
                     }
 
                     binding.btnCancel.setOnClickListener {
@@ -378,7 +392,8 @@ class SchedulingFragment : Fragment() {
 
     private fun addOrUpdateCalendarFieldFirestoreDatabase(
         hourList: List<String>,
-        date: String) {
+        date: String
+    ) {
         val time = Time(hourList)
         FirebaseFirestore.getInstance().collection("calendarField")
             .document(date).set(time)
@@ -423,7 +438,7 @@ class SchedulingFragment : Fragment() {
                 showToast(requireContext(), R.string.empty_date)
             }
             isEmptyField(time) -> {
-                if(timeListOk.size == 1) {
+                if (timeListOk.size == 1) {
                     showToast(requireContext(), R.string.data_without_available_hour)
                 } else {
                     showToast(requireContext(), R.string.empty_time)
@@ -477,44 +492,6 @@ class SchedulingFragment : Fragment() {
         tvInformationPhotoChange.visibility = GONE
         ivPhoto.visibility = GONE
         btnChoosePhoneGallery.visibility = VISIBLE
-    }
-
-    //Clears data except data and time
-    private fun clearSharedPreferencesDatas() {
-         SharedPreferencesHelper.write(NAME, "")
-         SharedPreferencesHelper.write(SERVICE, "")
-         SharedPreferencesHelper.write(POSITION, 0)
-         SharedPreferencesHelper.write(URI_STRING, "")
-    }
-
-    override fun onPause() {
-        super.onPause()
-       /* with(binding) {
-            fillInAllSharedPreferencesFields(
-                name = txtName.editText?.text.toString().trim(),
-                service = txtService.editText?.text.toString().trim(),
-                date = date.toString(),
-                time = time.toString(),
-                position = pos,
-                uriString = uriString ?: ""
-            )
-        } */
-    }
-
-    private fun fillInAllSharedPreferencesFields(
-        name: String,
-        service: String,
-        date: String,
-        time: String,
-        position: Int,
-        uriString: String
-    ) {
-        SharedPreferencesHelper.write(NAME, name)
-        SharedPreferencesHelper.write(SERVICE, service)
-        SharedPreferencesHelper.write(DATE, date)
-        SharedPreferencesHelper.write(TIME, time)
-        SharedPreferencesHelper.write(POSITION, position)
-        SharedPreferencesHelper.write(URI_STRING, uriString)
     }
 
     override fun onDestroyView() {
