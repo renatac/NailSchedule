@@ -53,7 +53,8 @@ class GalleryFragment : Fragment() {
         galleryViewModel =
             ViewModelProvider(this).get(GalleryViewModel::class.java)
         email = SharedPreferencesHelper.read(
-            SharedPreferencesHelper.EXTRA_EMAIL, "")
+            SharedPreferencesHelper.EXTRA_EMAIL, ""
+        )
     }
 
     override fun onCreateView(
@@ -87,7 +88,7 @@ class GalleryFragment : Fragment() {
     private fun downloadPhotosFromCloudStorage() {
         galleryViewModel.hasPhoto.observe(viewLifecycleOwner, {
             hideProgress()
-            if(galleryViewModel.hasPhoto.value!!) {
+            if (galleryViewModel.hasPhoto.value!!) {
                 hideEmptyState()
                 showRecyclerView()
             } else {
@@ -100,12 +101,12 @@ class GalleryFragment : Fragment() {
             .addOnSuccessListener { listResult ->
                 if (listResult.items.size != 0) {
                     listResult.items.forEach {
-                            it.downloadUrl.addOnSuccessListener { uri ->
-                                galleryViewModel.hasPhoto.value = true
-                                galleryAdapter.setItemList(uri)
-                            }.addOnFailureListener { exception ->
-                                print(exception)
-                            }
+                        it.downloadUrl.addOnSuccessListener { uri ->
+                            galleryViewModel.hasPhoto.value = true
+                            galleryAdapter.setItemList(uri)
+                        }.addOnFailureListener { exception ->
+                            print(exception)
+                        }
                     }
                 } else {
                     hideProgress()

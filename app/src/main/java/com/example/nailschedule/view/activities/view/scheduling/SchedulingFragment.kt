@@ -87,6 +87,7 @@ class SchedulingFragment : Fragment() {
             R.layout.support_simple_spinner_dropdown_item,
             list
         )
+        binding.spinner.adapter = arrayAdapter
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -151,6 +152,10 @@ class SchedulingFragment : Fragment() {
     private fun setupListeners() = binding.apply {
         //calendar.date = 1640799751672
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            //selectSpinnerPosition(0)
+            initializeAdapter(mutableListOf(
+                requireContext().getString(R.string.select_the_hour)))
+            selectSpinnerPosition(0)
             showSpinner()
             val monthOk = month + 1
             date = if (monthOk <= 9) {
@@ -272,7 +277,6 @@ class SchedulingFragment : Fragment() {
                     timeListOk = deleteCurrentDayHour(timeListOk)
                     addOrUpdateCalendarFieldFirestoreDatabase(timeListOk, date!!)
                     initializeAdapter(timeListOk)
-                    binding.spinner.adapter = arrayAdapter
                 }
             }.addOnFailureListener {
                 print(it)
@@ -421,9 +425,13 @@ class SchedulingFragment : Fragment() {
         txtService.editText?.setText("")
         calendarView.clearFocus()
         uriString = null
-        spinner.setSelection(0)
+        //selectSpinnerPosition(0)
         hideSpinner()
         showOptionsToSelectPhoto()
+    }
+
+    private fun selectSpinnerPosition(position: Int) {
+        binding.spinner.setSelection(position)
     }
 
     private fun printEmptyField() {

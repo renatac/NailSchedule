@@ -46,7 +46,6 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
         navigationView.setNavigationItemSelectedListener(this)
 
         navController = findNavController(R.id.nav_host_fragment_activity_bottom_navigation)
-
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
@@ -83,7 +82,13 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
             if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.closeDrawer(GravityCompat.START)
             } else {
-                super.onBackPressed()
+                val isGalleryFragment =
+                    navController.currentDestination?.label.toString() == getString(R.string.title_gallery)
+                if (isGalleryFragment) {
+                    finishAffinity()
+                } else {
+                    super.onBackPressed()
+                }
             }
         }
     }

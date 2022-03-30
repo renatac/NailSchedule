@@ -17,7 +17,7 @@
     <string name="choose_photos">Escolher fotos</string>
     <string name="add_more_photos">Adicione mais Fotos</string>
     <string name="trash">lixeira</string>
-    <string name="no_selected_photo">Não há fotos selecionadas</string>
+    <string name="no_selected_photo">Não há nenhuma foto selecionada</string>
     <string name="photo_deleted">Foto apagada</string>
     <string name="photos_deleted">Fotos apagadas</string>
     <string name="all_photos_deleted">Todas as fotos foram apagadas</string>
@@ -31,7 +31,7 @@
     <string name="save">Salvar</string>
     <string name="confirm">Confirmar</string>
     <string name="cancel">Cancelar</string>
-    <string name="message_about_remark">Você já possui uma data e horário agendado(%s h do dia %s). Deseja remarcar?</string>
+    <string name="message_about_remark">Você já possui uma data e horário agendados(%s h do dia %s). Deseja remarcar?</string>
     <string name="choose_photo">Escolher foto</string>
     <string name="empty_name">Preencha o Nome</string>
     <string name="empty_service">Preencha o Serviço</string>
@@ -54,7 +54,7 @@
     <string name="lb_date">Data:</string>
     <string name="lb_time">Horário:</string>
     <string name="edit">Editar</string>
-    <string name="no_schedules">Você não possui horário agendado.</string>
+    <string name="no_schedules">Você não possui horário agendado</string>
     <string name="add_or_update">Observação: Caso já possua um agendamento, estará atualizando o mesmo.</string>
     <string name="explanation_about_choose_photo">Deixe-me ver a foto do serviço que você quer realizar. Escolha um dos métodos abaixo para obter a foto:</string>
 

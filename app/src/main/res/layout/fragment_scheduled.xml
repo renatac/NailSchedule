@@ -142,8 +142,11 @@
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/no_scheduled"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:gravity="center"
+        android:layout_marginHorizontal="@dimen/_16dp"
+        android:textStyle="bold"
+        android:textSize="@dimen/_20sp"
         android:text="@string/no_schedules"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"

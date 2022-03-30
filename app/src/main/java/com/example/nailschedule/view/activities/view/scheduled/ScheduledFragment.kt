@@ -43,7 +43,6 @@ class ScheduledFragment : Fragment() {
         FirebaseFirestore.getInstance().collection("users")
             .document(email!!).get()
             .addOnSuccessListener { documentSnapshot ->
-
                 documentSnapshot.data?.let {
                         print(this)
                         user = User(
@@ -82,7 +81,10 @@ class ScheduledFragment : Fragment() {
         tvServiceValue.text = user?.service
         tvDateValue.text = user?.date
         tvTimeValue.text = user?.time
-        Glide.with(requireContext()).load(user?.uriString).into(ivNail)
+        Glide.with(this@ScheduledFragment)
+            .load(user?.uriString)
+            .centerCrop()
+            .into(ivNail)
     }
 
     private fun redirectToSchedulingFragment() {
