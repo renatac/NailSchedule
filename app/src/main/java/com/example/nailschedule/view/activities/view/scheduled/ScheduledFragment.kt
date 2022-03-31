@@ -81,10 +81,12 @@ class ScheduledFragment : Fragment() {
         tvServiceValue.text = user?.service
         tvDateValue.text = user?.date
         tvTimeValue.text = user?.time
-        Glide.with(this@ScheduledFragment)
-            .load(user?.uriString)
-            .centerCrop()
-            .into(ivNail)
+        activity?.let {
+            Glide.with(it)
+                .load(user?.uriString)
+                .centerCrop()
+                .into(ivNail)
+        }
     }
 
     private fun redirectToSchedulingFragment() {

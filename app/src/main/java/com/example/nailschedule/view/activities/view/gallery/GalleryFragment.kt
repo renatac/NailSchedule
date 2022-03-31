@@ -1,7 +1,9 @@
 package com.example.nailschedule.view.activities.view.gallery
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -96,6 +98,8 @@ class GalleryFragment : Fragment() {
                 hideRecyclerView()
             }
         })
+        val a = isOnline(requireContext())
+
         //galleryViewModel.hasPhoto.value = false
         storage.child("/images").child("/$email").listAll()
             .addOnSuccessListener { listResult ->
@@ -237,5 +241,11 @@ class GalleryFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun isOnline(context: Context): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val netInfo = cm.activeNetworkInfo
+        return netInfo != null && netInfo.isConnected
     }
 }

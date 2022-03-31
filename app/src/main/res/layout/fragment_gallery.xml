@@ -17,6 +17,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <ImageView
+        android:id="@+id/img_no_internet"
+        android:layout_width="@dimen/_100dp"
+        android:layout_height="@dimen/_100dp"
+        android:src="@drawable/ic_signal_wifi_off"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/bottom_description"
         android:layout_width="match_parent"
@@ -40,7 +51,7 @@
         android:orientation="vertical"
         android:visibility="gone"
         tools:visibility="visible"
-        app:layout_constraintBaseline_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
