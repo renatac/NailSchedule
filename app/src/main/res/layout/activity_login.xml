@@ -21,7 +21,7 @@
         app:layout_constraintBottom_toTopOf="@id/horizontal_guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:src="@drawable/ic_white_florist_24dp"/>
+        android:src="@mipmap/ic_launcher"/>
 
     <TextView
         android:id="@+id/tv_before_can_do_login"
