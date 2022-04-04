@@ -12,7 +12,7 @@ import com.example.nailschedule.databinding.ItemListGalleryBinding
 import com.example.nailschedule.view.activities.utils.showToast
 
 class GalleryAdapter(
-    private val onShortClick: (Uri) -> Unit,
+    private val onShortClick: (String) -> Unit,
     private val hideTrash: () -> Unit,
     private val deletePhotosFromCloudStorage: (List<Uri>, areAllItems: Boolean) -> Unit
 ) :
@@ -120,7 +120,7 @@ class GalleryAdapter(
     }
 
     private fun shortClick(uri: Uri?) {
-        uri?.let { onShortClick.invoke(uri) }
+        uri?.let { onShortClick.invoke(uri.toString()) }
     }
 
     inner class MyViewHolder(private val binding: ItemListGalleryBinding) :

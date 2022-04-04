@@ -174,7 +174,6 @@ class SchedulingFragment : Fragment() {
             }
             false
         }
-
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parentView: AdapterView<*>?,

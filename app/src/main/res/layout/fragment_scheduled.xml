@@ -6,152 +6,193 @@
     android:layout_height="match_parent"
     tools:context=".view.activities.view.scheduled.ScheduledFragment">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/container_scheduled"
+    <ViewFlipper
+        android:id="@+id/scheduled_view_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="parent">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progress_scheduled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:trackColor="@color/purple_500" />
+
+        <ImageView
+            android:id="@+id/img_no_internet"
+            android:layout_width="@dimen/_100dp"
+            android:layout_height="@dimen/_100dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_signal_wifi_off" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/no_scheduled"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            tools:visibility="visible"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginHorizontal="@dimen/_16dp"
+            android:gravity="center"
+            android:text="@string/no_schedules"
+            android:textSize="@dimen/_20sp"
+            android:textStyle="bold" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbarSize="4dp"
+            android:scrollbarThumbVertical="@android:color/darker_gray"
+            android:scrollbars="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/iv_nail"
-                android:layout_width="300dp"
-                android:layout_height="300dp"
-                android:layout_margin="@dimen/_16dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/tv_name"
-                tools:src="@drawable/com_facebook_profile_picture_blank_square"/>
-
-            <TextView
-                android:id="@+id/tv_name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="@dimen/_22sp"
-                android:textStyle="bold"
-                android:gravity="center_vertical|center_horizontal"
-                android:layout_margin="@dimen/_16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/iv_nail"
-                tools:text="Ananere Marilha" />
-
-            <TextView
-                android:id="@+id/tv_service"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="@dimen/_20sp"
-                android:textStyle="bold"
-                android:layout_marginStart="@dimen/_16dp"
-                android:layout_marginVertical="@dimen/_16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_name"
-                android:text="@string/lb_service" />
-
-            <TextView
-                android:id="@+id/tv_service_value"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="@dimen/_20sp"
-                android:layout_marginStart="@dimen/_8dp"
-                android:layout_marginVertical="@dimen/_16dp"
-                android:layout_marginEnd="@dimen/_16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/tv_service"
-                app:layout_constraintTop_toBottomOf="@id/tv_name"
-                tools:text="Mãos e pés" />
-
-            <TextView
-                android:id="@+id/tv_date"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="@dimen/_20sp"
-                android:textStyle="bold"
-                android:layout_margin="@dimen/_16dp"
-                android:layout_marginStart="@dimen/_16dp"
-                android:layout_marginVertical="@dimen/_16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_service"
-                android:text="@string/lb_date" />
-
-            <TextView
-                android:id="@+id/tv_date_value"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="@dimen/_20sp"
-                android:layout_marginStart="@dimen/_8dp"
-                android:layout_marginVertical="@dimen/_16dp"
-                android:layout_marginEnd="@dimen/_16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/tv_date"
-                app:layout_constraintTop_toBottomOf="@id/tv_service"
-                tools:text="Seu data foi agendada - 12/01/2022." />
-
-            <TextView
-                android:id="@+id/tv_time"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                android:textSize="@dimen/_20sp"
-                android:layout_marginStart="@dimen/_16dp"
-                android:layout_marginVertical="@dimen/_16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_date"
-                android:text="@string/lb_time" />
-
-            <TextView
-                android:id="@+id/tv_time_value"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textColor="@color/black"
-                android:textSize="@dimen/_20sp"
-                android:layout_marginStart="@dimen/_8dp"
-                android:layout_marginVertical="@dimen/_16dp"
-                android:layout_marginEnd="@dimen/_16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/tv_time"
-                app:layout_constraintTop_toBottomOf="@id/tv_date"
-                tools:text="Horário agendado: 20:00" />
-
-            <Button
-                android:id="@+id/btn_edit"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/container_scheduled"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_16dp"
-                android:layout_marginBottom="@dimen/_100dp"
-                android:textColor="@color/white"
-                android:textSize="@dimen/_20sp"
-                android:text="@string/edit"
-                android:textAllCaps="false"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                android:layout_height="match_parent">
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <ImageView
+                    android:id="@+id/iv_nail"
+                    android:layout_width="300dp"
+                    android:layout_height="300dp"
+                    android:layout_margin="@dimen/_16dp"
+                    app:layout_constraintBottom_toTopOf="@id/tv_name"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:src="@drawable/com_facebook_profile_picture_blank_square" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/no_scheduled"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:layout_marginHorizontal="@dimen/_16dp"
-        android:textStyle="bold"
-        android:textSize="@dimen/_20sp"
-        android:text="@string/no_schedules"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+                <TextView
+                    android:id="@+id/tv_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_16dp"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_22sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/iv_nail"
+                    tools:text="Ananere Marilha" />
+
+                <TextView
+                    android:id="@+id/tv_service"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="@dimen/_16dp"
+                    android:layout_marginStart="@dimen/_16dp"
+                    android:text="@string/lb_service"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_name" />
+
+                <TextView
+                    android:id="@+id/tv_service_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="@dimen/_16dp"
+                    android:layout_marginStart="@dimen/_8dp"
+                    android:layout_marginEnd="@dimen/_16dp"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/tv_service"
+                    app:layout_constraintTop_toBottomOf="@id/tv_name"
+                    tools:text="Mãos e pés" />
+
+                <TextView
+                    android:id="@+id/tv_date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_16dp"
+                    android:layout_marginVertical="@dimen/_16dp"
+                    android:layout_marginStart="@dimen/_16dp"
+                    android:text="@string/lb_date"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_service" />
+
+                <TextView
+                    android:id="@+id/tv_date_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="@dimen/_16dp"
+                    android:layout_marginStart="@dimen/_8dp"
+                    android:layout_marginEnd="@dimen/_16dp"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/tv_date"
+                    app:layout_constraintTop_toBottomOf="@id/tv_service"
+                    tools:text="Seu data foi agendada - 12/01/2022." />
+
+                <TextView
+                    android:id="@+id/tv_time"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="@dimen/_16dp"
+                    android:layout_marginStart="@dimen/_16dp"
+                    android:text="@string/lb_time"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_date" />
+
+                <TextView
+                    android:id="@+id/tv_time_value"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="@dimen/_16dp"
+                    android:layout_marginStart="@dimen/_8dp"
+                    android:layout_marginEnd="@dimen/_16dp"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/tv_time"
+                    app:layout_constraintTop_toBottomOf="@id/tv_date"
+                    tools:text="Horário agendado: 20:00" />
+
+                <Button
+                    android:id="@+id/btn_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_16dp"
+                    android:layout_marginVertical="@dimen/_24dp"
+                    android:text="@string/edit_schedule"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_time" />
+
+                <Button
+                    android:id="@+id/btn_delete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_16dp"
+                    android:text="@string/delete_schedule"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_20sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/btn_edit" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+    </ViewFlipper>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

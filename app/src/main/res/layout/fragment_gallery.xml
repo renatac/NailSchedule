@@ -6,121 +6,122 @@
     android:layout_height="match_parent"
     tools:context=".view.activities.view.gallery.GalleryFragment">
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progress_gallery"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:trackColor="@color/purple_500"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <ImageView
-        android:id="@+id/img_no_internet"
-        android:layout_width="@dimen/_100dp"
-        android:layout_height="@dimen/_100dp"
-        android:src="@drawable/ic_signal_wifi_off"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/bottom_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/gallery_message"
-        android:layout_margin="@dimen/_20dp"
-        android:textSize="@dimen/_22sp"
-        android:textStyle="italic|bold"
-        android:textColor="@color/purple_700"
-        android:visibility="gone"
-        tools:visibility="visible"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <LinearLayout
-        android:id="@+id/ll_home"
+    <ViewFlipper
+        android:id="@+id/gallery_view_flipper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical|center_horizontal"
-        android:orientation="vertical"
-        android:visibility="gone"
-        tools:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="parent">
 
-        <TextView
-            android:id="@+id/text_home"
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progress_gallery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:trackColor="@color/purple_500" />
+
+        <ImageView
+            android:id="@+id/img_no_internet"
+            android:layout_width="@dimen/_100dp"
+            android:layout_height="@dimen/_100dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_signal_wifi_off" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/add_photo"
-            android:textAlignment="center"
-            android:textAllCaps="false"
-            android:textColor="@color/purple_500"
-            android:textSize="@dimen/_20sp" />
+            android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btn_select_photo"
-            android:layout_width="200dp"
-            android:shadowRadius="23"
-            android:background="@color/purple_500"
-            android:text="@string/choose_photos"
-            android:textAlignment="center"
-            android:textAllCaps="false"
-            android:textSize="@dimen/_20sp"
-            android:textColor="@color/white"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:layout_marginTop="8dp" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/bottom_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_20dp"
+                android:text="@string/gallery_message"
+                android:textColor="@color/purple_700"
+                android:textSize="@dimen/_22sp"
+                android:textStyle="italic|bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/text_home"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="@string/add_photo"
+                android:textAllCaps="false"
+                android:textColor="@color/purple_500"
+                android:textSize="@dimen/_20sp"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintBottom_toTopOf="@id/btn_select_photo"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_add_photos"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:text="@string/add_more_photos"
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:layout_marginTop="@dimen/_16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_select_photo"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:background="@color/purple_500"
+                android:shadowRadius="23"
+                android:text="@string/choose_photos"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_20sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ImageView
-        android:id="@+id/iv_delete"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="8dp"
-        android:visibility="gone"
-        app:layout_constraintTop_toTopOf="@id/btn_add_photos"
-        app:layout_constraintStart_toEndOf="@id/btn_add_photos"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:src="@drawable/ic_delete_24dp"
-        android:contentDescription="@string/trash" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/ll_with_photo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_home"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:layout_marginStart="@dimen/_8dp"
-        android:layout_marginVertical="@dimen/_8dp"
-        android:scrollbarSize="4dp"
-        android:scrollbarThumbVertical="@android:color/darker_gray"
-        android:scrollbars="vertical"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/btn_add_photos"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/item_list_gallery" />
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_add_photos"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_16dp"
+                android:text="@string/add_more_photos"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/iv_delete"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:contentDescription="@string/trash"
+                android:src="@drawable/ic_delete_24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/btn_add_photos"
+                app:layout_constraintTop_toTopOf="@id/btn_add_photos" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_home"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginVertical="@dimen/_8dp"
+                android:layout_marginStart="@dimen/_8dp"
+                android:scrollbarSize="4dp"
+                android:scrollbarThumbVertical="@android:color/darker_gray"
+                android:scrollbars="vertical"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btn_add_photos"
+                tools:listitem="@layout/item_list_gallery" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ViewFlipper>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,6 +18,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.nailschedule.databinding.FragmentGalleryBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
+import com.example.nailschedule.view.activities.view.activities.PhotoActivity
+import com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -44,6 +46,13 @@ class GalleryFragment : Fragment() {
 
     private var selectedUri: Uri? = null
 
+    companion object {
+        const val VIEW_FLIPPER_LOADING = 0
+        const val VIEW_FLIPPER_NO_INTERNET = 1
+        const val VIEW_FLIPPER_EMPTY_STATE = 2
+        const val VIEW_FLIPPER_HAS_PHOTO = 3
+    }
+
     private val galleryAdapter: GalleryAdapter by lazy {
         GalleryAdapter(::onShortClick, ::hideTrash, ::deletePhotosFromCloudStorage)
     }
@@ -67,7 +76,6 @@ class GalleryFragment : Fragment() {
 
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
         val root: View = binding.root
-
         showProgress()
         galleryAdapter.clearList()
         downloadPhotosFromCloudStorage()
@@ -89,13 +97,10 @@ class GalleryFragment : Fragment() {
 
     private fun downloadPhotosFromCloudStorage() {
         galleryViewModel.hasPhoto.observe(viewLifecycleOwner, {
-            hideProgress()
             if (galleryViewModel.hasPhoto.value!!) {
-                hideEmptyState()
                 showRecyclerView()
             } else {
                 showEmptyState()
-                hideRecyclerView()
             }
         })
         val a = isOnline(requireContext())
@@ -113,9 +118,7 @@ class GalleryFragment : Fragment() {
                         }
                     }
                 } else {
-                    hideProgress()
                     showEmptyState()
-                    hideRecyclerView()
                 }
             }.addOnFailureListener {
                 print(it)
@@ -151,7 +154,6 @@ class GalleryFragment : Fragment() {
                     try {
                         selectedUri?.let {
                             galleryAdapter.setItemList(it)
-                            hideEmptyState()
                             showRecyclerView()
                             uploadPhotoToCloudStorage()
                         }
@@ -164,33 +166,11 @@ class GalleryFragment : Fragment() {
     }
 
     private fun showRecyclerView() {
-        with(binding) {
-            recyclerHome.visibility = View.VISIBLE
-            btnAddPhotos.visibility = View.VISIBLE
-            ivDelete.visibility = View.VISIBLE
-        }
-    }
-
-    private fun hideRecyclerView() {
-        with(binding) {
-            btnAddPhotos.visibility = View.GONE
-            ivDelete.visibility = View.GONE
-            recyclerHome.visibility = View.GONE
-        }
+        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_HAS_PHOTO
     }
 
     private fun showEmptyState() {
-        with(binding) {
-            bottomDescription.visibility = View.VISIBLE
-            llHome.visibility = View.VISIBLE
-        }
-    }
-
-    private fun hideEmptyState() {
-        with(binding) {
-            bottomDescription.visibility = View.GONE
-            llHome.visibility = View.GONE
-        }
+       binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_EMPTY_STATE
     }
 
     private fun uploadPhotoToCloudStorage() {
@@ -203,16 +183,19 @@ class GalleryFragment : Fragment() {
         }
     }
 
-    private fun onShortClick(uri: Uri) {
+    private fun onShortClick(uriString: String) {
+        showExpandedPhoto(uriString)
         Toast.makeText(requireContext(), "", Toast.LENGTH_LONG).show()
     }
 
-    private fun showProgress() {
-        binding.progressGallery.visibility = View.VISIBLE
+    private fun showExpandedPhoto(uriString: String) {
+        val intent = Intent(activity, PhotoActivity::class.java)
+        intent.putExtra(ScheduledFragment.EXTRA_URI_STRING, uriString)
+        startActivity(intent)
     }
 
-    private fun hideProgress() {
-        binding.progressGallery.visibility = View.GONE
+    private fun showProgress() {
+        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_LOADING
     }
 
     private fun hideTrash() {
@@ -228,7 +211,6 @@ class GalleryFragment : Fragment() {
                     }
                 }
             showEmptyState()
-            hideRecyclerView()
         } else {
             uriList.forEach { uri ->
                 val uriString = uri.toString()

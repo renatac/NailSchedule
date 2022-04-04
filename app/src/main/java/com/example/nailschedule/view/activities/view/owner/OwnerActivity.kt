@@ -2,6 +2,7 @@ package com.example.nailschedule.view.activities.view.owner
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nailschedule.R
@@ -28,10 +29,11 @@ class OwnerActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() = binding.apply {
-        toolbar.title = getString(R.string.general_schedule)
-        setSupportActionBar(toolbar)
-        toolbar.setTitleTextColor(ContextCompat.getColor(this@OwnerActivity, R.color.white))
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.apply {
+            title = getString(R.string.photo)
+            setSupportActionBar(this)
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        }
     }
 
     private fun setCalendarListener() {

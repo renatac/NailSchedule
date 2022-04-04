@@ -42,6 +42,8 @@
         <activity
             android:name=".view.activities.view.activities.PhotoActivity"
             android:label="@string/photo"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:parentActivityName=".view.activities.view.activities.LoginActivity"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".view.activities.view.activities.BottomNavigationActivity"

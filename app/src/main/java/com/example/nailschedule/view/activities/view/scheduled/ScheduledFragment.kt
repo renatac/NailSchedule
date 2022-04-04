@@ -9,11 +9,12 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentScheduledBinding
+import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.data.model.User
-import com.example.nailschedule.view.activities.view.activities.PhotoActivity
-import com.example.nailschedule.view.activities.view.scheduling.SchedulingFragment
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showToast
+import com.example.nailschedule.view.activities.view.activities.PhotoActivity
+import com.example.nailschedule.view.activities.view.scheduling.SchedulingFragment
 import com.google.firebase.firestore.FirebaseFirestore
 
 
@@ -23,8 +24,19 @@ class ScheduledFragment : Fragment() {
 
     private var user: User? = null
 
+    private val email = SharedPreferencesHelper.read(
+        SharedPreferencesHelper.EXTRA_EMAIL, ""
+    )
+
+    private var date: String? = null
+    private var time: String? = null
+
     companion object {
         const val EXTRA_URI_STRING = "extra_uri_string"
+        const val VIEW_FLIPPER_LOADING = 0
+        const val VIEW_FLIPPER_NO_INTERNET = 1
+        const val VIEW_FLIPPER_EMPTY_STATE = 2
+        const val VIEW_FLIPPER_SCHEDULED = 3
     }
 
     // This property is only valid between onCreateView and
@@ -38,27 +50,27 @@ class ScheduledFragment : Fragment() {
 
     //Firestore Database - Cloud Firestore
     private fun getDocumentsFromFirestoreDatabase() {
-        val email = SharedPreferencesHelper.read(
-            SharedPreferencesHelper.EXTRA_EMAIL, "")
         FirebaseFirestore.getInstance().collection("users")
             .document(email!!).get()
             .addOnSuccessListener { documentSnapshot ->
                 documentSnapshot.data?.let {
-                        print(this)
-                        user = User(
-                                it["name"] as String,
-                                it["service"] as String,
-                                it["date"] as String,
-                                it["time"] as String,
-                                it["uriString"] as String
-                            )
+                    print(this)
+                    user = User(
+                        it["name"] as String,
+                        it["service"] as String,
+                        it["date"] as String,
+                        it["time"] as String,
+                        it["uriString"] as String
+                    )
+                    date = user?.date
+                    time = user?.time
                 }
-                if(user == null){
+                if (user == null) {
                     showEmptyState()
                 } else {
                     setupFields()
                     setupListeners()
-                    hideEmptyState()
+                    showScheduled()
                 }
             }
             .addOnFailureListener {
@@ -69,15 +81,43 @@ class ScheduledFragment : Fragment() {
     }
 
     private fun setupListeners() = binding.apply {
-        btnEdit.setOnClickListener {
-            redirectToSchedulingFragment()
-        }
         ivNail.setOnClickListener {
             showExpandedPhoto()
         }
+        btnEdit.setOnClickListener {
+            redirectToSchedulingFragment()
+        }
+        btnDelete.setOnClickListener {
+            deleteFirebaseFirestoreDatas()
+        }
     }
+
+    private fun deleteFirebaseFirestoreDatas() {
+        FirebaseFirestore.getInstance().collection("users")
+            .document(email!!).delete()
+
+        val previousTimeList = mutableListOf<String>()
+        FirebaseFirestore.getInstance().collection("calendarField")
+            .document(date!!).get().addOnSuccessListener { documentSnapshot ->
+                documentSnapshot.data?.let {
+                    val timeList = it["timeList"] as List<*>
+                    timeList.forEach { time ->
+                        previousTimeList.add(time.toString())
+                    }
+                    previousTimeList.apply {
+                        add(time!!)
+                        sort()
+                    }
+                    val hoursList = Time(previousTimeList)
+                    FirebaseFirestore.getInstance().collection("calendarField")
+                        .document(date!!).set(hoursList)
+                    showEmptyState()
+                }
+            }
+    }
+
     private fun setupFields() = binding.apply {
-        tvName.text =  user?.name
+        tvName.text = user?.name
         tvServiceValue.text = user?.service
         tvDateValue.text = user?.date
         tvTimeValue.text = user?.time
@@ -89,8 +129,9 @@ class ScheduledFragment : Fragment() {
         }
     }
 
-    private fun redirectToSchedulingFragment() {
-        binding.btnEdit.visibility = View.GONE
+    private fun redirectToSchedulingFragment() = binding.apply {
+        //btnEdit.visibility = View.GONE
+        //btnDelete.visibility = View.GONE
         saveAtSharedPreferences()
         parentFragmentManager
             .beginTransaction()
@@ -100,20 +141,13 @@ class ScheduledFragment : Fragment() {
 
     private fun saveAtSharedPreferences() = binding.apply {
         SharedPreferencesHelper.write(SharedPreferencesHelper.NAME, tvName.text.toString().trim())
-        SharedPreferencesHelper.write(SharedPreferencesHelper.SERVICE, tvServiceValue.text.toString().trim())
+        SharedPreferencesHelper.write(
+            SharedPreferencesHelper.SERVICE,
+            tvServiceValue.text.toString().trim()
+        )
         SharedPreferencesHelper.write(SharedPreferencesHelper.DATE, tvDateValue.text.toString())
         SharedPreferencesHelper.write(SharedPreferencesHelper.TIME, tvTimeValue.text.toString())
         SharedPreferencesHelper.write(SharedPreferencesHelper.URI_STRING, user?.uriString)
-    }
-
-    private fun showEmptyState() = binding.apply {
-        noScheduled.visibility = View.VISIBLE
-        containerScheduled.visibility = View.GONE
-    }
-
-    private fun hideEmptyState() = binding.apply {
-        noScheduled.visibility = View.GONE
-        containerScheduled.visibility = View.VISIBLE
     }
 
     private fun showExpandedPhoto() {
@@ -134,5 +168,13 @@ class ScheduledFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun showEmptyState() {
+        binding.scheduledViewFlipper.displayedChild = VIEW_FLIPPER_EMPTY_STATE
+    }
+
+    private fun showScheduled() {
+        binding.scheduledViewFlipper.displayedChild = VIEW_FLIPPER_SCHEDULED
     }
 }
