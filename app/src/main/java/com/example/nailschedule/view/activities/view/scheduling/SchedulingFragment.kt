@@ -158,11 +158,17 @@ class SchedulingFragment : Fragment() {
             selectSpinnerPosition(0)
             showSpinner()
             val monthOk = month + 1
-            date = if (monthOk <= 9) {
-                "$dayOfMonth-0${monthOk}-$year"
+            val day = if(dayOfMonth <= 9) {
+                "0$dayOfMonth"
             } else {
-                "$dayOfMonth-${monthOk}-$year"
+                dayOfMonth
             }
+            date = if (monthOk <= 9) {
+                "$day-0${monthOk}-$year"
+            } else {
+                "$day-${monthOk}-$year"
+            }
+
             timeListOk.clear()
         }
 

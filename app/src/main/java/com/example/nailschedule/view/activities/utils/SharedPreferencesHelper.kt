@@ -16,7 +16,6 @@ object SharedPreferencesHelper {
     const val SERVICE = "service"
     const val DATE = "date"
     const val TIME = "time"
-    const val POSITION = "position"
     const val URI_STRING = "uri_string"
     const val MIN_DATE = "min_date"
 
