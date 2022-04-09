@@ -30,7 +30,7 @@ class OwnerActivity : AppCompatActivity() {
 
     private fun setupToolbar() = binding.apply {
         toolbar.apply {
-            title = getString(R.string.photo)
+            title = getString(R.string.general_schedule)
             setSupportActionBar(this)
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
         }

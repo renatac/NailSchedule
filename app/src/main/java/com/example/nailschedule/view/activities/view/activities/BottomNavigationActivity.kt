@@ -1,6 +1,5 @@
 package com.example.nailschedule.view.activities.view.activities
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -148,6 +147,6 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
     }
 
     private fun redirectToLoginActivity() {
-        startActivity(Intent(this, LoginActivity::class.java))
+        finish()
     }
 }

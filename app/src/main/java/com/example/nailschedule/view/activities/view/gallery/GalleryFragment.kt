@@ -14,8 +14,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentGalleryBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
+import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
 import com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment
 import com.google.firebase.ktx.Firebase
@@ -28,6 +30,9 @@ import java.util.*
 class GalleryFragment : Fragment() {
 
     private var email: String? = null
+    private var selectedUriList: List<Uri>? = null
+    private var uriList: List<Uri>? = null
+    private var areAllItems: Boolean? = null
 
     //private lateinit var homeViewModel: HomeViewModel
     private var _binding: FragmentGalleryBinding? = null
@@ -49,6 +54,8 @@ class GalleryFragment : Fragment() {
         const val VIEW_FLIPPER_NO_INTERNET = 1
         const val VIEW_FLIPPER_EMPTY_STATE = 2
         const val VIEW_FLIPPER_HAS_PHOTO = 3
+        const val DOWNLOAD = "download"
+        const val DELETE = "delete"
     }
 
     private val galleryAdapter: GalleryAdapter by lazy {
@@ -86,41 +93,75 @@ class GalleryFragment : Fragment() {
                 selectPhoto()
             }
             ivDelete.setOnClickListener {
-                galleryAdapter.clickToRemove(root.context)
+                galleryAdapter.clickToRemove()
             }
         }
+        setupObserver()
         setupAdapter()
         return root
     }
 
-    private fun downloadPhotosFromCloudStorage() {
-
-        galleryViewModel.hasPhoto.observe(viewLifecycleOwner, {
-            if (galleryViewModel.hasPhoto.value!!) {
-                showRecyclerView()
-            } else {
-                showEmptyState()
-            }
-        })
-
-        //galleryViewModel.hasPhoto.value = false
-        storage.child("/images").child("/$email").listAll()
-            .addOnSuccessListener { listResult ->
-                if (listResult.items.size != 0) {
-                    listResult.items.forEach {
-                        it.downloadUrl.addOnSuccessListener { uri ->
-                            galleryViewModel.hasPhoto.value = true
-                            galleryAdapter.setItemList(uri)
-                        }.addOnFailureListener { exception ->
-                            print(exception)
+    private fun setupObserver() {
+        galleryViewModel.hasInternet.observe(viewLifecycleOwner,
+            {
+                if (it.first) {
+                    if (it.second == DOWNLOAD) {
+                        galleryViewModel.hasPhoto.observe(viewLifecycleOwner, {
+                            if (galleryViewModel.hasPhoto.value!!) {
+                                showRecyclerView()
+                            } else {
+                                showEmptyState()
+                            }
+                        })
+                        //galleryViewModel.hasPhoto.value = false
+                        storage.child("/images").child("/$email").listAll()
+                            .addOnSuccessListener { listResult ->
+                                if (listResult.items.size != 0) {
+                                    listResult.items.forEach {
+                                        it.downloadUrl.addOnSuccessListener { uri ->
+                                            galleryViewModel.hasPhoto.value = true
+                                            galleryAdapter.setItemList(uri)
+                                        }.addOnFailureListener { exception ->
+                                            print(exception)
+                                        }
+                                    }
+                                } else {
+                                    showEmptyState()
+                                }
+                            }.addOnFailureListener { exception ->
+                                print(exception)
+                            }
+                    } else if (it.second == DELETE) {
+                        printMessageAboutExclusion()
+                        if (areAllItems!!) {
+                            storage.child("/images").child("/$email")
+                                .listAll().addOnSuccessListener { listResult ->
+                                    listResult.items.forEach {
+                                        it.delete()
+                                    }
+                                }
+                            showEmptyState()
+                        } else {
+                            selectedUriList?.forEach { uri ->
+                                val uriString = uri.toString()
+                                val initialIndex = uriString.indexOf("_")
+                                //val finalIndexOk = initialIndex + 8
+                                val finalIndexOk = uriString.lastIndexOf("_")
+                                if (initialIndex != -1 && finalIndexOk != -1) {
+                                    val filename = uriString.substring(initialIndex, finalIndexOk)
+                                    storage.child("/images").child("/$email/$filename").delete()
+                                }
+                            }
                         }
                     }
                 } else {
-                    showEmptyState()
+                    showNoIntern()
                 }
-            }.addOnFailureListener {
-                print(it)
-            }
+            })
+    }
+
+    private fun downloadPhotosFromCloudStorage() {
+        galleryViewModel.checkForInternet(requireContext(), DOWNLOAD)
     }
 
     private fun setupAdapter() {
@@ -168,7 +209,11 @@ class GalleryFragment : Fragment() {
     }
 
     private fun showEmptyState() {
-       binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_EMPTY_STATE
+        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_EMPTY_STATE
+    }
+
+    private fun showNoIntern() {
+        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_NO_INTERNET
     }
 
     private fun uploadPhotoToCloudStorage() {
@@ -200,26 +245,27 @@ class GalleryFragment : Fragment() {
         binding.ivDelete.visibility = View.GONE
     }
 
-    private fun deletePhotosFromCloudStorage(uriList: List<Uri>, areAllItems: Boolean) {
-        if (areAllItems) {
-            storage.child("/images").child("/$email")
-                .listAll().addOnSuccessListener { listResult ->
-                    listResult.items.forEach {
-                        it.delete()
-                    }
-                }
-            showEmptyState()
-        } else {
-            uriList.forEach { uri ->
-                val uriString = uri.toString()
-                val initialIndex = uriString.indexOf("_")
-                //val finalIndexOk = initialIndex + 8
-                val finalIndexOk = uriString.lastIndexOf("_")
-                if (initialIndex != -1 && finalIndexOk != -1) {
-                    val filename = uriString.substring(initialIndex, finalIndexOk)
-                    storage.child("/images").child("/$email/$filename").delete()
-                }
+    private fun printMessageAboutExclusion() {
+        when {
+            selectedUriList!!.isEmpty() -> {
+                showToast(requireContext(), R.string.no_selected_photo)
+            }
+            selectedUriList!!.size == 1 -> {
+                showToast(requireContext(), R.string.photo_deleted)
+            }
+            uriList?.size == selectedUriList!!.size -> {
+                showToast(requireContext(), R.string.all_photos_deleted)
+            }
+            else -> {
+                showToast(requireContext(), R.string.photos_deleted)
             }
         }
+    }
+
+    private fun deletePhotosFromCloudStorage(selectedUriList: List<Uri>, areAllItems: Boolean, uriList: ArrayList<Uri>?) {
+        this.selectedUriList = selectedUriList
+        this.areAllItems = areAllItems
+        this.uriList = uriList
+        galleryViewModel.checkForInternet(requireContext(), DELETE)
     }
 }
