@@ -6,6 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".view.activities.view.gallery.GalleryFragment">
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/gallery_swipeRefresh_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <ViewFlipper
         android:id="@+id/gallery_view_flipper"
         android:layout_width="match_parent"
@@ -147,4 +152,5 @@
 
     </ViewFlipper>
 
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

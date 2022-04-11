@@ -80,10 +80,19 @@ class GalleryFragment : Fragment() {
     ): View {
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        showProgress()
+        setupObservers()
+        setupRefresh()
+        initialSetup()
+        return root
+    }
+
+    private fun initialSetup() {
         galleryAdapter.clearList()
         downloadPhotosFromCloudStorage()
+        setupAdapter()
+    }
 
+    private fun setupObservers() {
         with(binding) {
             btnSelectPhoto.setOnClickListener {
                 selectPhoto()
@@ -95,15 +104,12 @@ class GalleryFragment : Fragment() {
                 galleryAdapter.clickToRemove()
             }
         }
-        setupObserver()
-        setupAdapter()
-        return root
-    }
 
-    private fun setupObserver() {
         galleryViewModel.hasInternet.observe(viewLifecycleOwner,
             {
                 if (it.first) {
+                    showProgress()
+                    hideRefresh()
                     if (it.second == DOWNLOAD) {
                         galleryViewModel.hasPhoto.observe(viewLifecycleOwner, {
                             if (galleryViewModel.hasPhoto.value!!) {
@@ -154,6 +160,7 @@ class GalleryFragment : Fragment() {
                         }
                     }
                 } else {
+                    hideRefresh()
                     showNoIntern()
                 }
             })
@@ -215,6 +222,10 @@ class GalleryFragment : Fragment() {
         binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_NO_INTERNET
     }
 
+    private fun hideRefresh() {
+        binding.gallerySwipeRefreshLayout.isRefreshing = false
+    }
+
     private fun uploadPhotoToCloudStorage() {
         //val filename = "_${UUID.randomUUID().toString().substring(0,6)}_"
         val filename = "_${Date()}_"
@@ -234,6 +245,12 @@ class GalleryFragment : Fragment() {
         val intent = Intent(activity, PhotoActivity::class.java)
         intent.putExtra(ScheduledFragment.EXTRA_URI_STRING, uriString)
         startActivity(intent)
+    }
+
+    private fun setupRefresh() {
+        binding.gallerySwipeRefreshLayout.setOnRefreshListener {
+            initialSetup()
+        }
     }
 
     private fun showProgress() {

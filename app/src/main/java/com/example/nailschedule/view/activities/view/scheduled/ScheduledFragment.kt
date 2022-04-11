@@ -15,7 +15,6 @@ import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
-import com.example.nailschedule.view.activities.view.gallery.GalleryFragment
 import com.example.nailschedule.view.activities.view.gallery.GalleryViewModel
 import com.example.nailschedule.view.activities.view.scheduling.SchedulingFragment
 import com.google.firebase.firestore.FirebaseFirestore
@@ -59,14 +58,27 @@ class ScheduledFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupObserver()
+        setupRefresh()
+        initialSetup()
+    }
+
+    private fun initialSetup() {
         showProgress()
         downloadUserDataFromFirestoreDatabase()
+    }
+
+    private fun setupRefresh() {
+        binding.scheduledSwipeRefreshLayout.setOnRefreshListener {
+            initialSetup()
+        }
     }
 
     private fun setupObserver() {
         galleryViewModel.hasInternet.observe(viewLifecycleOwner,
             {
                 if (it.first) {
+                    showProgress()
+                    hideRefresh()
                     if (it.second == USER_DATA_DOWNLOAD) {
                         FirebaseFirestore.getInstance().collection("users")
                             .document(email!!).get()
@@ -120,6 +132,7 @@ class ScheduledFragment : Fragment() {
                             }
                     }
                 } else {
+                    hideRefresh()
                     showNoInternet()
                 }
             })
@@ -214,5 +227,9 @@ class ScheduledFragment : Fragment() {
 
     private fun showScheduled() {
         binding.scheduledViewFlipper.displayedChild = VIEW_FLIPPER_SCHEDULED
+    }
+
+    private fun hideRefresh() {
+        binding.scheduledSwipeRefreshLayout.isRefreshing = false
     }
 }

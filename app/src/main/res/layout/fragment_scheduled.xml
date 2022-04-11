@@ -6,6 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".view.activities.view.scheduled.ScheduledFragment">
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/scheduled_swipeRefresh_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <ViewFlipper
         android:id="@+id/scheduled_view_flipper"
         android:layout_width="match_parent"
@@ -217,5 +222,7 @@
 
         </androidx.core.widget.NestedScrollView>
     </ViewFlipper>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
