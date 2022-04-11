@@ -78,7 +78,6 @@ class GalleryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         _binding = FragmentGalleryBinding.inflate(inflater, container, false)
         val root: View = binding.root
         showProgress()
@@ -262,7 +261,11 @@ class GalleryFragment : Fragment() {
         }
     }
 
-    private fun deletePhotosFromCloudStorage(selectedUriList: List<Uri>, areAllItems: Boolean, uriList: ArrayList<Uri>?) {
+    private fun deletePhotosFromCloudStorage(
+        selectedUriList: List<Uri>,
+        areAllItems: Boolean,
+        uriList: ArrayList<Uri>?
+    ) {
         this.selectedUriList = selectedUriList
         this.areAllItems = areAllItems
         this.uriList = uriList

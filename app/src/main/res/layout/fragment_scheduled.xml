@@ -22,12 +22,35 @@
             android:layout_gravity="center"
             app:trackColor="@color/purple_500" />
 
-        <ImageView
-            android:id="@+id/img_no_internet"
-            android:layout_width="@dimen/_100dp"
-            android:layout_height="@dimen/_100dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_signal_wifi_off" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/img_no_internet"
+                android:layout_width="@dimen/_50dp"
+                android:layout_height="@dimen/_50dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_signal_wifi_off"
+                app:layout_constraintBottom_toTopOf="@id/tv_no_internet"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_no_internet"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/no_internet"
+                android:layout_marginHorizontal="@dimen/_16dp"
+                android:gravity="center"
+                android:textSize="@dimen/_20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/no_scheduled"

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentScheduledBinding
@@ -14,6 +15,8 @@ import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
+import com.example.nailschedule.view.activities.view.gallery.GalleryFragment
+import com.example.nailschedule.view.activities.view.gallery.GalleryViewModel
 import com.example.nailschedule.view.activities.view.scheduling.SchedulingFragment
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -21,6 +24,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 class ScheduledFragment : Fragment() {
 
     private var _binding: FragmentScheduledBinding? = null
+
+    private lateinit var galleryViewModel: GalleryViewModel
 
     private var user: User? = null
 
@@ -37,6 +42,8 @@ class ScheduledFragment : Fragment() {
         const val VIEW_FLIPPER_NO_INTERNET = 1
         const val VIEW_FLIPPER_EMPTY_STATE = 2
         const val VIEW_FLIPPER_SCHEDULED = 3
+        const val USER_DATA_DOWNLOAD = "user_data_download"
+        const val USER_DATA_DELETION = "user_data_deletion"
     }
 
     // This property is only valid between onCreateView and
@@ -45,39 +52,82 @@ class ScheduledFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        getDocumentsFromFirestoreDatabase()
+        galleryViewModel =
+            ViewModelProvider(this).get(GalleryViewModel::class.java)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupObserver()
+        showProgress()
+        downloadUserDataFromFirestoreDatabase()
+    }
+
+    private fun setupObserver() {
+        galleryViewModel.hasInternet.observe(viewLifecycleOwner,
+            {
+                if (it.first) {
+                    if (it.second == USER_DATA_DOWNLOAD) {
+                        FirebaseFirestore.getInstance().collection("users")
+                            .document(email!!).get()
+                            .addOnSuccessListener { documentSnapshot ->
+                                documentSnapshot.data?.let {
+                                    print(this)
+                                    user = User(
+                                        it["name"] as String,
+                                        it["service"] as String,
+                                        it["date"] as String,
+                                        it["time"] as String,
+                                        it["uriString"] as String
+                                    )
+                                    date = user?.date
+                                    time = user?.time
+                                }
+                                if (user == null) {
+                                    showEmptyState()
+                                } else {
+                                    setupFields()
+                                    setupListeners()
+                                    showScheduled()
+                                }
+                            }
+                            .addOnFailureListener { exception ->
+                                print(exception)
+                                showEmptyState()
+                                showToast(requireContext(), R.string.error_scheduling)
+                            }
+                    } else if(it.second == USER_DATA_DELETION) {
+                        FirebaseFirestore.getInstance().collection("users")
+                            .document(email!!).delete()
+
+                        val previousTimeList = mutableListOf<String>()
+                        FirebaseFirestore.getInstance().collection("calendarField")
+                            .document(date!!).get().addOnSuccessListener { documentSnapshot ->
+                                documentSnapshot.data?.let {
+                                    val timeList = it["timeList"] as List<*>
+                                    timeList.forEach { time ->
+                                        previousTimeList.add(time.toString())
+                                    }
+                                    previousTimeList.apply {
+                                        add(time!!)
+                                        sort()
+                                    }
+                                    val hoursList = Time(previousTimeList)
+                                    FirebaseFirestore.getInstance().collection("calendarField")
+                                        .document(  date!!).set(hoursList)
+                                    showEmptyState()
+                                }
+                            }
+                    }
+                } else {
+                    showNoInternet()
+                }
+            })
     }
 
     //Firestore Database - Cloud Firestore
-    private fun getDocumentsFromFirestoreDatabase() {
-        FirebaseFirestore.getInstance().collection("users")
-            .document(email!!).get()
-            .addOnSuccessListener { documentSnapshot ->
-                documentSnapshot.data?.let {
-                    print(this)
-                    user = User(
-                        it["name"] as String,
-                        it["service"] as String,
-                        it["date"] as String,
-                        it["time"] as String,
-                        it["uriString"] as String
-                    )
-                    date = user?.date
-                    time = user?.time
-                }
-                if (user == null) {
-                    showEmptyState()
-                } else {
-                    setupFields()
-                    setupListeners()
-                    showScheduled()
-                }
-            }
-            .addOnFailureListener {
-                print(it)
-                showEmptyState()
-                showToast(requireContext(), R.string.error_scheduling)
-            }
+    private fun downloadUserDataFromFirestoreDatabase() {
+        galleryViewModel.checkForInternet(requireContext(), USER_DATA_DOWNLOAD)
     }
 
     private fun setupListeners() = binding.apply {
@@ -88,32 +138,12 @@ class ScheduledFragment : Fragment() {
             redirectToSchedulingFragment()
         }
         btnDelete.setOnClickListener {
-            deleteFirebaseFirestoreDatas()
+            deleteFirebaseFirestoreData()
         }
     }
 
-    private fun deleteFirebaseFirestoreDatas() {
-        FirebaseFirestore.getInstance().collection("users")
-            .document(email!!).delete()
-
-        val previousTimeList = mutableListOf<String>()
-        FirebaseFirestore.getInstance().collection("calendarField")
-            .document(date!!).get().addOnSuccessListener { documentSnapshot ->
-                documentSnapshot.data?.let {
-                    val timeList = it["timeList"] as List<*>
-                    timeList.forEach { time ->
-                        previousTimeList.add(time.toString())
-                    }
-                    previousTimeList.apply {
-                        add(time!!)
-                        sort()
-                    }
-                    val hoursList = Time(previousTimeList)
-                    FirebaseFirestore.getInstance().collection("calendarField")
-                        .document(date!!).set(hoursList)
-                    showEmptyState()
-                }
-            }
+    private fun deleteFirebaseFirestoreData() {
+        galleryViewModel.checkForInternet(requireContext(), USER_DATA_DELETION)
     }
 
     private fun setupFields() = binding.apply {
@@ -168,6 +198,14 @@ class ScheduledFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun showProgress() {
+        binding.scheduledViewFlipper.displayedChild = VIEW_FLIPPER_LOADING
+    }
+
+    private fun showNoInternet() {
+        binding.scheduledViewFlipper.displayedChild = VIEW_FLIPPER_NO_INTERNET
     }
 
     private fun showEmptyState() {

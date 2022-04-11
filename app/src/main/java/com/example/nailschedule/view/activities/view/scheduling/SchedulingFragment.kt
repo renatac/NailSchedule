@@ -19,6 +19,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentSchedulingBinding
@@ -26,6 +27,7 @@ import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.MIN_DATE
+import com.example.nailschedule.view.activities.view.gallery.GalleryViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
@@ -41,6 +43,8 @@ class SchedulingFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+    private lateinit var galleryViewModel: GalleryViewModel
+
     private lateinit var arrayAdapter: ArrayAdapter<String>
 
     private var timeListOk = mutableListOf<String>()
@@ -55,8 +59,24 @@ class SchedulingFragment : Fragment() {
 
     private var email: String? = null
 
+    private var previousDt: String? = null
+    private var previousTm: String? = null
+    private var currentTimeList: MutableList<String>? = null
+    private var calendarUser: User? = null
+    private var dt: String? = null
+    private var downloadUser: User? = null
+    private var hourList: List<String>? = null
+    private var dateCalendarFieldAddOrUpdate: String? = null
+    private var addOrUpdateUser: User? = null
+
     companion object {
         fun newInstance() = SchedulingFragment()
+        const val DELETE_ALL_DATA = "delete_all_data"
+        const val SETUP_SPINNER = "setup_spinner"
+        const val CALENDAR_FIELD = "calendar_field"
+        const val DOWNLOAD = "download"
+        const val ADD_OR_UPDATE_CALENDAR_FIELD = "add_or_update_calendar_field"
+        const val ADD_OR_UPDATE = "add_or_update"
     }
 
     override fun onCreateView(
@@ -66,6 +86,9 @@ class SchedulingFragment : Fragment() {
     ): View {
         _binding = FragmentSchedulingBinding.inflate(inflater, container, false)
         val root: View = binding.root
+        galleryViewModel =
+            ViewModelProvider(this).get(GalleryViewModel::class.java)
+        setupObserver()
         initializeAdapter(listOf(requireContext().getString(R.string.select_the_hour)))
         initializeEmail()
         setupCalendarViewDatesMinAndMax()
@@ -73,6 +96,172 @@ class SchedulingFragment : Fragment() {
         hideSpinner()
         setupListeners()
         return root
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun setupObserver() {
+        galleryViewModel.hasInternet.observe(
+            viewLifecycleOwner,
+            {
+                if (it.first) {
+                    when (it.second) {
+                        DELETE_ALL_DATA -> {
+                            for (i in 1 until 10) {
+                                val now = Calendar.getInstance()
+                                val f = SimpleDateFormat("dd-MM-yyyy")
+                                val number = "-$i".toInt()
+                                now.add(Calendar.DAY_OF_MONTH, number)
+
+                                val dtMinusOne = f.format(now.time)
+                                FirebaseFirestore.getInstance().collection("calendarField")
+                                    .document(dtMinusOne)
+                                    .delete()
+
+                                FirebaseFirestore.getInstance().collection("users")
+                                    .document(email!!).get().addOnSuccessListener { documentSnapshot ->
+                                        documentSnapshot.data?.let {
+                                            val userDate = it["date"] as String
+                                            if (userDate == dtMinusOne) {
+                                                FirebaseFirestore.getInstance().collection("users")
+                                                    .document(email!!).delete()
+                                            }
+                                        }
+                                    }
+                            }
+                        }
+                        SETUP_SPINNER -> {
+                            FirebaseFirestore.getInstance().collection("calendarField")
+                                .document(date!!).get().addOnSuccessListener { documentSnapshot ->
+                                    documentSnapshot.data?.let {
+                                        val timeList = it["timeList"] as List<*>
+                                        timeList.forEach { time ->
+                                            timeListOk.add(time.toString())
+                                        }
+                                    } ?: run {
+                                        val originalList = mutableListOf(
+                                            requireContext().getString(R.string.select_the_hour),
+                                            "08:00", "10:00", "12:00", "14:00", "16:00", "18:00"
+                                        )
+                                        timeListOk.addAll(originalList)
+                                    }
+                                    if (timeListOk.size == 1) {
+                                        showToast(requireContext(), R.string.data_without_available_hour)
+                                    } else {
+                                        timeListOk = deleteCurrentDayHour(timeListOk)
+                                        addOrUpdateCalendarFieldFirestoreDatabase(timeListOk, date!!)
+                                        initializeAdapter(timeListOk)
+                                    }
+                                }.addOnFailureListener {
+                                    print(it)
+                                }
+                        }
+                        CALENDAR_FIELD -> {
+                            val previousTimeList = mutableListOf<String>()
+                            FirebaseFirestore.getInstance().collection("calendarField")
+                                .document(previousDt!!).get().addOnSuccessListener { documentSnapshot ->
+                                    documentSnapshot.data?.let {
+                                        val timeList = it["timeList"] as List<*>
+                                        timeList.forEach { time ->
+                                            previousTimeList.add(time.toString())
+                                        }
+                                        previousTimeList.apply {
+                                            add(previousTm!!)
+                                            sort()
+                                        }
+                                        if (calendarUser!!.date == previousDt) {
+                                            currentTimeList?.apply {
+                                                add(previousTm!!)
+                                                sort()
+                                            }
+                                            addOrUpdateFirestoreDatabase(currentTimeList!!, calendarUser!!)
+                                        } else {
+                                            addOrUpdateCalendarFieldFirestoreDatabase(previousTimeList, previousDt!!)
+                                            addOrUpdateFirestoreDatabase(currentTimeList!!, calendarUser!!)
+                                        }
+                                        clearFields()
+                                        setBottomVisibility(GONE)
+                                        setBtnSaveVisibility(VISIBLE)
+                                    }
+                                }
+                        }
+                        DOWNLOAD -> {
+                            FirebaseFirestore.getInstance().collection("calendarField")
+                                .document(dt!!).get().addOnSuccessListener { documentSnapshot ->
+                                    documentSnapshot.data?.let {
+                                        var canUseTime = false
+                                        val timeList = it["timeList"] as List<*>
+                                        val actualTimeList = mutableListOf<String>()
+                                        timeList.forEach { t ->
+                                            if (time == t.toString()) {
+                                                canUseTime = true
+                                            } else {
+                                                actualTimeList.add(t.toString())
+                                            }
+                                        }
+
+                                        var previousDate = ""
+                                        var previousTime = ""
+
+                                        if (canUseTime) {
+                                            FirebaseFirestore.getInstance().collection("users")
+                                                .document(email!!).get().addOnSuccessListener { documentSnapshot ->
+                                                    documentSnapshot.data?.let {
+                                                        previousDate = it["date"] as String
+                                                        previousTime = it["time"] as String
+                                                        setupBottom(previousDate, previousTime)
+                                                        setBtnSaveVisibility(GONE)
+                                                        setBottomVisibility(VISIBLE)
+                                                    } ?: run {
+                                                        addOrUpdateFirestoreDatabase(actualTimeList, downloadUser!!)
+                                                        clearFields()
+                                                    }
+                                                }
+                                        } else {
+                                            showToast(requireContext(), R.string.unavailable_time)
+                                        }
+
+                                        binding.btnConfirm.setOnClickListener {
+                                            getFirebaseFirestoreCalendarField(
+                                                previousDate,
+                                                previousTime,
+                                                actualTimeList,
+                                                downloadUser!!
+                                            )
+                                        }
+
+                                        binding.btnCancel.setOnClickListener {
+                                            clearFields()
+                                            setBottomVisibility(GONE)
+                                            setBtnSaveVisibility(VISIBLE)
+                                        }
+
+                                    }
+                                }.addOnFailureListener {
+                                    print(it)
+                                }
+                        }
+                        ADD_OR_UPDATE_CALENDAR_FIELD -> {
+                            val time = Time(hourList!!)
+                            FirebaseFirestore.getInstance().collection("calendarField")
+                                .document(dateCalendarFieldAddOrUpdate!!).set(time)
+                        }
+                        ADD_OR_UPDATE -> {
+                            FirebaseFirestore.getInstance().collection("users")
+                                .document(email!!)
+                                .set(addOrUpdateUser!!) //add the data if it doesn't already exist and update it if it already exists
+                                .addOnSuccessListener {
+                                    showToast(requireContext(), R.string.successful_scheduling)
+                                }
+                                .addOnFailureListener {
+                                    print(it)
+                                    showToast(requireContext(), R.string.error_scheduling)
+                                }
+                        }
+                    }
+                } else {
+                    showToast(requireContext(), R.string.no_internet)
+                }
+            })
     }
 
     private fun initializeEmail() {
@@ -92,27 +281,7 @@ class SchedulingFragment : Fragment() {
 
     @SuppressLint("SimpleDateFormat")
     private fun deleteFirebaseFirestoreAllDates() {
-        for (i in 1 until 10) {
-            val now = Calendar.getInstance()
-            val f = SimpleDateFormat("dd-MM-yyyy")
-            val number = "-$i".toInt()
-            now.add(Calendar.DAY_OF_MONTH, number)
-            val dtMinusOne = f.format(now.time)
-            FirebaseFirestore.getInstance().collection("calendarField")
-                .document(dtMinusOne)
-                .delete()
-
-            FirebaseFirestore.getInstance().collection("users")
-                .document(email!!).get().addOnSuccessListener { documentSnapshot ->
-                    documentSnapshot.data?.let {
-                        val userDate = it["date"] as String
-                        if (userDate == dtMinusOne) {
-                            FirebaseFirestore.getInstance().collection("users")
-                                .document(email!!).delete()
-                        }
-                    }
-                }
-        }
+        galleryViewModel.checkForInternet(requireContext(), DELETE_ALL_DATA)
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -153,12 +322,15 @@ class SchedulingFragment : Fragment() {
         //calendar.date = 1640799751672
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             //selectSpinnerPosition(0)
-            initializeAdapter(mutableListOf(
-                requireContext().getString(R.string.select_the_hour)))
+            initializeAdapter(
+                mutableListOf(
+                    requireContext().getString(R.string.select_the_hour)
+                )
+            )
             selectSpinnerPosition(0)
             showSpinner()
             val monthOk = month + 1
-            val day = if(dayOfMonth <= 9) {
+            val day = if (dayOfMonth <= 9) {
                 "0$dayOfMonth"
             } else {
                 dayOfMonth
@@ -239,8 +411,7 @@ class SchedulingFragment : Fragment() {
     @SuppressLint("SimpleDateFormat")
     private fun deleteCurrentDayHour(
         timeList: MutableList<String>
-    )
-            : MutableList<String> {
+    ): MutableList<String> {
         val currentDateAndHour = Date()
         val currentDate = SimpleDateFormat("dd-MM-yyyy").format(currentDateAndHour)
         val currentHour = SimpleDateFormat("HH:mm").format(currentDateAndHour)
@@ -262,122 +433,26 @@ class SchedulingFragment : Fragment() {
     }
 
     private fun setupSpinnerWithFirebaseFirestoreDownload() {
-        FirebaseFirestore.getInstance().collection("calendarField")
-            .document(date!!).get().addOnSuccessListener { documentSnapshot ->
-                documentSnapshot.data?.let {
-                    val timeList = it["timeList"] as List<*>
-                    timeList.forEach { time ->
-                        timeListOk.add(time.toString())
-                    }
-                } ?: run {
-                    val originalList = mutableListOf(
-                        requireContext().getString(R.string.select_the_hour),
-                        "08:00", "10:00", "12:00", "14:00", "16:00", "18:00"
-                    )
-                    timeListOk.addAll(originalList)
-                }
-                if (timeListOk.size == 1) {
-                    showToast(requireContext(), R.string.data_without_available_hour)
-                } else {
-                    timeListOk = deleteCurrentDayHour(timeListOk)
-                    addOrUpdateCalendarFieldFirestoreDatabase(timeListOk, date!!)
-                    initializeAdapter(timeListOk)
-                }
-            }.addOnFailureListener {
-                print(it)
-            }
+        galleryViewModel.checkForInternet(requireContext(), SETUP_SPINNER)
     }
 
     private fun getFirebaseFirestoreCalendarField(
-        previousDate: String,
-        previousTime: String,
-        actualTimeList: MutableList<String>,
-        user: User
+        previousDt: String,
+        previousTm: String,
+        currentTimeList: MutableList<String>,
+        calendarUser: User
     ) {
-        val previousTimeList = mutableListOf<String>()
-        FirebaseFirestore.getInstance().collection("calendarField")
-            .document(previousDate).get().addOnSuccessListener { documentSnapshot ->
-                documentSnapshot.data?.let {
-                    val timeList = it["timeList"] as List<*>
-                    timeList.forEach { time ->
-                        previousTimeList.add(time.toString())
-                    }
-                    previousTimeList.apply {
-                        add(previousTime)
-                        sort()
-                    }
-                    if (user.date == previousDate) {
-                        actualTimeList.apply {
-                            add(previousTime)
-                            sort()
-                        }
-                        addOrUpdateFirestoreDatabase(actualTimeList, user)
-                    } else {
-                        addOrUpdateCalendarFieldFirestoreDatabase(previousTimeList, previousDate)
-                        addOrUpdateFirestoreDatabase(actualTimeList, user)
-                    }
-                    clearFields()
-                    setBottomVisibility(GONE)
-                    setBtnSaveVisibility(VISIBLE)
-                }
-            }
+        this.previousDt = previousDt
+        this.previousTm = previousTm
+        this.currentTimeList = currentTimeList
+        this.calendarUser = calendarUser
+        galleryViewModel.checkForInternet(requireContext(), CALENDAR_FIELD)
     }
 
-    private fun downloadForFirebaseFirestore(date: String, user: User) {
-        FirebaseFirestore.getInstance().collection("calendarField")
-            .document(date).get().addOnSuccessListener { documentSnapshot ->
-                documentSnapshot.data?.let {
-                    var canUseTime = false
-                    val timeList = it["timeList"] as List<*>
-                    val actualTimeList = mutableListOf<String>()
-                    timeList.forEach { t ->
-                        if (time == t.toString()) {
-                            canUseTime = true
-                        } else {
-                            actualTimeList.add(t.toString())
-                        }
-                    }
-
-                    var previousDate = ""
-                    var previousTime = ""
-
-                    if (canUseTime) {
-                        FirebaseFirestore.getInstance().collection("users")
-                            .document(email!!).get().addOnSuccessListener { documentSnapshot ->
-                                documentSnapshot.data?.let {
-                                    previousDate = it["date"] as String
-                                    previousTime = it["time"] as String
-                                    setupBottom(previousDate, previousTime)
-                                    setBtnSaveVisibility(GONE)
-                                    setBottomVisibility(VISIBLE)
-                                } ?: run {
-                                    addOrUpdateFirestoreDatabase(actualTimeList, user)
-                                    clearFields()
-                                }
-                            }
-                    } else {
-                        showToast(requireContext(), R.string.unavailable_time)
-                    }
-
-                    binding.btnConfirm.setOnClickListener {
-                        getFirebaseFirestoreCalendarField(
-                            previousDate,
-                            previousTime,
-                            actualTimeList,
-                            user
-                        )
-                    }
-
-                    binding.btnCancel.setOnClickListener {
-                        clearFields()
-                        setBottomVisibility(GONE)
-                        setBtnSaveVisibility(VISIBLE)
-                    }
-
-                }
-            }.addOnFailureListener {
-                print(it)
-            }
+    private fun downloadForFirebaseFirestore(dt: String, downloadUser: User) {
+        this.dt = dt
+        this.downloadUser = downloadUser
+        galleryViewModel.checkForInternet(requireContext(), DOWNLOAD)
     }
 
     private fun setupBottom(userDate: String, userTime: String) = binding.apply {
@@ -401,27 +476,20 @@ class SchedulingFragment : Fragment() {
 
     private fun addOrUpdateCalendarFieldFirestoreDatabase(
         hourList: List<String>,
-        date: String
+        dateCalendarFieldAddOrUpdate: String
     ) {
-        val time = Time(hourList)
-        FirebaseFirestore.getInstance().collection("calendarField")
-            .document(date).set(time)
+        this.hourList = hourList
+        this.dateCalendarFieldAddOrUpdate = dateCalendarFieldAddOrUpdate
+        galleryViewModel.checkForInternet(requireContext(),
+            ADD_OR_UPDATE_CALENDAR_FIELD)
     }
 
     //Firestore Database - Cloud Firestore
-    private fun addOrUpdateFirestoreDatabase(hourList: List<String>, user: User) {
-        addOrUpdateCalendarFieldFirestoreDatabase(hourList, date!!)
-
-        FirebaseFirestore.getInstance().collection("users")
-            .document(email!!)
-            .set(user) //add the data if it doesn't already exist and update it if it already exists
-            .addOnSuccessListener {
-                showToast(requireContext(), R.string.successful_scheduling)
-            }
-            .addOnFailureListener {
-                print(it)
-                showToast(requireContext(), R.string.error_scheduling)
-            }
+    private fun addOrUpdateFirestoreDatabase(hourAddOrUpdateList: List<String>, addOrUpdateUser: User) {
+        addOrUpdateCalendarFieldFirestoreDatabase(hourAddOrUpdateList, date!!)
+        this.addOrUpdateUser = addOrUpdateUser
+        galleryViewModel.checkForInternet(requireContext(),
+            ADD_OR_UPDATE)
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -430,7 +498,6 @@ class SchedulingFragment : Fragment() {
         txtService.editText?.setText("")
         calendarView.clearFocus()
         uriString = null
-        //selectSpinnerPosition(0)
         hideSpinner()
         showOptionsToSelectPhoto()
     }

@@ -81,4 +81,6 @@
     <string name="get_out">Sair</string>
     <string name="login_title">Agende horários e guarde as fotos de suas unhas favoritas.\nCom o App Nails schedule não existem mais dúvidas de quais horários estão disponíveis e de qual serviço você vai querer que seja realizado.</string>
 
+    <string name="no_internet">Você está sem internet. Por favor, ative a internet.</string>
+
 </resources>
