@@ -14,8 +14,7 @@ class GalleryAdapter(
     private val hideTrash: () -> Unit,
     private val deletePhotosFromCloudStorage:
         (List<Uri>, Boolean, ArrayList<Uri>?) -> Unit
-) :
-    RecyclerView.Adapter<GalleryAdapter.MyViewHolder>() {
+): RecyclerView.Adapter<GalleryAdapter.MyViewHolder>() {
 
     private var uriList: ArrayList<Uri>? = arrayListOf()
     private var hasLongClick = false

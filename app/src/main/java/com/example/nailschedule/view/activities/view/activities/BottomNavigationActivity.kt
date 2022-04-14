@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -18,21 +19,30 @@ import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityBottomNavigationBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
+import com.example.nailschedule.view.activities.utils.showToast
+import com.example.nailschedule.view.activities.view.gallery.GalleryViewModel
 import com.facebook.login.LoginManager
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 
 
-class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigationItemSelectedListener {
+class BottomNavigationActivity : AppCompatActivity(),
+    NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var activityBottomNavigationBinding: ActivityBottomNavigationBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
+    private lateinit var galleryViewModel: GalleryViewModel
+
     private var photoUrl: Uri? = null
     private var displayName: String? = null
     private var email: String? = null
+
+    companion object {
+        const val LOG_OUT = "log_out"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +50,10 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
         setContentView(activityBottomNavigationBinding.root)
 
         val bottomNavigationView: BottomNavigationView = activityBottomNavigationBinding.bottomNavView
+        galleryViewModel =
+            ViewModelProvider(this).get(GalleryViewModel::class.java)
+
+        setupObserver()
 
         val navigationView: NavigationView = activityBottomNavigationBinding.navView
         navigationView.setNavigationItemSelectedListener(this)
@@ -75,6 +89,32 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
         setupNavHeaderElements()
     }
 
+    private fun showNoIntern() {
+        showToast(this@BottomNavigationActivity, R.string.no_internet)
+    }
+
+    private fun setupObserver() {
+        galleryViewModel.hasInternet.observe(this,
+            {
+                if (it.first) {
+                    if (it.second == LOG_OUT) {
+                        //It separates if it's Facebook or Google
+                        if (isLoggedInFacebook()) {
+                            LoginManager.getInstance().logOut()
+                            redirectToLoginActivity()
+                        } else {
+                            LoginActivity.googleSignInClientGetInstance(this).signOut()
+                                .addOnCompleteListener(this, OnCompleteListener<Void?> {
+                                    redirectToLoginActivity()
+                                })
+                        }
+                    }
+                } else {
+                    showNoIntern()
+                }
+            })
+    }
+
     override fun onBackPressed() {
         Log.i("test", "onBackPressed: ")
         activityBottomNavigationBinding.apply {
@@ -99,25 +139,29 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
 
     private fun getExtras() {
         displayName = SharedPreferencesHelper.read(
-            SharedPreferencesHelper.EXTRA_DISPLAY_NAME, "")
+            SharedPreferencesHelper.EXTRA_DISPLAY_NAME, ""
+        )
         photoUrl = Uri.parse(
             SharedPreferencesHelper.read(
-            SharedPreferencesHelper.EXTRA_PHOTO_URL, ""))
+                SharedPreferencesHelper.EXTRA_PHOTO_URL, ""
+            )
+        )
         email = SharedPreferencesHelper.read(
-            SharedPreferencesHelper.EXTRA_EMAIL, "")
+            SharedPreferencesHelper.EXTRA_EMAIL, ""
+        )
     }
 
     private fun setupNavHeaderElements() {
-            val headerView = activityBottomNavigationBinding.navView.getHeaderView(0)
-            val navHeaderTvName = headerView.findViewById(R.id.nav_header_tv_name) as TextView
-            displayName?.let { navHeaderTvName.text = displayName }
-            val navHeaderIv = headerView.findViewById(R.id.nav_header_iv) as ImageView
-            //Setting the image to imageView using Glide Library
-            photoUrl?.let {
-                Glide.with(this@BottomNavigationActivity).load(photoUrl).into(navHeaderIv)
-            }
-            val navHeaderTvEmail = headerView.findViewById(R.id.nav_header_tv_email) as TextView
-            email?.let { navHeaderTvEmail.text = email }
+        val headerView = activityBottomNavigationBinding.navView.getHeaderView(0)
+        val navHeaderTvName = headerView.findViewById(R.id.nav_header_tv_name) as TextView
+        displayName?.let { navHeaderTvName.text = displayName }
+        val navHeaderIv = headerView.findViewById(R.id.nav_header_iv) as ImageView
+        //Setting the image to imageView using Glide Library
+        photoUrl?.let {
+            Glide.with(this@BottomNavigationActivity).load(photoUrl).into(navHeaderIv)
+        }
+        val navHeaderTvEmail = headerView.findViewById(R.id.nav_header_tv_email) as TextView
+        email?.let { navHeaderTvEmail.text = email }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -134,16 +178,8 @@ class BottomNavigationActivity : AppCompatActivity() , NavigationView.OnNavigati
     }
 
     private fun signOut() {
-        //It separates if it's Facebook or Google
-        if(isLoggedInFacebook()) {
-            LoginManager.getInstance().logOut()
-            redirectToLoginActivity()
-        } else {
-            LoginActivity.googleSignInClientGetInstance(this).signOut()
-                .addOnCompleteListener(this, OnCompleteListener<Void?> {
-                    redirectToLoginActivity()
-                })
-        }
+        galleryViewModel.checkForInternet(
+            this@BottomNavigationActivity, LOG_OUT)
     }
 
     private fun redirectToLoginActivity() {

@@ -49,25 +49,38 @@ class GalleryFragment : Fragment() {
 
     private var selectedUri: Uri? = null
 
+    private val galleryAdapter: GalleryAdapter by lazy {
+        GalleryAdapter(::onShortClick, ::hideTrash, ::deletePhotosFromCloudStorage)
+    }
+
     companion object {
         const val VIEW_FLIPPER_LOADING = 0
         const val VIEW_FLIPPER_NO_INTERNET = 1
         const val VIEW_FLIPPER_EMPTY_STATE = 2
         const val VIEW_FLIPPER_HAS_PHOTO = 3
         const val DOWNLOAD = "download"
+        const val UPLOAD = "upload"
         const val DELETE = "delete"
-    }
-
-    private val galleryAdapter: GalleryAdapter by lazy {
-        GalleryAdapter(::onShortClick, ::hideTrash, ::deletePhotosFromCloudStorage)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerForActivityResult()
-        storage = Firebase.storage.reference
+        getFirebaseStoreReference()
+        setupGalleryViewModel()
+        getUserEmail()
+    }
+
+    private fun setupGalleryViewModel() {
         galleryViewModel =
             ViewModelProvider(this).get(GalleryViewModel::class.java)
+    }
+
+    private fun getFirebaseStoreReference() {
+        storage = Firebase.storage.reference
+    }
+
+    private fun getUserEmail() {
         email = SharedPreferencesHelper.read(
             SharedPreferencesHelper.EXTRA_EMAIL, ""
         )
@@ -118,8 +131,9 @@ class GalleryFragment : Fragment() {
                                 showEmptyState()
                             }
                         })
-                        //galleryViewModel.hasPhoto.value = false
-                        storage.child("/images").child("/$email").listAll()
+                        storage.child("/images")
+                            .child("/$email")
+                            .listAll()
                             .addOnSuccessListener { listResult ->
                                 if (listResult.items.size != 0) {
                                     listResult.items.forEach {
@@ -136,13 +150,21 @@ class GalleryFragment : Fragment() {
                             }.addOnFailureListener { exception ->
                                 print(exception)
                             }
+                    } else if(it.second == UPLOAD) {
+                        val filename = "_${Date()}_"
+                        val ref = FirebaseStorage.getInstance()
+                            .getReference("images/${email}/${filename}")
+                        selectedUri?.let { uri ->
+                            ref.putFile(uri)
+                        }
                     } else if (it.second == DELETE) {
                         printMessageAboutExclusion()
                         if (areAllItems!!) {
-                            storage.child("/images").child("/$email")
+                            storage.child("/images")
+                                .child("/$email")
                                 .listAll().addOnSuccessListener { listResult ->
-                                    listResult.items.forEach {
-                                        it.delete()
+                                    listResult.items.forEach { storageReference ->
+                                        storageReference.delete()
                                     }
                                 }
                             showEmptyState()
@@ -150,11 +172,12 @@ class GalleryFragment : Fragment() {
                             selectedUriList?.forEach { uri ->
                                 val uriString = uri.toString()
                                 val initialIndex = uriString.indexOf("_")
-                                //val finalIndexOk = initialIndex + 8
                                 val finalIndexOk = uriString.lastIndexOf("_")
                                 if (initialIndex != -1 && finalIndexOk != -1) {
                                     val filename = uriString.substring(initialIndex, finalIndexOk)
-                                    storage.child("/images").child("/$email/$filename").delete()
+                                    storage.child("/images")
+                                        .child("/$email/$filename")
+                                        .delete()
                                 }
                             }
                         }
@@ -207,33 +230,10 @@ class GalleryFragment : Fragment() {
                     }
                 }
             }
-
-    }
-
-    private fun showRecyclerView() {
-        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_HAS_PHOTO
-    }
-
-    private fun showEmptyState() {
-        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_EMPTY_STATE
-    }
-
-    private fun showNoIntern() {
-        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_NO_INTERNET
-    }
-
-    private fun hideRefresh() {
-        binding.gallerySwipeRefreshLayout.isRefreshing = false
     }
 
     private fun uploadPhotoToCloudStorage() {
-        //val filename = "_${UUID.randomUUID().toString().substring(0,6)}_"
-        val filename = "_${Date()}_"
-        val ref = FirebaseStorage.getInstance()
-            .getReference("images/${email}/${filename}")
-        selectedUri?.let {
-            ref.putFile(it)
-        }
+        galleryViewModel.checkForInternet(requireContext(), UPLOAD)
     }
 
     private fun onShortClick(uriString: String) {
@@ -253,12 +253,28 @@ class GalleryFragment : Fragment() {
         }
     }
 
+    private fun hideRefresh() {
+        binding.gallerySwipeRefreshLayout.isRefreshing = false
+    }
+
     private fun showProgress() {
         binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_LOADING
     }
 
     private fun hideTrash() {
         binding.ivDelete.visibility = View.GONE
+    }
+
+    private fun showRecyclerView() {
+        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_HAS_PHOTO
+    }
+
+    private fun showEmptyState() {
+        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_EMPTY_STATE
+    }
+
+    private fun showNoIntern() {
+        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_NO_INTERNET
     }
 
     private fun printMessageAboutExclusion() {

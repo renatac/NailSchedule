@@ -12,10 +12,13 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityLoginBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
+import com.example.nailschedule.view.activities.utils.showToast
+import com.example.nailschedule.view.activities.view.gallery.GalleryViewModel
 import com.example.nailschedule.view.activities.view.owner.OwnerActivity
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
@@ -41,7 +44,16 @@ import java.io.IOException
 
 class LoginActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityLoginBinding
+    private lateinit var mGoogleSignInClient: GoogleSignInClient
+    private lateinit var startForResult: ActivityResultLauncher<Intent>
+    private lateinit var callbackManager: CallbackManager
+
+    private lateinit var viewModel: GalleryViewModel
+
     companion object {
+        const val GOOGLE_LOGIN = "google_login"
+
         const val LOGIN_TYPE_IDENTIFIER = "login_type_identifier"
         const val GOOGLE_SIGN_IN_VALUE = 1
 
@@ -67,16 +79,13 @@ class LoginActivity : AppCompatActivity() {
         var credential: AuthCredential? = null
     }
 
-    private lateinit var binding: ActivityLoginBinding
-    private lateinit var mGoogleSignInClient: GoogleSignInClient
-    private lateinit var startForResult: ActivityResultLauncher<Intent>
-    private lateinit var callbackManager: CallbackManager
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        setupViewModel()
+        setupObserver()
         initSharedPreferences()
-        if(GoogleSignIn.getLastSignedInAccount(this) != null || isLoggedInFacebook()) {
+        if(GoogleSignIn.getLastSignedInAccount(this) != null
+            || isLoggedInFacebook()) {
             redirectToBottomNavigation()
         }
         else {
@@ -92,6 +101,24 @@ class LoginActivity : AppCompatActivity() {
             registerFacebookSignInCallback()
             setListeners()
         }
+    }
+
+    private fun setupObserver() {
+        viewModel.hasInternet.observe(this@LoginActivity,
+            {
+                if (it.first) {
+                    if (it.second == GOOGLE_LOGIN) {
+                        googleSignIn()
+                    }
+                } else {
+                    showNoInternet()
+                }
+            })
+    }
+
+    private fun setupViewModel() {
+        viewModel =
+            ViewModelProvider(this).get(GalleryViewModel::class.java)
     }
 
     private fun setListeners() = binding.apply {
@@ -111,7 +138,8 @@ class LoginActivity : AppCompatActivity() {
 
     private fun registerGoogleSignInClickListener() {
         binding.btnGoogleSignIn.setOnClickListener {
-            googleSignIn()
+            viewModel.checkForInternet(this@LoginActivity,
+                GOOGLE_LOGIN)
         }
     }
 
@@ -122,7 +150,8 @@ class LoginActivity : AppCompatActivity() {
         binding.btnFacebookSignIn.setReadPermissions("email", "public_profile")
 
         // Callback registration
-        binding.btnFacebookSignIn.registerCallback(callbackManager, object : FacebookCallback<LoginResult?> {
+        binding.btnFacebookSignIn.registerCallback(callbackManager,
+            object : FacebookCallback<LoginResult?> {
             override fun onSuccess(loginResult: LoginResult?) {
                 SharedPreferencesHelper.write(
                     SharedPreferencesHelper.FACEBOOK_ACCESS_TOKEN,
@@ -136,7 +165,7 @@ class LoginActivity : AppCompatActivity() {
             }
 
             override fun onError(exception: FacebookException) {
-                println("exception = $exception")
+                showNoInternet()
             }
         })
     }
@@ -163,7 +192,7 @@ class LoginActivity : AppCompatActivity() {
                     val googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(result.data!!)
                     if (googleSignInResult.isSuccess) {
                         val account: GoogleSignInAccount? = googleSignInResult.signInAccount
-                        saveHeaderNavDatasInSharedPreferences(
+                        saveHeaderNavDataInSharedPreferences(
                             account?.displayName.toString(),
                             account?.photoUrl.toString(),
                             account?.email.toString())
@@ -182,8 +211,10 @@ class LoginActivity : AppCompatActivity() {
                                 )
 
                                 val accountGoogle = GoogleSignIn.getSignedInAccountFromIntent(result.data).result
-                                accountGoogle?.let { conta ->
-                                    credential = GoogleAuthProvider.getCredential(conta.idToken, accessToken)
+                                accountGoogle?.let { googleSignInAccount ->
+                                    credential = GoogleAuthProvider.getCredential(
+                                        googleSignInAccount.idToken, accessToken
+                                    )
                                 }
 
                                 //Login With Google
@@ -207,7 +238,7 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
-    private fun saveHeaderNavDatasInSharedPreferences(name: String, photoUrl: String, email: String) {
+    private fun saveHeaderNavDataInSharedPreferences(name: String, photoUrl: String, email: String) {
         SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_DISPLAY_NAME, name)
         SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_PHOTO_URL, photoUrl)
         SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_EMAIL, email)
@@ -260,7 +291,7 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     val user = FirebaseAuth.getInstance().currentUser
-                    saveHeaderNavDatasInSharedPreferences(
+                    saveHeaderNavDataInSharedPreferences(
                         user?.displayName.toString(),
                         user?.photoUrl.toString(),
                         user?.email.toString())
@@ -280,5 +311,9 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setClientOrOwnerGroupVisibility(typeVisibility: Int) {
         binding.clientOrOwnerGroup.visibility= typeVisibility
+    }
+
+    private fun showNoInternet() {
+        showToast(this@LoginActivity, R.string.no_internet)
     }
 }
