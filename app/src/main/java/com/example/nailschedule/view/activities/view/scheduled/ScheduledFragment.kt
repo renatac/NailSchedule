@@ -90,7 +90,8 @@ class ScheduledFragment : Fragment() {
                                         it["service"] as String,
                                         it["date"] as String,
                                         it["time"] as String,
-                                        it["uriString"] as String
+                                        it["uriString"] as String,
+                                        it["isMarked"] as Boolean
                                     )
                                     date = user?.date
                                     time = user?.time

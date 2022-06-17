@@ -63,11 +63,12 @@ class SchedulingFragment : Fragment() {
     private var previousTm: String? = null
     private var currentTimeList: MutableList<String>? = null
     private var calendarUser: User? = null
-    private var dt: String? = null
     private var downloadUser: User? = null
     private var hourList: List<String>? = null
     private var dateCalendarFieldAddOrUpdate: String? = null
     private var addOrUpdateUser: User? = null
+
+    private lateinit var originalList: List<String>
 
     companion object {
         fun newInstance() = SchedulingFragment()
@@ -76,7 +77,7 @@ class SchedulingFragment : Fragment() {
         const val CALENDAR_FIELD = "calendar_field"
         const val DOWNLOAD = "download"
         const val ADD_OR_UPDATE_CALENDAR_FIELD = "add_or_update_calendar_field"
-        const val ADD_OR_UPDATE = "add_or_update"
+        const val USER_ADD_OR_UPDATE = "user_add_or_update"
     }
 
     override fun onCreateView(
@@ -86,6 +87,12 @@ class SchedulingFragment : Fragment() {
     ): View {
         _binding = FragmentSchedulingBinding.inflate(inflater, container, false)
         val root: View = binding.root
+        originalList = mutableListOf(
+            requireContext().getString(R.string.select_the_hour),
+            "08:00;false", "10:00;false",
+            "12:00;false", "14:00;false",
+            "16:00;false", "18:00;false"
+        )
         galleryViewModel =
             ViewModelProvider(this).get(GalleryViewModel::class.java)
         setupObserver()
@@ -102,7 +109,7 @@ class SchedulingFragment : Fragment() {
     private fun setupObserver() {
         galleryViewModel.hasInternet.observe(
             viewLifecycleOwner,
-            {
+            { it ->
                 if (it.first) {
                     when (it.second) {
                         DELETE_ALL_DATA -> {
@@ -118,7 +125,8 @@ class SchedulingFragment : Fragment() {
                                     .delete()
 
                                 FirebaseFirestore.getInstance().collection("users")
-                                    .document(email!!).get().addOnSuccessListener { documentSnapshot ->
+                                    .document(email!!).get()
+                                    .addOnSuccessListener { documentSnapshot ->
                                         documentSnapshot.data?.let {
                                             val userDate = it["date"] as String
                                             if (userDate == dtMinusOne) {
@@ -130,6 +138,7 @@ class SchedulingFragment : Fragment() {
                             }
                         }
                         SETUP_SPINNER -> {
+                            var isAddOrUpdateCalendarField = false
                             FirebaseFirestore.getInstance().collection("calendarField")
                                 .document(date!!).get().addOnSuccessListener { documentSnapshot ->
                                     documentSnapshot.data?.let {
@@ -138,18 +147,35 @@ class SchedulingFragment : Fragment() {
                                             timeListOk.add(time.toString())
                                         }
                                     } ?: run {
-                                        val originalList = mutableListOf(
-                                            requireContext().getString(R.string.select_the_hour),
-                                            "08:00", "10:00", "12:00", "14:00", "16:00", "18:00"
-                                        )
+                                        isAddOrUpdateCalendarField = true
                                         timeListOk.addAll(originalList)
                                     }
                                     if (timeListOk.size == 1) {
-                                        showToast(requireContext(), R.string.data_without_available_hour)
+                                        showToast(
+                                            requireContext(),
+                                            R.string.data_without_available_hour
+                                        )
                                     } else {
-                                        timeListOk = deleteCurrentDayHour(timeListOk)
-                                        addOrUpdateCalendarFieldFirestoreDatabase(timeListOk, date!!)
-                                        initializeAdapter(timeListOk)
+                                        val currentDate =
+                                            SimpleDateFormat("dd-MM-yyyy").format(Date())
+                                        if (date == currentDate) {
+                                            //If the hour is 7, so 7 + 2  = 9 ---> I can only dial
+                                            // from 10 o'clock down
+                                            timeListOk = deleteCurrentDayHour(timeListOk)
+                                        }
+                                        val listToAdapter = mutableListOf<String>()
+                                        timeListOk.forEach { time ->
+                                            if (time.contains(";false")) {
+                                                listToAdapter.add(time.removeSuffix(";false"))
+                                            }
+                                        }
+                                        initializeAdapter(listToAdapter)
+                                        if (isAddOrUpdateCalendarField) {
+                                            addOrUpdateCalendarFieldAtFirestoreDatabase(
+                                                timeListOk,
+                                                date!!
+                                            )
+                                        }
                                     }
                                 }.addOnFailureListener {
                                     print(it)
@@ -158,53 +184,85 @@ class SchedulingFragment : Fragment() {
                         CALENDAR_FIELD -> {
                             val previousTimeList = mutableListOf<String>()
                             FirebaseFirestore.getInstance().collection("calendarField")
-                                .document(previousDt!!).get().addOnSuccessListener { documentSnapshot ->
+                                .document(previousDt!!).get()
+                                .addOnSuccessListener { documentSnapshot ->
                                     documentSnapshot.data?.let {
                                         val timeList = it["timeList"] as List<*>
-                                        timeList.forEach { time ->
-                                            previousTimeList.add(time.toString())
-                                        }
-                                        previousTimeList.apply {
-                                            add(previousTm!!)
-                                            sort()
-                                        }
-                                        if (calendarUser!!.date == previousDt) {
-                                            currentTimeList?.apply {
-                                                add(previousTm!!)
-                                                sort()
+                                        if (previousDt.toString() == calendarUser!!.date) {
+                                            currentTimeList!!.forEach { t ->
+                                                if (t.contains(previousTm.toString())) {
+                                                    previousTimeList.add(
+                                                        t.replace(";true", ";false")
+                                                    )
+                                                } else {
+                                                    previousTimeList.add(t)
+                                                }
                                             }
-                                            addOrUpdateFirestoreDatabase(currentTimeList!!, calendarUser!!)
+                                            addOrUpdateUserAtFirestoreDatabase(
+                                                previousTimeList,
+                                                calendarUser!!
+                                            )
                                         } else {
-                                            addOrUpdateCalendarFieldFirestoreDatabase(previousTimeList, previousDt!!)
-                                            addOrUpdateFirestoreDatabase(currentTimeList!!, calendarUser!!)
+                                            timeList.forEach { t ->
+                                                if (t.toString().contains(previousTm.toString())) {
+                                                    previousTimeList.add(
+                                                        t.toString().replace(";true", ";false")
+                                                    )
+                                                } else {
+                                                    previousTimeList.add(t.toString())
+                                                }
+                                            }
+                                            addOrUpdateCalendarFieldAtFirestoreDatabase(
+                                                previousTimeList,
+                                                previousDt!!
+                                            )
+                                            addOrUpdateUserAtFirestoreDatabase(
+                                                currentTimeList!!,
+                                                calendarUser!!
+                                            )
                                         }
                                         clearFields()
                                         setBottomVisibility(GONE)
                                         setBtnSaveVisibility(VISIBLE)
                                     }
+                                }.addOnFailureListener {
+                                    showToast(requireContext(), R.string.error_scheduling)
+                                    print(it)
                                 }
                         }
                         DOWNLOAD -> {
                             FirebaseFirestore.getInstance().collection("calendarField")
-                                .document(dt!!).get().addOnSuccessListener { documentSnapshot ->
-                                    documentSnapshot.data?.let {
+                                .document(date!!).get()
+                                .addOnSuccessListener { documentSnapshot ->
+                                    documentSnapshot.data?.let { it ->
                                         var canUseTime = false
-                                        val timeList = it["timeList"] as List<*>
-                                        val actualTimeList = mutableListOf<String>()
+                                        val timeList = it["timeList"] as MutableList<*>
+                                        val timeMutableList = mutableListOf<String>()
                                         timeList.forEach { t ->
-                                            if (time == t.toString()) {
+                                            var canSchedule = false
+                                            if (t.toString()
+                                                    .contains(time.toString()) &&
+                                                t.toString()
+                                                    .contains(";false")
+                                            ) {
                                                 canUseTime = true
+                                                canSchedule = true
+                                            }
+                                            if (canSchedule) {
+                                                timeMutableList.add(
+                                                    t.toString().replace(";false", ";true")
+                                                )
                                             } else {
-                                                actualTimeList.add(t.toString())
+                                                timeMutableList.add(t.toString())
                                             }
                                         }
-
                                         var previousDate = ""
                                         var previousTime = ""
 
                                         if (canUseTime) {
                                             FirebaseFirestore.getInstance().collection("users")
-                                                .document(email!!).get().addOnSuccessListener { documentSnapshot ->
+                                                .document(email!!).get()
+                                                .addOnSuccessListener { documentSnapshot ->
                                                     documentSnapshot.data?.let {
                                                         previousDate = it["date"] as String
                                                         previousTime = it["time"] as String
@@ -212,9 +270,24 @@ class SchedulingFragment : Fragment() {
                                                         setBtnSaveVisibility(GONE)
                                                         setBottomVisibility(VISIBLE)
                                                     } ?: run {
-                                                        addOrUpdateFirestoreDatabase(actualTimeList, downloadUser!!)
+                                                        addOrUpdateUserAtFirestoreDatabase(
+                                                            timeMutableList,
+                                                            downloadUser!!
+                                                        )
+                                                        addOrUpdateCalendarFieldAtFirestoreDatabase(
+                                                            timeMutableList,
+                                                            date!!
+                                                        )
                                                         clearFields()
+                                                        setBottomVisibility(GONE)
+                                                        setBtnSaveVisibility(VISIBLE)
                                                     }
+                                                }.addOnFailureListener {
+                                                    showToast(
+                                                        requireContext(),
+                                                        R.string.error_scheduling
+                                                    )
+                                                    print(it)
                                                 }
                                         } else {
                                             showToast(requireContext(), R.string.unavailable_time)
@@ -224,7 +297,7 @@ class SchedulingFragment : Fragment() {
                                             getFirebaseFirestoreCalendarField(
                                                 previousDate,
                                                 previousTime,
-                                                actualTimeList,
+                                                timeMutableList,
                                                 downloadUser!!
                                             )
                                         }
@@ -234,9 +307,23 @@ class SchedulingFragment : Fragment() {
                                             setBottomVisibility(GONE)
                                             setBtnSaveVisibility(VISIBLE)
                                         }
-
+                                    } ?: run {
+                                        val timeMutableList = mutableListOf<String>()
+                                        originalList.forEach { t ->
+                                            if (it.toString().contains(time.toString())) {
+                                                timeMutableList.add(t.replace(";false", ";true"))
+                                            } else {
+                                                timeMutableList.add(t.toString())
+                                            }
+                                        }
+                                        originalList.filter { it.contains(time.toString()) }
+                                        addOrUpdateUserAtFirestoreDatabase(
+                                            timeMutableList,
+                                            downloadUser!!
+                                        )
                                     }
                                 }.addOnFailureListener {
+                                    showToast(requireContext(), R.string.error_scheduling)
                                     print(it)
                                 }
                         }
@@ -245,7 +332,7 @@ class SchedulingFragment : Fragment() {
                             FirebaseFirestore.getInstance().collection("calendarField")
                                 .document(dateCalendarFieldAddOrUpdate!!).set(time)
                         }
-                        ADD_OR_UPDATE -> {
+                        USER_ADD_OR_UPDATE -> {
                             FirebaseFirestore.getInstance().collection("users")
                                 .document(email!!)
                                 .set(addOrUpdateUser!!) //add the data if it doesn't already exist and update it if it already exists
@@ -340,7 +427,6 @@ class SchedulingFragment : Fragment() {
             } else {
                 "$day-${monthOk}-$year"
             }
-
             timeListOk.clear()
         }
 
@@ -380,17 +466,17 @@ class SchedulingFragment : Fragment() {
             ) {
                 val user = User(
                     name = name!!, service = service!!, date = date!!,
-                    time = time!!, uriString = uriString!!
+                    time = time!!, uriString = uriString!!, isMarked = true
                 )
                 val currentDate = SimpleDateFormat("dd-MM-yyyy").format(Date())
                 val currentHour = SimpleDateFormat("HH:mm").format(Date())
                 val currentHourToLong = currentHour.toString().substring(0, 2).toLong()
                 val timeToLong = time!!.substring(0, 2).toLong()
-
-                if (currentDate == date && timeToLong < currentHourToLong + 2) {
-                    showToast(requireContext(), R.string.unavailable_time)
+                if (currentDate == date && timeToLong > currentHourToLong + 2) {
+                    showToast(requireContext(), R.string.q)
+                    //showToast(requireContext(), R.string.unavailable_time)
                 } else {
-                    downloadForFirebaseFirestore(date!!, user)
+                    downloadForFirebaseFirestore(user)
                 }
             } else {
                 printEmptyField()
@@ -412,19 +498,24 @@ class SchedulingFragment : Fragment() {
     private fun deleteCurrentDayHour(
         timeList: MutableList<String>
     ): MutableList<String> {
-        val currentDateAndHour = Date()
-        val currentDate = SimpleDateFormat("dd-MM-yyyy").format(currentDateAndHour)
-        val currentHour = SimpleDateFormat("HH:mm").format(currentDateAndHour)
-
+        val currentHour = SimpleDateFormat("HH:mm").format(Date())
         val hoursLessThan2 = mutableListOf<String>()
-        if (date == currentDate) {
-            timeList.forEachIndexed { index, hour ->
-                if (index != 0) {
-                    val currentHourToLong = currentHour.toString().substring(0, 2).toLong()
-                    val hourToLong = hour.substring(0, 2).toLong()
-                    if (hourToLong < currentHourToLong + 2) {
-                        hoursLessThan2.add(hour)
-                    }
+        timeList.forEachIndexed { index, hour ->
+            //Index 0 is "Selecione a hora"
+            if (index != 0) {
+                val currentHourToLong = currentHour.toString().substring(0, 2).toLong()
+                val suffix: String
+                val hourToLong = if (hour.contains(";false")) {
+                    suffix = ";false"
+                    hour.removeSuffix(suffix).substring(0, 2).toLong()
+                } else {
+                    suffix = ";true"
+                    hour.removeSuffix(suffix).substring(0, 2).toLong()
+                }
+                //If the hour is 7, so 7 + 2  = 9 ---> I can only dial from 10 o'clock
+                // down
+                if (currentHourToLong + 2 > hourToLong) {
+                    hoursLessThan2.add(hour.plus(suffix))
                 }
             }
         }
@@ -449,8 +540,7 @@ class SchedulingFragment : Fragment() {
         galleryViewModel.checkForInternet(requireContext(), CALENDAR_FIELD)
     }
 
-    private fun downloadForFirebaseFirestore(dt: String, downloadUser: User) {
-        this.dt = dt
+    private fun downloadForFirebaseFirestore(downloadUser: User) {
         this.downloadUser = downloadUser
         galleryViewModel.checkForInternet(requireContext(), DOWNLOAD)
     }
@@ -474,22 +564,29 @@ class SchedulingFragment : Fragment() {
         binding.btnSave.visibility = visibility
     }
 
-    private fun addOrUpdateCalendarFieldFirestoreDatabase(
+    private fun addOrUpdateCalendarFieldAtFirestoreDatabase(
         hourList: List<String>,
         dateCalendarFieldAddOrUpdate: String
     ) {
         this.hourList = hourList
         this.dateCalendarFieldAddOrUpdate = dateCalendarFieldAddOrUpdate
-        galleryViewModel.checkForInternet(requireContext(),
-            ADD_OR_UPDATE_CALENDAR_FIELD)
+        galleryViewModel.checkForInternet(
+            requireContext(),
+            ADD_OR_UPDATE_CALENDAR_FIELD
+        )
     }
 
     //Firestore Database - Cloud Firestore
-    private fun addOrUpdateFirestoreDatabase(hourAddOrUpdateList: List<String>, addOrUpdateUser: User) {
-        addOrUpdateCalendarFieldFirestoreDatabase(hourAddOrUpdateList, date!!)
+    private fun addOrUpdateUserAtFirestoreDatabase(
+        hourAddOrUpdateList: List<String>,
+        addOrUpdateUser: User
+    ) {
+        addOrUpdateCalendarFieldAtFirestoreDatabase(hourAddOrUpdateList, date!!)
         this.addOrUpdateUser = addOrUpdateUser
-        galleryViewModel.checkForInternet(requireContext(),
-            ADD_OR_UPDATE)
+        galleryViewModel.checkForInternet(
+            requireContext(),
+            USER_ADD_OR_UPDATE
+        )
     }
 
     @SuppressLint("SimpleDateFormat")

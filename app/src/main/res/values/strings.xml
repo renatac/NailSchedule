@@ -45,6 +45,7 @@
     <string name="you_are_another_rebooking">"Você está fazendo outra marcação"</string>
     <string name="unavailable_time">Este horário não está mais disponível. Por favor selecione outro.</string>
     <string name="select_time">Selecione o Horário</string>
+    <string name="q">253</string>
     <string name="data_without_available_hour">Por favor <b>escolha outra data</b>, pois essa não possui horários disponíveis.</string>
 
     <!-- Scheduled Fragment-->

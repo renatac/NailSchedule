@@ -2,18 +2,15 @@ package com.example.nailschedule.view.activities.view.owner
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityOwnerBinding
 import com.google.firebase.firestore.FirebaseFirestore
 
 class OwnerActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityOwnerBinding
-
     private var date: String? = null
-
     private val ownerScheduleAdapter: OwnerAdapter by lazy {
         OwnerAdapter()
     }
