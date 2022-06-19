@@ -19,6 +19,7 @@ import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityBottomNavigationBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
+import com.example.nailschedule.view.activities.utils.showLoginScreen
 import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.gallery.GalleryViewModel
 import com.facebook.login.LoginManager
@@ -48,7 +49,6 @@ class BottomNavigationActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         activityBottomNavigationBinding = ActivityBottomNavigationBinding.inflate(layoutInflater)
         setContentView(activityBottomNavigationBinding.root)
-
         val bottomNavigationView: BottomNavigationView = activityBottomNavigationBinding.bottomNavView
         galleryViewModel =
             ViewModelProvider(this).get(GalleryViewModel::class.java)
@@ -101,11 +101,11 @@ class BottomNavigationActivity : AppCompatActivity(),
                         //It separates if it's Facebook or Google
                         if (isLoggedInFacebook()) {
                             LoginManager.getInstance().logOut()
-                            redirectToLoginActivity()
+                            showLoginScreen(this)
                         } else {
                             LoginActivity.googleSignInClientGetInstance(this).signOut()
                                 .addOnCompleteListener(this, OnCompleteListener<Void?> {
-                                    redirectToLoginActivity()
+                                    showLoginScreen(this)
                                 })
                         }
                     }
@@ -180,9 +180,5 @@ class BottomNavigationActivity : AppCompatActivity(),
     private fun signOut() {
         galleryViewModel.checkForInternet(
             this@BottomNavigationActivity, LOG_OUT)
-    }
-
-    private fun redirectToLoginActivity() {
-        finish()
     }
 }

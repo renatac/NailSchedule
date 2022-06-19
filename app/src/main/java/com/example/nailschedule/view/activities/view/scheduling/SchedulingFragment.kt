@@ -164,13 +164,17 @@ class SchedulingFragment : Fragment() {
                                             timeListOk = deleteCurrentDayHour(timeListOk)
                                         }
                                         val listToAdapter = mutableListOf<String>()
-                                        timeListOk.forEach { time ->
-                                            if (time.contains(";false")) {
-                                                listToAdapter.add(time.removeSuffix(";false"))
+                                        if(timeListOk.size == 1) {
+                                            listToAdapter.add(timeListOk[0])
+                                        } else {
+                                            timeListOk.forEach { time ->
+                                                if (time.contains(";false")) {
+                                                    listToAdapter.add(time.removeSuffix(";false"))
+                                                }
                                             }
                                         }
                                         initializeAdapter(listToAdapter)
-                                        if (isAddOrUpdateCalendarField) {
+                                        if (isAddOrUpdateCalendarField && timeListOk.size > 1) {
                                             addOrUpdateCalendarFieldAtFirestoreDatabase(
                                                 timeListOk,
                                                 date!!
@@ -470,9 +474,12 @@ class SchedulingFragment : Fragment() {
                 )
                 val currentDate = SimpleDateFormat("dd-MM-yyyy").format(Date())
                 val currentHour = SimpleDateFormat("HH:mm").format(Date())
-                val currentHourToLong = currentHour.toString().substring(0, 2).toLong()
-                val timeToLong = time!!.substring(0, 2).toLong()
-                if (currentDate == date && timeToLong > currentHourToLong + 2) {
+                val currentHourToInt = currentHour.substring(0, 2).toInt()
+                val timeToInt = time!!.substring(0, 2).toInt()
+
+                if ((currentDate == date) &&
+                    ((currentHourToInt <= 15) && (timeToInt <= currentHourToInt + 2)
+                    || (currentHourToInt > 15))) {
                     showToast(requireContext(), R.string.q)
                     //showToast(requireContext(), R.string.unavailable_time)
                 } else {
@@ -498,30 +505,27 @@ class SchedulingFragment : Fragment() {
     private fun deleteCurrentDayHour(
         timeList: MutableList<String>
     ): MutableList<String> {
-        val currentHour = SimpleDateFormat("HH:mm").format(Date())
+
         val hoursLessThan2 = mutableListOf<String>()
+        val currentDate = SimpleDateFormat("dd-MM-yyyy").format(Date())
+        val currentHour = SimpleDateFormat("HH:mm").format(Date())
+        val currentHourToInt = currentHour.substring(0, 2).toInt()
+
         timeList.forEachIndexed { index, hour ->
             //Index 0 is "Selecione a hora"
             if (index != 0) {
-                val currentHourToLong = currentHour.toString().substring(0, 2).toLong()
-                val suffix: String
-                val hourToLong = if (hour.contains(";false")) {
-                    suffix = ";false"
-                    hour.removeSuffix(suffix).substring(0, 2).toLong()
-                } else {
-                    suffix = ";true"
-                    hour.removeSuffix(suffix).substring(0, 2).toLong()
-                }
-                //If the hour is 7, so 7 + 2  = 9 ---> I can only dial from 10 o'clock
-                // down
-                if (currentHourToLong + 2 > hourToLong) {
-                    hoursLessThan2.add(hour.plus(suffix))
+                val timeToInt = hour.substring(0, 2).toInt()
+                if ((currentDate == date) &&
+                    ((currentHourToInt <= 15) && (timeToInt <= currentHourToInt + 2)
+                            || (currentHourToInt > 15))
+                ) {
+                    hoursLessThan2.add(hour)
                 }
             }
         }
-        timeList.removeAll(hoursLessThan2)
-        return timeList
-    }
+            timeList.removeAll(hoursLessThan2)
+            return timeList
+        }
 
     private fun setupSpinnerWithFirebaseFirestoreDownload() {
         galleryViewModel.checkForInternet(requireContext(), SETUP_SPINNER)

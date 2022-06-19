@@ -1,11 +1,11 @@
 package com.example.nailschedule.view.activities.view.activities
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.example.nailschedule.databinding.ActivitySplashBinding
+import com.example.nailschedule.view.activities.utils.showLoginScreen
 
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
@@ -19,7 +19,7 @@ class SplashActivity : AppCompatActivity() {
 
     private fun createAnimation() {
         Handler(Looper.getMainLooper()).postDelayed({
-            showLoginScreen()}, 4000)
+            showLoginScreen(this)}, 4000)
 
         binding.llSplash.animate().apply {
             duration = 1500
@@ -32,10 +32,5 @@ class SplashActivity : AppCompatActivity() {
                 translationYBy(360f)
             }
         }
-    }
-
-    private fun showLoginScreen() {
-        startActivity(Intent(this, LoginActivity::class.java))
-        finish()
     }
 }
