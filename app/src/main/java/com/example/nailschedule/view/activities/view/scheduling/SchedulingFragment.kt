@@ -193,11 +193,32 @@ class SchedulingFragment : Fragment() {
                                     documentSnapshot.data?.let {
                                         val timeList = it["timeList"] as List<*>
                                         if (previousDt.toString() == calendarUser!!.date) {
+                                           /* timeList.forEach { t ->
+                                                with(t.toString()) {
+                                                    if (this.contains(previousTm.toString())) {
+                                                        val finalIndex = this.indexOf(";true")
+                                                        val timeNew = this.substring(0, finalIndex)
+                                                        previousTimeList.add(timeNew.plus(";false"))
+                                                    } else {
+                                                        previousTimeList.add(this)
+                                                    }
+                                                }
+                                            }
+                                            addOrUpdateCalendarFieldAtFirestoreDatabase(
+                                                previousTimeList,
+                                                previousDt!!
+                                            )
+                                            print(currentTimeList)*/
                                             currentTimeList!!.forEach { t ->
                                                 if (t.contains(previousTm.toString())) {
-                                                    previousTimeList.add(
-                                                        t.replace(";true", ";false")
-                                                    )
+                                                    val finalIndex = t.indexOf(";true")
+                                                    val timeNew = t.substring(0,finalIndex)
+                                                    previousTimeList.add(timeNew.plus(";false"))
+                                                } else if(t.contains(";true")) {
+                                                    previousTimeList.add(t.plus(downloadUser.toString())
+                                                        .replace("User(",";")
+                                                        .replace(")","")
+                                                        .replace(",",";"))
                                                 } else {
                                                     previousTimeList.add(t)
                                                 }
@@ -209,9 +230,9 @@ class SchedulingFragment : Fragment() {
                                         } else {
                                             timeList.forEach { t ->
                                                 if (t.toString().contains(previousTm.toString())) {
-                                                    previousTimeList.add(
-                                                        t.toString().replace(";true", ";false")
-                                                    )
+                                                    val finalIndex = t.toString().indexOf(";true")
+                                                    val timeNew = t.toString().substring(0,finalIndex)
+                                                    previousTimeList.add(timeNew.plus(";false"))
                                                 } else {
                                                     previousTimeList.add(t.toString())
                                                 }
@@ -220,8 +241,19 @@ class SchedulingFragment : Fragment() {
                                                 previousTimeList,
                                                 previousDt!!
                                             )
+                                            val currentTimeListWithUser = mutableListOf<String>()
+                                            currentTimeList!!.forEach { t ->
+                                                if (t.contains(";true")) {
+                                                    currentTimeListWithUser.add(t.plus(downloadUser.toString()
+                                                        .replace("User(",";")
+                                                        .replace(")","")
+                                                        .replace(",",";")))
+                                                } else {
+                                                    currentTimeListWithUser.add(t)
+                                                }
+                                            }
                                             addOrUpdateUserAtFirestoreDatabase(
-                                                currentTimeList!!,
+                                                currentTimeListWithUser,
                                                 calendarUser!!
                                             )
                                         }
@@ -278,8 +310,20 @@ class SchedulingFragment : Fragment() {
                                                             timeMutableList,
                                                             downloadUser!!
                                                         )
+                                                        val timeMutableListWithUser = mutableListOf<String>()
+                                                        timeMutableList.forEach { t ->
+                                                            if(t.contains(";true")) {
+                                                                timeMutableListWithUser.add(
+                                                                    t.plus(downloadUser.toString()
+                                                                        .replace("User(",";")
+                                                                        .replace(")","")
+                                                                        .replace(",",";")))
+                                                            } else {
+                                                                timeMutableListWithUser.add(t)
+                                                            }
+                                                        }
                                                         addOrUpdateCalendarFieldAtFirestoreDatabase(
-                                                            timeMutableList,
+                                                            timeMutableListWithUser,
                                                             date!!
                                                         )
                                                         clearFields()
@@ -315,14 +359,30 @@ class SchedulingFragment : Fragment() {
                                         val timeMutableList = mutableListOf<String>()
                                         originalList.forEach { t ->
                                             if (it.toString().contains(time.toString())) {
-                                                timeMutableList.add(t.replace(";false", ";true"))
+                                                timeMutableList.add(t.replace(";false", ";true")
+                                                    .plus(downloadUser.toString()
+                                                    .replace("User(",";")
+                                                    .replace(")","")
+                                                    .replace(",",";")))
                                             } else {
-                                                timeMutableList.add(t.toString())
+                                                timeMutableList.add(t)
                                             }
                                         }
                                         originalList.filter { it.contains(time.toString()) }
+                                        val timeMutableListWithUser = mutableListOf<String>()
+                                        timeMutableList.forEach { t ->
+                                            if(t.contains(";true")) {
+                                                timeMutableListWithUser.add(
+                                                    t.plus(downloadUser.toString()
+                                                        .replace("User(",";")
+                                                        .replace(")","")
+                                                        .replace(",",";")))
+                                            } else {
+                                                timeMutableListWithUser.add(t)
+                                            }
+                                        }
                                         addOrUpdateUserAtFirestoreDatabase(
-                                            timeMutableList,
+                                            timeMutableListWithUser,
                                             downloadUser!!
                                         )
                                     }
