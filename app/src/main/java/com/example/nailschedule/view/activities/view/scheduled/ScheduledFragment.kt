@@ -91,7 +91,7 @@ class ScheduledFragment : Fragment() {
                                         it["date"] as String,
                                         it["time"] as String,
                                         it["uriString"] as String,
-                                        it["isMarked"] as Boolean
+                                        it["marked"] as Boolean
                                     )
                                     date = user?.date
                                     time = user?.time
@@ -118,16 +118,20 @@ class ScheduledFragment : Fragment() {
                             .document(date!!).get().addOnSuccessListener { documentSnapshot ->
                                 documentSnapshot.data?.let {
                                     val timeList = it["timeList"] as List<*>
-                                    timeList.forEach { time ->
-                                        previousTimeList.add(time.toString())
-                                    }
-                                    previousTimeList.apply {
-                                        add(time!!)
-                                        sort()
+                                    timeList.forEach { t->
+                                        with(t.toString()) {
+                                            if (this.contains(time!!)) {
+                                                val finalIndex = this.indexOf(";true")
+                                                val timeNew = this.substring(0, finalIndex)
+                                                previousTimeList.add(timeNew.plus(";false"))
+                                            } else {
+                                                previousTimeList.add(this)
+                                            }
+                                        }
                                     }
                                     val hoursList = Time(previousTimeList)
                                     FirebaseFirestore.getInstance().collection("calendarField")
-                                        .document(  date!!).set(hoursList)
+                                        .document( date!!).set(hoursList)
                                     showEmptyState()
                                 }
                             }
@@ -173,14 +177,18 @@ class ScheduledFragment : Fragment() {
         }
     }
 
-    private fun redirectToSchedulingFragment() = binding.apply {
-        //btnEdit.visibility = View.GONE
-        //btnDelete.visibility = View.GONE
+    private fun redirectToSchedulingFragment() {
+        hideButtons()
         saveAtSharedPreferences()
         parentFragmentManager
             .beginTransaction()
             .add(R.id.container_scheduled, SchedulingFragment.newInstance(), "schedulingFragment")
             .commit()
+    }
+
+    private fun hideButtons() = binding.apply {
+        btnEdit.visibility = View.GONE
+        btnDelete.visibility = View.GONE
     }
 
     private fun saveAtSharedPreferences() = binding.apply {
