@@ -73,9 +73,11 @@
 
     <!--Owner Activity -->
     <string name="owner_title">Clique no dia que quiser e veja os horários:</string>
-    <string name="available">Disponível</string>
+    <string name="all_free">Todos horários livres</string>
+    <string name="available">Horário Disponível</string>
     <string name="unavailable">Indisponível</string>
     <string name="general_schedule">Agenda Geral</string>
+    <string name="see_schedule">Ver agendamento</string>
 
     <!-- Menu nav -->
     <string name="logout">Deslogar</string>

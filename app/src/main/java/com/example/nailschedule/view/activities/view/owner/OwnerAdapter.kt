@@ -1,14 +1,14 @@
 package com.example.nailschedule.view.activities.view.owner
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ItemHourBinding
 
 class OwnerAdapter : RecyclerView.Adapter<OwnerAdapter.MyViewHolder>() {
-    private var availableTimeList: ArrayList<Pair<String, Boolean>> = arrayListOf()
+    private var availableTimeList: ArrayList<String> = arrayListOf()
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -26,7 +26,7 @@ class OwnerAdapter : RecyclerView.Adapter<OwnerAdapter.MyViewHolder>() {
 
     override fun getItemCount() = availableTimeList.size
 
-    fun setItemsList(timeList: List<Pair<String, Boolean>>) {
+    fun setItemsList(timeList: List<String>) {
         availableTimeList.addAll(timeList)
         notifyDataSetChanged()
     }
@@ -36,19 +36,22 @@ class OwnerAdapter : RecyclerView.Adapter<OwnerAdapter.MyViewHolder>() {
         notifyDataSetChanged()
     }
 
+
     inner class MyViewHolder(private val binding: ItemHourBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(availableTime: Pair<String, Boolean>) = binding.apply {
-            val hour = "${availableTime.first} h"
+        fun bind(info: String) = binding.apply {
+            btnSeeSchedule.setOnClickListener {
+                //goToUserDetails()
+            }
+            val hour = "${info.subSequence(0, 5)} h"
             tvHour.text = hour
-            with(tvAvailability) {
-                if (availableTime.second) {
-                    text = binding.root.context.getString(R.string.available)
-                    setTextColor(ContextCompat.getColor(context, R.color.purple_500))
-                } else {
-                    text = binding.root.context.getString(R.string.unavailable)
-                    setTextColor(ContextCompat.getColor(context, R.color.red))
-                }
+            if (info.subSequence(5, info.length) == ";false") {
+                tvAvailability.text = binding.root.context.getString(R.string.available)
+                btnSeeSchedule.visibility = View.GONE
+                tvAvailability.visibility = View.VISIBLE
+            } else {
+                btnSeeSchedule.visibility = View.VISIBLE
+                tvAvailability.visibility = View.GONE
             }
         }
     }

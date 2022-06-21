@@ -193,22 +193,6 @@ class SchedulingFragment : Fragment() {
                                     documentSnapshot.data?.let {
                                         val timeList = it["timeList"] as List<*>
                                         if (previousDt.toString() == calendarUser!!.date) {
-                                           /* timeList.forEach { t ->
-                                                with(t.toString()) {
-                                                    if (this.contains(previousTm.toString())) {
-                                                        val finalIndex = this.indexOf(";true")
-                                                        val timeNew = this.substring(0, finalIndex)
-                                                        previousTimeList.add(timeNew.plus(";false"))
-                                                    } else {
-                                                        previousTimeList.add(this)
-                                                    }
-                                                }
-                                            }
-                                            addOrUpdateCalendarFieldAtFirestoreDatabase(
-                                                previousTimeList,
-                                                previousDt!!
-                                            )
-                                            print(currentTimeList)*/
                                             currentTimeList!!.forEach { t ->
                                                 if (t.contains(previousTm.toString())) {
                                                     val finalIndex = t.indexOf(";true")

@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityOwnerBinding
+import com.example.nailschedule.view.activities.utils.showToast
 import com.google.firebase.firestore.FirebaseFirestore
 
 class OwnerActivity : AppCompatActivity() {
@@ -61,37 +62,24 @@ class OwnerActivity : AppCompatActivity() {
     }
 
     private fun getAvailableTimeList() {
-        var helpList = mutableListOf<Pair<String, Boolean>>()
-        val availableTimeList = mutableListOf<Pair<String, Boolean>>()
-        FirebaseFirestore.getInstance().collection("calendarField")
+        val mutableTimeList = mutableListOf<String>()
+       FirebaseFirestore.getInstance().collection("calendarField")
             .document(date!!).get().addOnSuccessListener { documentSnapshot ->
                 documentSnapshot.data?.let {
                     val timeList = it["timeList"] as List<*>
-                    timeList.forEach { time ->
-                        time?.let {
-                            availableTimeList.add(Pair(it.toString(), true))
-                        }
-                    }
-                    //Removing the item "Selecione a hora"
-                    availableTimeList.removeAt(0)
-                    helpList = mutableListOf(
-                        Pair("08:00", false), Pair("10:00", false), Pair("12:00", false),
-                        Pair("14:00", false), Pair("16:00", false), Pair("18:00", false)
-                    )
-                    helpList.forEachIndexed { index, pair ->
-                        if (availableTimeList.contains(Pair(pair.first, true))) {
-                            helpList[index] = Pair(pair.first, true)
+                    timeList.forEachIndexed { index, time ->
+                        time?.let { t->
+                            if(index != 0) {
+                                mutableTimeList.add(t.toString())
+                            }
                         }
                     }
                 } ?: run {
-                    helpList = mutableListOf(
-                        Pair("08:00", true), Pair("10:00", true), Pair("12:00", true),
-                        Pair("14:00", true), Pair("16:00", true), Pair("18:00", true)
-                    )
+                    showToast(this, R.string.all_free)
                 }
                 with(ownerScheduleAdapter) {
                     clearItemsList()
-                    setItemsList(helpList)
+                    setItemsList(mutableTimeList)
                 }
             }
     }
