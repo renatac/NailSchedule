@@ -1,8 +1,10 @@
 package com.example.nailschedule.view.activities.view.owner
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityOwnerBinding
 import com.example.nailschedule.view.activities.utils.showToast
@@ -13,7 +15,7 @@ class OwnerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOwnerBinding
     private var date: String? = null
     private val ownerScheduleAdapter: OwnerAdapter by lazy {
-        OwnerAdapter()
+        OwnerAdapter(::seeSchedule)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +38,8 @@ class OwnerActivity : AppCompatActivity() {
 
     private fun setCalendarListener() {
         binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            hideCardView()
+            showRecycler()
             val monthOk = month + 1
             date = if (monthOk <= 9) {
                 "$dayOfMonth-0${monthOk}-$year"
@@ -63,13 +67,13 @@ class OwnerActivity : AppCompatActivity() {
 
     private fun getAvailableTimeList() {
         val mutableTimeList = mutableListOf<String>()
-       FirebaseFirestore.getInstance().collection("calendarField")
+        FirebaseFirestore.getInstance().collection("calendarField")
             .document(date!!).get().addOnSuccessListener { documentSnapshot ->
                 documentSnapshot.data?.let {
                     val timeList = it["timeList"] as List<*>
                     timeList.forEachIndexed { index, time ->
-                        time?.let { t->
-                            if(index != 0) {
+                        time?.let { t ->
+                            if (index != 0) {
                                 mutableTimeList.add(t.toString())
                             }
                         }
@@ -82,5 +86,50 @@ class OwnerActivity : AppCompatActivity() {
                     setItemsList(mutableTimeList)
                 }
             }
+    }
+
+    private fun seeSchedule(info: String) = binding.apply {
+        setBtnListener()
+        hideRecycler()
+        showCardView()
+        setupUserInfo(info)
+    }
+
+    private fun setBtnListener() {
+        binding.ivClose.setOnClickListener {
+            hideCardView()
+            showRecycler()
+        }
+    }
+
+    private fun hideCardView() {
+        binding.cardViewUser.visibility = View.GONE
+    }
+
+    private fun showCardView() {
+        binding.cardViewUser.visibility = View.VISIBLE
+    }
+
+    private fun hideRecycler() {
+        binding.rvSchedules.visibility = View.GONE
+    }
+
+    private fun showRecycler() {
+        binding.rvSchedules.visibility = View.VISIBLE
+    }
+
+    private fun setupUserInfo(info: String) = binding.apply {
+        val list = info.split(";")
+        tvUserTime.text =
+            applicationContext.getString(R.string.user_time, list[0].removePrefix("time="))
+        tvUserName.text =
+            applicationContext.getString(R.string.user_name, list[2].removePrefix("name="))
+        tvUserService.text = applicationContext.getString(
+            R.string.user_service,
+            list[3].trim().removePrefix("service=")
+        )
+        //Setting the image to imageView using Glide Library
+        Glide.with(this@OwnerActivity).load(list[6].trim().removePrefix("uriString="))
+            .into(ivService)
     }
 }

@@ -78,6 +78,9 @@
     <string name="unavailable">Indisponível</string>
     <string name="general_schedule">Agenda Geral</string>
     <string name="see_schedule">Ver agendamento</string>
+    <string name="user_name"><b>Nome:</b> %s</string>
+    <string name="user_service"><b>Serviço:</b> %s</string>
+    <string name="user_time"><b>Hora marcada:</b> %s</string>
 
     <!-- Menu nav -->
     <string name="logout">Deslogar</string>
