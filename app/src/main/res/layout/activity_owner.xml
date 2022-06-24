@@ -33,7 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#ffffff"
-            android:paddingBottom="@dimen/_100dp">
+            android:paddingBottom="@dimen/_16dp">
 
             <TextView
                 android:id="@+id/tv_owner_title"
@@ -79,15 +79,17 @@
                 app:cardCornerRadius="@dimen/_16dp"
                 app:cardElevation="@dimen/_8dp"
                 android:layout_margin="@dimen/_16dp"
+                android:paddingBottom="@dimen/_16dp"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/calendar_view" >
+                app:layout_constraintTop_toBottomOf="@id/calendar_view"
+                app:layout_constraintBottom_toBottomOf="parent">
 
                 <LinearLayout
                     android:id="@+id/ll_user_info"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
                     <ImageView
@@ -103,7 +105,6 @@
                         android:id="@+id/tv_user_time"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
                         android:layout_marginStart="@dimen/_24sp"
                         android:layout_marginEnd="@dimen/_16sp"
                         android:layout_marginBottom="@dimen/_16sp"
@@ -117,7 +118,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_24sp"
                         android:layout_marginEnd="@dimen/_16sp"                        android:layout_marginBottom="@dimen/_16sp"
-                        android:layout_gravity="center_horizontal"
                         android:textColor="@color/purple_700"
                         android:textSize="@dimen/_22sp"
                         tools:text="@string/user_name" />
@@ -128,15 +128,20 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_24sp"
                         android:layout_marginEnd="@dimen/_16sp"                        android:layout_marginBottom="@dimen/_16sp"
-                        android:layout_gravity="center_horizontal"
                         android:textColor="@color/purple_700"
                         android:textSize="@dimen/_22sp"
                         tools:text="@string/user_service" />
 
-                    <ImageView
-                        android:id="@+id/iv_service"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                    <Button
+                        android:id="@+id/btn_delete_schedule"
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/_16dp"
+                        android:layout_marginBottom="@dimen/_24dp"
+                        android:gravity="center_horizontal"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/delete_schedule"
+                        android:textColor="@color/purple_700" />
 
                 </LinearLayout>
 

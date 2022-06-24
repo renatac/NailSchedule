@@ -55,7 +55,6 @@
     <string name="lb_date">Data:</string>
     <string name="lb_time">Horário:</string>
     <string name="edit_schedule">Editar agendamento</string>
-    <string name="delete_schedule">Deletar agendamento</string>
     <string name="no_schedules">Você não possui horário agendado</string>
     <string name="add_or_update">Observação: Caso já possua um agendamento, estará atualizando o mesmo.</string>
     <string name="explanation_about_choose_photo">Deixe-me ver a foto do serviço que você quer realizar. Escolha um dos métodos abaixo para obter a foto:</string>
@@ -86,6 +85,8 @@
     <string name="logout">Deslogar</string>
     <string name="get_out">Sair</string>
     <string name="login_title">Agende horários e guarde as fotos de suas unhas favoritas.\nCom o App Nails schedule não existem mais dúvidas de quais horários estão disponíveis e de qual serviço você vai querer que seja realizado.</string>
+
+    <string name="delete_schedule">Deletar agendamento</string>
 
     <string name="no_internet">Você está sem internet. Por favor, ative a internet.</string>
 

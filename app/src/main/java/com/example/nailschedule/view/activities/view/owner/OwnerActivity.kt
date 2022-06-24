@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityOwnerBinding
 import com.example.nailschedule.view.activities.utils.showToast
@@ -126,10 +125,9 @@ class OwnerActivity : AppCompatActivity() {
             applicationContext.getString(R.string.user_name, list[2].removePrefix("name="))
         tvUserService.text = applicationContext.getString(
             R.string.user_service,
-            list[3].trim().removePrefix("service=")
-        )
-        //Setting the image to imageView using Glide Library
-        Glide.with(this@OwnerActivity).load(list[6].trim().removePrefix("uriString="))
-            .into(ivService)
+            list[3].trim().removePrefix("service="))
+        btnDeleteSchedule.setOnClickListener {
+
+        }
     }
 }
