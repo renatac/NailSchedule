@@ -21,6 +21,7 @@
     <string name="photo_deleted">Foto apagada</string>
     <string name="photos_deleted">Fotos apagadas</string>
     <string name="all_photos_deleted">Todas as fotos foram apagadas</string>
+    <string name="unscheduled_time">Remarque outro horário, pois seu horário foi desmarcado!</string>
 
     <!-- Scheduling Fragment-->
     <string name="service">Digite o Serviço</string>
@@ -80,8 +81,7 @@
     <string name="user_name"><b>Nome:</b> %s</string>
     <string name="user_service"><b>Serviço:</b> %s</string>
     <string name="user_time"><b>Hora marcada:</b> %s</string>
-    <string name="user_time_unscheduled"><b>Hora desmarcada:</b> %s</string>
-    <string name="scheduled_deleted">Agendamento excluído!</string>
+    <string name="scheduled_deleted">Obs: O agendamento foi excluído!</string>
 
     <!-- Menu nav -->
     <string name="logout">Deslogar</string>

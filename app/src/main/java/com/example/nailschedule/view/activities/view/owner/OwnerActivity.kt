@@ -74,11 +74,7 @@ class OwnerActivity : AppCompatActivity() {
                                     hideBtnDeleteSchedule()
                                     getAvailableTimeList()
                                     showToast(this, R.string.scheduled_deleted)
-                                    binding.tvUserTime.text =
-                                        binding.tvUserTime.text.toString().replace(
-                                            getString(R.string.user_time),
-                                            getString(R.string.user_time_unscheduled)
-                                        )
+                                    showUnscheduledLabel()
                                 }
                             }
                     }
@@ -86,6 +82,15 @@ class OwnerActivity : AppCompatActivity() {
                     showToast(this, R.string.no_internet)
                 }
             })
+    }
+
+    private fun showUnscheduledLabel() = binding.tvUnscheduledTime.apply {
+        text = getString(R.string.scheduled_deleted)
+        visibility = View.VISIBLE
+    }
+
+    private fun hideUnscheduledLabel() {
+        binding.tvUnscheduledTime.visibility = View.GONE
     }
 
     private fun setupToolbar() = binding.apply {
@@ -150,6 +155,7 @@ class OwnerActivity : AppCompatActivity() {
 
     private fun seeSchedule(info: String) = binding.apply {
         time = info
+        hideUnscheduledLabel()
         setBtnListener()
         hideRecycler()
         showCardView()
