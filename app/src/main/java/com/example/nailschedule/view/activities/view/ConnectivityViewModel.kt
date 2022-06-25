@@ -1,4 +1,4 @@
-package com.example.nailschedule.view.activities.view.gallery
+package com.example.nailschedule.view.activities.view
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -8,7 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class GalleryViewModel : ViewModel() {
+class ConnectivityViewModel : ViewModel() {
     var hasPhoto = MutableLiveData<Boolean>()
 
     private var _hasInternet = MutableLiveData<Pair<Boolean, String>>()

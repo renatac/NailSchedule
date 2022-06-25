@@ -18,7 +18,7 @@ import com.example.nailschedule.databinding.ActivityLoginBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
 import com.example.nailschedule.view.activities.utils.showToast
-import com.example.nailschedule.view.activities.view.gallery.GalleryViewModel
+import com.example.nailschedule.view.activities.view.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.owner.OwnerActivity
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
@@ -49,7 +49,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var startForResult: ActivityResultLauncher<Intent>
     private lateinit var callbackManager: CallbackManager
 
-    private lateinit var viewModel: GalleryViewModel
+    private lateinit var viewModel: ConnectivityViewModel
 
     companion object {
         const val GOOGLE_LOGIN = "google_login"
@@ -118,7 +118,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun setupViewModel() {
         viewModel =
-            ViewModelProvider(this).get(GalleryViewModel::class.java)
+            ViewModelProvider(this).get(ConnectivityViewModel::class.java)
     }
 
     private fun setListeners() = binding.apply {

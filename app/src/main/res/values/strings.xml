@@ -80,6 +80,8 @@
     <string name="user_name"><b>Nome:</b> %s</string>
     <string name="user_service"><b>Serviço:</b> %s</string>
     <string name="user_time"><b>Hora marcada:</b> %s</string>
+    <string name="user_time_unscheduled"><b>Hora desmarcada:</b> %s</string>
+    <string name="scheduled_deleted">Agendamento excluído!</string>
 
     <!-- Menu nav -->
     <string name="logout">Deslogar</string>

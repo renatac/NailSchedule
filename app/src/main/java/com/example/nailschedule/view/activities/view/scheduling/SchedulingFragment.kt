@@ -27,7 +27,7 @@ import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.MIN_DATE
-import com.example.nailschedule.view.activities.view.gallery.GalleryViewModel
+import com.example.nailschedule.view.activities.view.ConnectivityViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
@@ -43,7 +43,7 @@ class SchedulingFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private lateinit var galleryViewModel: GalleryViewModel
+    private lateinit var connectivityViewModel: ConnectivityViewModel
 
     private lateinit var arrayAdapter: ArrayAdapter<String>
 
@@ -93,8 +93,8 @@ class SchedulingFragment : Fragment() {
             "12:00;false", "14:00;false",
             "16:00;false", "18:00;false"
         )
-        galleryViewModel =
-            ViewModelProvider(this).get(GalleryViewModel::class.java)
+        connectivityViewModel =
+            ViewModelProvider(this).get(ConnectivityViewModel::class.java)
         setupObserver()
         initializeAdapter(listOf(requireContext().getString(R.string.select_the_hour)))
         initializeEmail()
@@ -107,7 +107,7 @@ class SchedulingFragment : Fragment() {
 
     @SuppressLint("SimpleDateFormat")
     private fun setupObserver() {
-        galleryViewModel.hasInternet.observe(
+        connectivityViewModel.hasInternet.observe(
             viewLifecycleOwner,
             { it ->
                 if (it.first) {
@@ -416,7 +416,7 @@ class SchedulingFragment : Fragment() {
 
     @SuppressLint("SimpleDateFormat")
     private fun deleteFirebaseFirestoreAllDates() {
-        galleryViewModel.checkForInternet(requireContext(), DELETE_ALL_DATA)
+        connectivityViewModel.checkForInternet(requireContext(), DELETE_ALL_DATA)
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -572,7 +572,7 @@ class SchedulingFragment : Fragment() {
         }
 
     private fun setupSpinnerWithFirebaseFirestoreDownload() {
-        galleryViewModel.checkForInternet(requireContext(), SETUP_SPINNER)
+        connectivityViewModel.checkForInternet(requireContext(), SETUP_SPINNER)
     }
 
     private fun getFirebaseFirestoreCalendarField(
@@ -585,12 +585,12 @@ class SchedulingFragment : Fragment() {
         this.previousTm = previousTm
         this.currentTimeList = currentTimeList
         this.calendarUser = calendarUser
-        galleryViewModel.checkForInternet(requireContext(), CALENDAR_FIELD)
+        connectivityViewModel.checkForInternet(requireContext(), CALENDAR_FIELD)
     }
 
     private fun downloadForFirebaseFirestore(downloadUser: User) {
         this.downloadUser = downloadUser
-        galleryViewModel.checkForInternet(requireContext(), DOWNLOAD)
+        connectivityViewModel.checkForInternet(requireContext(), DOWNLOAD)
     }
 
     private fun setupBottom(userDate: String, userTime: String) = binding.apply {
@@ -618,7 +618,7 @@ class SchedulingFragment : Fragment() {
     ) {
         this.hourList = hourList
         this.dateCalendarFieldAddOrUpdate = dateCalendarFieldAddOrUpdate
-        galleryViewModel.checkForInternet(
+        connectivityViewModel.checkForInternet(
             requireContext(),
             ADD_OR_UPDATE_CALENDAR_FIELD
         )
@@ -631,7 +631,7 @@ class SchedulingFragment : Fragment() {
     ) {
         addOrUpdateCalendarFieldAtFirestoreDatabase(hourAddOrUpdateList, date!!)
         this.addOrUpdateUser = addOrUpdateUser
-        galleryViewModel.checkForInternet(
+        connectivityViewModel.checkForInternet(
             requireContext(),
             USER_ADD_OR_UPDATE
         )

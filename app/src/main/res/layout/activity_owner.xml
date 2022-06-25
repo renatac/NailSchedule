@@ -24,10 +24,10 @@
         android:scrollbarSize="4dp"
         android:scrollbarThumbVertical="@android:color/darker_gray"
         android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -63,9 +63,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_16dp"
                 android:scrollbarSize="4dp"
-                android:visibility="visible"
                 android:scrollbarThumbVertical="@android:color/darker_gray"
                 android:scrollbars="vertical"
+                android:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/calendar_view"
@@ -76,15 +76,15 @@
                 android:id="@+id/card_view_user"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="@dimen/_16dp"
-                app:cardElevation="@dimen/_8dp"
                 android:layout_margin="@dimen/_16dp"
                 android:paddingBottom="@dimen/_16dp"
                 android:visibility="gone"
+                app:cardCornerRadius="@dimen/_16dp"
+                app:cardElevation="@dimen/_8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/calendar_view"
-                app:layout_constraintBottom_toBottomOf="parent">
+                app:layout_constraintTop_toBottomOf="@id/calendar_view">
 
                 <LinearLayout
                     android:id="@+id/ll_user_info"
@@ -92,14 +92,22 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:id="@+id/progress_owner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        app:trackColor="@color/purple_500"
+                        android:visibility="gone"/>
+
                     <ImageView
                         android:id="@+id/iv_close"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/_24dp"
-                        android:layout_marginHorizontal="@dimen/_24dp"
                         android:layout_gravity="end"
-                        android:src="@drawable/ic_close"/>
+                        android:layout_marginHorizontal="@dimen/_24dp"
+                        android:layout_marginTop="@dimen/_24dp"
+                        android:src="@drawable/ic_close" />
 
                     <TextView
                         android:id="@+id/tv_user_time"
@@ -117,7 +125,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_24sp"
-                        android:layout_marginEnd="@dimen/_16sp"                        android:layout_marginBottom="@dimen/_16sp"
+                        android:layout_marginEnd="@dimen/_16sp"
+                        android:layout_marginBottom="@dimen/_16sp"
                         android:textColor="@color/purple_700"
                         android:textSize="@dimen/_22sp"
                         tools:text="@string/user_name" />
@@ -127,7 +136,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/_24sp"
-                        android:layout_marginEnd="@dimen/_16sp"                        android:layout_marginBottom="@dimen/_16sp"
+                        android:layout_marginEnd="@dimen/_16sp"
+                        android:layout_marginBottom="@dimen/_16sp"
                         android:textColor="@color/purple_700"
                         android:textSize="@dimen/_22sp"
                         tools:text="@string/user_service" />
@@ -136,10 +146,10 @@
                         android:id="@+id/btn_delete_schedule"
                         android:layout_width="200dp"
                         android:layout_height="wrap_content"
-                        android:padding="@dimen/_16dp"
+                        android:layout_gravity="center_horizontal"
                         android:layout_marginBottom="@dimen/_24dp"
                         android:gravity="center_horizontal"
-                        android:layout_gravity="center_horizontal"
+                        android:padding="@dimen/_16dp"
                         android:text="@string/delete_schedule"
                         android:textColor="@color/purple_700" />
 

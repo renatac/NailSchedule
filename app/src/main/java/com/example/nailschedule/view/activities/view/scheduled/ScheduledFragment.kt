@@ -15,7 +15,7 @@ import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
-import com.example.nailschedule.view.activities.view.gallery.GalleryViewModel
+import com.example.nailschedule.view.activities.view.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.scheduling.SchedulingFragment
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -24,7 +24,7 @@ class ScheduledFragment : Fragment() {
 
     private var _binding: FragmentScheduledBinding? = null
 
-    private lateinit var galleryViewModel: GalleryViewModel
+    private lateinit var connectivityViewModel: ConnectivityViewModel
 
     private var user: User? = null
 
@@ -51,8 +51,8 @@ class ScheduledFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        galleryViewModel =
-            ViewModelProvider(this).get(GalleryViewModel::class.java)
+        connectivityViewModel =
+            ViewModelProvider(this).get(ConnectivityViewModel::class.java)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,7 +74,7 @@ class ScheduledFragment : Fragment() {
     }
 
     private fun setupObserver() {
-        galleryViewModel.hasInternet.observe(viewLifecycleOwner,
+        connectivityViewModel.hasInternet.observe(viewLifecycleOwner,
             {
                 if (it.first) {
                     showProgress()
@@ -145,7 +145,7 @@ class ScheduledFragment : Fragment() {
 
     //Firestore Database - Cloud Firestore
     private fun downloadUserDataFromFirestoreDatabase() {
-        galleryViewModel.checkForInternet(requireContext(), USER_DATA_DOWNLOAD)
+        connectivityViewModel.checkForInternet(requireContext(), USER_DATA_DOWNLOAD)
     }
 
     private fun setupListeners() = binding.apply {
@@ -161,7 +161,7 @@ class ScheduledFragment : Fragment() {
     }
 
     private fun deleteFirebaseFirestoreData() {
-        galleryViewModel.checkForInternet(requireContext(), USER_DATA_DELETION)
+        connectivityViewModel.checkForInternet(requireContext(), USER_DATA_DELETION)
     }
 
     private fun setupFields() = binding.apply {

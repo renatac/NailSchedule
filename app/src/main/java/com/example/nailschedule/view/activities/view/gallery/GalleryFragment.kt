@@ -18,6 +18,7 @@ import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentGalleryBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showToast
+import com.example.nailschedule.view.activities.view.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
 import com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment
 import com.google.firebase.ktx.Firebase
@@ -37,7 +38,7 @@ class GalleryFragment : Fragment() {
     //private lateinit var homeViewModel: HomeViewModel
     private var _binding: FragmentGalleryBinding? = null
 
-    private lateinit var galleryViewModel: GalleryViewModel
+    private lateinit var connectivityViewModel: ConnectivityViewModel
 
     private lateinit var storage: StorageReference
 
@@ -72,8 +73,8 @@ class GalleryFragment : Fragment() {
     }
 
     private fun setupGalleryViewModel() {
-        galleryViewModel =
-            ViewModelProvider(this).get(GalleryViewModel::class.java)
+        connectivityViewModel =
+            ViewModelProvider(this).get(ConnectivityViewModel::class.java)
     }
 
     private fun getFirebaseStoreReference() {
@@ -118,14 +119,14 @@ class GalleryFragment : Fragment() {
             }
         }
 
-        galleryViewModel.hasInternet.observe(viewLifecycleOwner,
+        connectivityViewModel.hasInternet.observe(viewLifecycleOwner,
             {
                 if (it.first) {
                     showProgress()
                     hideRefresh()
                     if (it.second == DOWNLOAD) {
-                        galleryViewModel.hasPhoto.observe(viewLifecycleOwner, {
-                            if (galleryViewModel.hasPhoto.value!!) {
+                        connectivityViewModel.hasPhoto.observe(viewLifecycleOwner, {
+                            if (connectivityViewModel.hasPhoto.value!!) {
                                 showRecyclerView()
                             } else {
                                 showEmptyState()
@@ -138,7 +139,7 @@ class GalleryFragment : Fragment() {
                                 if (listResult.items.size != 0) {
                                     listResult.items.forEach {
                                         it.downloadUrl.addOnSuccessListener { uri ->
-                                            galleryViewModel.hasPhoto.value = true
+                                            connectivityViewModel.hasPhoto.value = true
                                             galleryAdapter.setItemList(uri)
                                         }.addOnFailureListener { exception ->
                                             print(exception)
@@ -190,7 +191,7 @@ class GalleryFragment : Fragment() {
     }
 
     private fun downloadPhotosFromCloudStorage() {
-        galleryViewModel.checkForInternet(requireContext(), DOWNLOAD)
+        connectivityViewModel.checkForInternet(requireContext(), DOWNLOAD)
     }
 
     private fun setupAdapter() {
@@ -233,7 +234,7 @@ class GalleryFragment : Fragment() {
     }
 
     private fun uploadPhotoToCloudStorage() {
-        galleryViewModel.checkForInternet(requireContext(), UPLOAD)
+        connectivityViewModel.checkForInternet(requireContext(), UPLOAD)
     }
 
     private fun onShortClick(uriString: String) {
@@ -302,6 +303,6 @@ class GalleryFragment : Fragment() {
         this.selectedUriList = selectedUriList
         this.areAllItems = areAllItems
         this.uriList = uriList
-        galleryViewModel.checkForInternet(requireContext(), DELETE)
+        connectivityViewModel.checkForInternet(requireContext(), DELETE)
     }
 }

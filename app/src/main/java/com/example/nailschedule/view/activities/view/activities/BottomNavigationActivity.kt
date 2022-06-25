@@ -21,7 +21,7 @@ import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
 import com.example.nailschedule.view.activities.utils.showLoginScreen
 import com.example.nailschedule.view.activities.utils.showToast
-import com.example.nailschedule.view.activities.view.gallery.GalleryViewModel
+import com.example.nailschedule.view.activities.view.ConnectivityViewModel
 import com.facebook.login.LoginManager
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -35,7 +35,7 @@ class BottomNavigationActivity : AppCompatActivity(),
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    private lateinit var galleryViewModel: GalleryViewModel
+    private lateinit var connectivityViewModel: ConnectivityViewModel
 
     private var photoUrl: Uri? = null
     private var displayName: String? = null
@@ -50,8 +50,8 @@ class BottomNavigationActivity : AppCompatActivity(),
         activityBottomNavigationBinding = ActivityBottomNavigationBinding.inflate(layoutInflater)
         setContentView(activityBottomNavigationBinding.root)
         val bottomNavigationView: BottomNavigationView = activityBottomNavigationBinding.bottomNavView
-        galleryViewModel =
-            ViewModelProvider(this).get(GalleryViewModel::class.java)
+        connectivityViewModel =
+            ViewModelProvider(this).get(ConnectivityViewModel::class.java)
 
         setupObserver()
 
@@ -94,7 +94,7 @@ class BottomNavigationActivity : AppCompatActivity(),
     }
 
     private fun setupObserver() {
-        galleryViewModel.hasInternet.observe(this,
+        connectivityViewModel.hasInternet.observe(this,
             {
                 if (it.first) {
                     if (it.second == LOG_OUT) {
@@ -178,7 +178,7 @@ class BottomNavigationActivity : AppCompatActivity(),
     }
 
     private fun signOut() {
-        galleryViewModel.checkForInternet(
+        connectivityViewModel.checkForInternet(
             this@BottomNavigationActivity, LOG_OUT)
     }
 }
