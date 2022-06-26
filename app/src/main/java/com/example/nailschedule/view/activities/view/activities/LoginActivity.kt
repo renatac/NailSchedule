@@ -15,9 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityLoginBinding
-import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
-import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
-import com.example.nailschedule.view.activities.utils.showToast
+import com.example.nailschedule.view.activities.utils.*
 import com.example.nailschedule.view.activities.view.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.owner.OwnerActivity
 import com.facebook.AccessToken
@@ -39,6 +37,8 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import java.io.IOException
 
 
@@ -48,17 +48,26 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var mGoogleSignInClient: GoogleSignInClient
     private lateinit var startForResult: ActivityResultLauncher<Intent>
     private lateinit var callbackManager: CallbackManager
+    private lateinit var authByEmail: FirebaseAuth
 
     private lateinit var viewModel: ConnectivityViewModel
 
+    private var email = ""
+    private var password = ""
+
     companion object {
         const val GOOGLE_LOGIN = "google_login"
-
+        const val FACEBOOK_LOGIN = "facebook_login"
+        const val EMAIL_AND_PASSWORD_LOGIN = "email_and_password_login"
         const val LOGIN_TYPE_IDENTIFIER = "login_type_identifier"
         const val GOOGLE_SIGN_IN_VALUE = 1
+        const val VIEW_FLIPPER_GOOGLE_OR_FACEBOOK = 0
+        const val VIEW_FLIPPER_EMAIL_AND_PASSWORD = 1
+        const val OWNER_NAME = "owner_name"
 
         @SuppressLint("StaticFieldLeak")
-        @Volatile private var INSTANCE: GoogleSignInClient? = null
+        @Volatile
+        private var INSTANCE: GoogleSignInClient? = null
 
         fun googleSignInClientGetInstance(activity: Activity): GoogleSignInClient =
             INSTANCE ?: synchronized(this) {
@@ -84,11 +93,12 @@ class LoginActivity : AppCompatActivity() {
         setupViewModel()
         setupObserver()
         initSharedPreferences()
-        if(GoogleSignIn.getLastSignedInAccount(this) != null
-            || isLoggedInFacebook()) {
+        initFirebaseAuthByEmailAndPassword()
+        if (GoogleSignIn.getLastSignedInAccount(this) != null
+            || isLoggedInFacebook()
+        ) {
             redirectToBottomNavigation()
-        }
-        else {
+        } else {
             binding = ActivityLoginBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
@@ -103,12 +113,27 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    private fun initFirebaseAuthByEmailAndPassword() {
+        // Initialize Firebase Auth
+        authByEmail = Firebase.auth
+    }
+
     private fun setupObserver() {
         viewModel.hasInternet.observe(this@LoginActivity,
             {
                 if (it.first) {
                     if (it.second == GOOGLE_LOGIN) {
                         googleSignIn()
+                    } else if (it.second == FACEBOOK_LOGIN) {
+                        facebookSignIn()
+                    } else if(it.second == EMAIL_AND_PASSWORD_LOGIN) {
+                        email = binding.txtEmail.editText?.text.toString().trim()
+                        password = binding.txtPassword.editText?.text.toString().trim()
+                        if (isNotEmptyField(email) && isNotEmptyField(password)) {
+                            ownerSignInUsingEmailAndPassword()
+                        } else {
+                            printEmptyField()
+                        }
                     }
                 } else {
                     showNoInternet()
@@ -122,24 +147,69 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setListeners() = binding.apply {
+        showLoginByGoogleOrFacebook()
         btnClient.setOnClickListener {
             setClientOrOwnerGroupVisibility(View.GONE)
             setBtnsLoginGroupVisibility(View.VISIBLE)
         }
         btnOwner.setOnClickListener {
-            redirectOwnerFlow()
+            setClientOrOwnerGroupVisibility(View.GONE)
+            setBtnsLoginGroupVisibility(View.GONE)
+            setBtnAccessListener()
+            showLoginByEmailOrPassword()
         }
         tvClientOrOwnerAgain.setOnClickListener {
             setBtnsLoginGroupVisibility(View.GONE)
             setClientOrOwnerGroupVisibility(View.VISIBLE)
         }
+    }
 
+    private fun setBtnAccessListener() = binding.apply {
+        btnAccess.setOnClickListener {
+            viewModel.checkForInternet(
+                this@LoginActivity,
+                EMAIL_AND_PASSWORD_LOGIN
+            )
+        }
+        tvChooseClientOrOwnerAgain.setOnClickListener {
+            setBtnsLoginGroupVisibility(View.GONE)
+            setClientOrOwnerGroupVisibility(View.VISIBLE)
+            showLoginByGoogleOrFacebook()
+        }
+    }
+
+    private fun printEmptyField() {
+        when {
+            isEmptyField(email) -> {
+                showToast(applicationContext, R.string.empty_email)
+            }
+            isEmptyField(password) -> {
+                showToast(applicationContext, R.string.empty_password)
+            }
+        }
+    }
+
+    private fun ownerSignInUsingEmailAndPassword() {
+        authByEmail.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    val userName = authByEmail.currentUser?.displayName
+                    redirectOwnerFlow(userName)
+                } else {
+                    showToast(applicationContext, R.string.incorrect_information)
+                }
+            }.addOnFailureListener {
+                showToast(applicationContext, R.string.unavailable)
+            }
     }
 
     private fun registerGoogleSignInClickListener() {
         binding.btnGoogleSignIn.setOnClickListener {
-            viewModel.checkForInternet(this@LoginActivity,
-                GOOGLE_LOGIN)
+            viewModel.checkForInternet(
+                this@LoginActivity,
+                GOOGLE_LOGIN
+            )
         }
     }
 
@@ -150,24 +220,12 @@ class LoginActivity : AppCompatActivity() {
         binding.btnFacebookSignIn.setReadPermissions("email", "public_profile")
 
         // Callback registration
-        binding.btnFacebookSignIn.registerCallback(callbackManager,
-            object : FacebookCallback<LoginResult?> {
-            override fun onSuccess(loginResult: LoginResult?) {
-                SharedPreferencesHelper.write(
-                    SharedPreferencesHelper.FACEBOOK_ACCESS_TOKEN,
-                    loginResult?.accessToken.toString()
-                )
-                loadUserProfile(loginResult?.accessToken)
-            }
-
-            override fun onCancel() {
-                println("onCancel")
-            }
-
-            override fun onError(exception: FacebookException) {
-                showNoInternet()
-            }
-        })
+        binding.btnFacebookSignIn.setOnClickListener {
+            viewModel.checkForInternet(
+                this@LoginActivity,
+                FACEBOOK_LOGIN
+            )
+        }
     }
 
     private fun initSharedPreferences() {
@@ -189,13 +247,15 @@ class LoginActivity : AppCompatActivity() {
                         task.result.idToken
                     )
 
-                    val googleSignInResult = Auth.GoogleSignInApi.getSignInResultFromIntent(result.data!!)
+                    val googleSignInResult =
+                        Auth.GoogleSignInApi.getSignInResultFromIntent(result.data!!)
                     if (googleSignInResult.isSuccess) {
                         val account: GoogleSignInAccount? = googleSignInResult.signInAccount
                         saveHeaderNavDataInSharedPreferences(
                             account?.displayName.toString(),
                             account?.photoUrl.toString(),
-                            account?.email.toString())
+                            account?.email.toString()
+                        )
                         val runnable = Runnable {
                             try {
                                 val scope = "oauth2:" + Scopes.EMAIL + " " + Scopes.PROFILE
@@ -210,7 +270,8 @@ class LoginActivity : AppCompatActivity() {
                                     accessToken
                                 )
 
-                                val accountGoogle = GoogleSignIn.getSignedInAccountFromIntent(result.data).result
+                                val accountGoogle =
+                                    GoogleSignIn.getSignedInAccountFromIntent(result.data).result
                                 accountGoogle?.let { googleSignInAccount ->
                                     credential = GoogleAuthProvider.getCredential(
                                         googleSignInAccount.idToken, accessToken
@@ -238,17 +299,42 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
-    private fun saveHeaderNavDataInSharedPreferences(name: String, photoUrl: String, email: String) {
+    private fun saveHeaderNavDataInSharedPreferences(
+        name: String,
+        photoUrl: String,
+        email: String
+    ) {
         SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_DISPLAY_NAME, name)
         SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_PHOTO_URL, photoUrl)
         SharedPreferencesHelper.write(SharedPreferencesHelper.EXTRA_EMAIL, email)
     }
 
     private fun googleSignIn() {
-        val intent : Intent = mGoogleSignInClient.signInIntent.apply {
+        val intent: Intent = mGoogleSignInClient.signInIntent.apply {
             putExtra(LOGIN_TYPE_IDENTIFIER, GOOGLE_SIGN_IN_VALUE)
         }
         startForResult.launch(intent)
+    }
+
+    private fun facebookSignIn() {
+        binding.btnFacebookSignIn.registerCallback(callbackManager,
+            object : FacebookCallback<LoginResult?> {
+                override fun onSuccess(loginResult: LoginResult?) {
+                    SharedPreferencesHelper.write(
+                        SharedPreferencesHelper.FACEBOOK_ACCESS_TOKEN,
+                        loginResult?.accessToken.toString()
+                    )
+                    loadUserProfile(loginResult?.accessToken)
+                }
+
+                override fun onCancel() {
+                    println("onCancel")
+                }
+
+                override fun onError(exception: FacebookException) {
+                    showNoInternet()
+                }
+            })
     }
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
@@ -256,7 +342,7 @@ class LoginActivity : AppCompatActivity() {
             val account: GoogleSignInAccount = completedTask.getResult(ApiException::class.java)
             // Signed in successfully, show authenticated UI.
             println(account)
-          redirectToBottomNavigation()
+            redirectToBottomNavigation()
         } catch (e: ApiException) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
@@ -264,17 +350,20 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun redirectOwnerFlow() {
-        val intent =  Intent(
+    private fun redirectOwnerFlow(userName: String?) {
+        val intent = Intent(
             this,
-            OwnerActivity::class.java)
+            OwnerActivity::class.java
+        )
+        intent.putExtra(OWNER_NAME, userName)
         startActivity(intent)
     }
 
     private fun redirectToBottomNavigation() {
-        val intent =  Intent(
+        val intent = Intent(
             this,
-            BottomNavigationActivity::class.java)
+            BottomNavigationActivity::class.java
+        )
         startActivity(intent)
     }
 
@@ -285,7 +374,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun loadUserProfile(newAccessToken: AccessToken?) {
-        val credential = FacebookAuthProvider.getCredential(newAccessToken?.token ?: "" )
+        val credential = FacebookAuthProvider.getCredential(newAccessToken?.token ?: "")
         FirebaseAuth.getInstance().signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
@@ -294,26 +383,36 @@ class LoginActivity : AppCompatActivity() {
                     saveHeaderNavDataInSharedPreferences(
                         user?.displayName.toString(),
                         user?.photoUrl.toString(),
-                        user?.email.toString())
+                        user?.email.toString()
+                    )
                     redirectToBottomNavigation()
                 }
             }.addOnFailureListener {
                 // If sign in fails, display a message to the user.
-                Toast.makeText(baseContext, getString(R.string.login_failed),
-                    Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    baseContext, getString(R.string.login_failed),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
     }
-
 
     private fun setBtnsLoginGroupVisibility(typeVisibility: Int) {
         binding.btnsLoginGroup.visibility = typeVisibility
     }
 
     private fun setClientOrOwnerGroupVisibility(typeVisibility: Int) {
-        binding.clientOrOwnerGroup.visibility= typeVisibility
+        binding.clientOrOwnerGroup.visibility = typeVisibility
     }
 
     private fun showNoInternet() {
         showToast(this@LoginActivity, R.string.no_internet)
+    }
+
+    private fun showLoginByGoogleOrFacebook() {
+        binding.loginViewFlipper.displayedChild = VIEW_FLIPPER_GOOGLE_OR_FACEBOOK
+    }
+
+    private fun showLoginByEmailOrPassword() {
+        binding.loginViewFlipper.displayedChild = VIEW_FLIPPER_EMAIL_AND_PASSWORD
     }
 }

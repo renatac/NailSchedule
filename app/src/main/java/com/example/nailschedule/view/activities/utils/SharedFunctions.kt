@@ -24,3 +24,11 @@ fun showLoginScreen(activity: AppCompatActivity) = activity.apply {
     startActivity(Intent(activity, LoginActivity::class.java))
     finish()
 }
+
+fun isNotEmptyField(field: String?): Boolean {
+    return field != null && field.isNotBlank() && field.isNotEmpty()
+}
+
+fun isEmptyField(field: String?): Boolean {
+    return field == null || field.isBlank() || field.isEmpty()
+}

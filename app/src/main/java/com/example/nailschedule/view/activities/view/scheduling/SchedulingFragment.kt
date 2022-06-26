@@ -27,6 +27,8 @@ import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.MIN_DATE
+import com.example.nailschedule.view.activities.utils.isEmptyField
+import com.example.nailschedule.view.activities.utils.isNotEmptyField
 import com.example.nailschedule.view.activities.view.ConnectivityViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
@@ -673,14 +675,6 @@ class SchedulingFragment : Fragment() {
                 showToast(requireContext(), R.string.empty_photo)
             }
         }
-    }
-
-    private fun isNotEmptyField(field: String?): Boolean {
-        return field != null && field.isNotBlank() && field.isNotEmpty()
-    }
-
-    private fun isEmptyField(field: String?): Boolean {
-        return field == null || field.isBlank() || field.isEmpty()
     }
 
     private fun selectPhotoFromGallery() {

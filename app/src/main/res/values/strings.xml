@@ -82,6 +82,13 @@
     <string name="user_service"><b>Serviço:</b> %s</string>
     <string name="user_time"><b>Hora marcada:</b> %s</string>
     <string name="scheduled_deleted">Obs: O agendamento foi excluído!</string>
+    <string name="email">Email</string>
+    <string name="password">Senha</string>
+    <string name="title_email_and_password">Digite seu email e senha de proprietário</string>
+    <string name="access">Acessar</string>
+    <string name="empty_email">Preencha o Nome</string>
+    <string name="empty_password">Preencha o Nome</string>
+    <string name="incorrect_information">Você é um proprietário? Alguma informação está incorreta.</string>
 
     <!-- Menu nav -->
     <string name="logout">Deslogar</string>
