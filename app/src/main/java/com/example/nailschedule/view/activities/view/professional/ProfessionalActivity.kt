@@ -51,7 +51,6 @@ class ProfessionalActivity : AppCompatActivity(),
             ViewModelProvider(this).get(ConnectivityViewModel::class.java)
         setupRefresh()
         initialSetup()
-        setupDrawerLayout()
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -63,6 +62,7 @@ class ProfessionalActivity : AppCompatActivity(),
         setupToolbar()
         setupAdapter()
         hideRefresh()
+        setupDrawerLayout()
     }
 
     private fun showNoIntern() {
