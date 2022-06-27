@@ -64,7 +64,6 @@ class LoginActivity : AppCompatActivity() {
         const val VIEW_FLIPPER_GOOGLE_OR_FACEBOOK = 0
         const val VIEW_FLIPPER_EMAIL_AND_PASSWORD = 1
         const val PROFESSIONAL_NAME = "professional_name"
-        const val AUTH_BY_EMAIL = "auth_by_email"
 
         @SuppressLint("StaticFieldLeak")
         @Volatile
@@ -127,7 +126,7 @@ class LoginActivity : AppCompatActivity() {
                         googleSignIn()
                     } else if (it.second == FACEBOOK_LOGIN) {
                         facebookSignIn()
-                    } else if(it.second == EMAIL_AND_PASSWORD_LOGIN) {
+                    } else if (it.second == EMAIL_AND_PASSWORD_LOGIN) {
                         email = binding.txtEmail.editText?.text.toString().trim()
                         password = binding.txtPassword.editText?.text.toString().trim()
                         if (isNotEmptyField(email) && isNotEmptyField(password)) {
@@ -154,7 +153,7 @@ class LoginActivity : AppCompatActivity() {
             setBtnsLoginGroupVisibility(View.VISIBLE)
         }
         btnOwner.setOnClickListener {
-            if(isProfessionalLogged()) {
+            if (isProfessionalLogged()) {
                 redirectOwnerFlow(authByEmail.currentUser?.displayName)
             } else {
                 setBtnAccessListener()
@@ -367,7 +366,9 @@ class LoginActivity : AppCompatActivity() {
             this,
             BottomNavigationActivity::class.java
         )
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+        //finish()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

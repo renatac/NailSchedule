@@ -21,8 +21,10 @@ fun showToast(context: Context, stringId: Int) {
 }
 
 fun showLoginScreen(activity: AppCompatActivity) = activity.apply {
-    startActivity(Intent(activity, LoginActivity::class.java))
-    finish()
+    val intent = Intent(activity, LoginActivity::class.java)
+    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    startActivity(intent)
+    //finish()
 }
 
 fun isNotEmptyField(field: String?): Boolean {
