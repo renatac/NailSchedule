@@ -1,4 +1,4 @@
-package com.example.nailschedule.view.activities.view.owner
+package com.example.nailschedule.view.activities.view.professional
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,21 +7,21 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ItemHourBinding
 
-class OwnerAdapter(val btnListener: (info: String)-> Unit)
-: RecyclerView.Adapter<OwnerAdapter.MyViewHolder>() {
+class ProfessionalAdapter(val btnListener: (info: String)-> Unit)
+: RecyclerView.Adapter<ProfessionalAdapter.MyViewHolder>() {
     private var availableTimeList: ArrayList<String> = arrayListOf()
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): OwnerAdapter.MyViewHolder = MyViewHolder(
+    ): ProfessionalAdapter.MyViewHolder = MyViewHolder(
         ItemHourBinding.inflate(
             LayoutInflater.from(parent.context),
             parent, false
         )
     )
 
-    override fun onBindViewHolder(holder: OwnerAdapter.MyViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ProfessionalAdapter.MyViewHolder, position: Int) {
         holder.bind(availableTimeList[position])
     }
 

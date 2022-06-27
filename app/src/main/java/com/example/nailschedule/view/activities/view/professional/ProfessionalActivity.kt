@@ -1,4 +1,4 @@
-package com.example.nailschedule.view.activities.view.owner
+package com.example.nailschedule.view.activities.view.professional
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -11,7 +11,7 @@ import androidx.core.view.GravityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nailschedule.R
-import com.example.nailschedule.databinding.ActivityOwnerBinding
+import com.example.nailschedule.databinding.ActivityProfessionalBinding
 import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showLoginScreen
@@ -27,16 +27,16 @@ import com.google.firebase.ktx.Firebase
 import java.util.*
 
 
-class OwnerActivity : AppCompatActivity(),
+class ProfessionalActivity : AppCompatActivity(),
     NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var connectivityViewModel: ConnectivityViewModel
-    private lateinit var binding: ActivityOwnerBinding
+    private lateinit var binding: ActivityProfessionalBinding
     private var date: String? = null
     private var time: String? = null
 
-    private val ownerScheduleAdapter: OwnerAdapter by lazy {
-        OwnerAdapter(::seeSchedule)
+    private val professionalScheduleAdapter: ProfessionalAdapter by lazy {
+        ProfessionalAdapter(::seeSchedule)
     }
 
     private val email = SharedPreferencesHelper.read(
@@ -45,7 +45,7 @@ class OwnerActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityOwnerBinding.inflate(layoutInflater)
+        binding = ActivityProfessionalBinding.inflate(layoutInflater)
         setContentView(binding.root)
         connectivityViewModel =
             ViewModelProvider(this).get(ConnectivityViewModel::class.java)
@@ -56,7 +56,7 @@ class OwnerActivity : AppCompatActivity(),
 
     @SuppressLint("SimpleDateFormat")
     private fun initialSetup() {
-        ownerScheduleAdapter.clearItemsList()
+        professionalScheduleAdapter.clearItemsList()
         setupCalendarViewDatesMinAndMax()
         setCalendarListener()
         setupObserver()
@@ -66,7 +66,7 @@ class OwnerActivity : AppCompatActivity(),
     }
 
     private fun showNoIntern() {
-        showToast(this@OwnerActivity, R.string.no_internet)
+        showToast(this@ProfessionalActivity, R.string.no_internet)
     }
 
     private fun setupDrawerLayout() {
@@ -164,8 +164,8 @@ class OwnerActivity : AppCompatActivity(),
     private fun setupAdapter() {
         binding.rvSchedules.apply {
             layoutManager =
-                LinearLayoutManager(this@OwnerActivity)
-            adapter = ownerScheduleAdapter
+                LinearLayoutManager(this@ProfessionalActivity)
+            adapter = professionalScheduleAdapter
         }
     }
 
@@ -195,7 +195,7 @@ class OwnerActivity : AppCompatActivity(),
                 } ?: run {
                     showToast(this, R.string.all_free)
                 }
-                with(ownerScheduleAdapter) {
+                with(professionalScheduleAdapter) {
                     clearItemsList()
                     setItemsList(mutableTimeList)
                 }
@@ -264,11 +264,11 @@ class OwnerActivity : AppCompatActivity(),
     }
 
     private fun showProgress() {
-        binding.progressOwner.visibility = View.VISIBLE
+        binding.progressProfessional.visibility = View.VISIBLE
     }
 
     private fun hideProgress() {
-        binding.progressOwner.visibility = View.GONE
+        binding.progressProfessional.visibility = View.GONE
     }
 
     private fun hideBtnDeleteSchedule() {
@@ -276,13 +276,13 @@ class OwnerActivity : AppCompatActivity(),
     }
 
     private fun setupRefresh() {
-        binding.ownerSwipeRefreshLayout.setOnRefreshListener {
+        binding.professionalSwipeRefreshLayout.setOnRefreshListener {
             initialSetup()
         }
     }
 
     private fun hideRefresh() {
-        binding.ownerSwipeRefreshLayout.isRefreshing = false
+        binding.professionalSwipeRefreshLayout.isRefreshing = false
     }
 
     private fun signOut() {

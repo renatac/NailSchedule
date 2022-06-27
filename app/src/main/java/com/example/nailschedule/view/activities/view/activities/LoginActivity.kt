@@ -17,7 +17,7 @@ import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityLoginBinding
 import com.example.nailschedule.view.activities.utils.*
 import com.example.nailschedule.view.activities.view.ConnectivityViewModel
-import com.example.nailschedule.view.activities.view.owner.OwnerActivity
+import com.example.nailschedule.view.activities.view.professional.ProfessionalActivity
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
@@ -130,7 +130,7 @@ class LoginActivity : AppCompatActivity() {
                         email = binding.txtEmail.editText?.text.toString().trim()
                         password = binding.txtPassword.editText?.text.toString().trim()
                         if (isNotEmptyField(email) && isNotEmptyField(password)) {
-                            ownerSignInUsingEmailAndPassword()
+                            professionalSignInUsingEmailAndPassword()
                         } else {
                             printEmptyField()
                         }
@@ -149,22 +149,22 @@ class LoginActivity : AppCompatActivity() {
     private fun setListeners() = binding.apply {
         showLoginByGoogleOrFacebook()
         btnClient.setOnClickListener {
-            setClientOrOwnerGroupVisibility(View.GONE)
+            setClientOrProfessionalGroupVisibility(View.GONE)
             setBtnsLoginGroupVisibility(View.VISIBLE)
         }
-        btnOwner.setOnClickListener {
+        btnProfessional.setOnClickListener {
             if (isProfessionalLogged()) {
-                redirectOwnerFlow(authByEmail.currentUser?.displayName)
+                redirectProfessionalFlow(authByEmail.currentUser?.displayName)
             } else {
                 setBtnAccessListener()
                 showLoginByEmailOrPassword()
-                setClientOrOwnerGroupVisibility(View.GONE)
+                setClientOrProfessionalGroupVisibility(View.GONE)
                 setBtnsLoginGroupVisibility(View.GONE)
             }
         }
-        tvClientOrOwnerAgain.setOnClickListener {
+        tvClientOrProfessionalAgain.setOnClickListener {
             setBtnsLoginGroupVisibility(View.GONE)
-            setClientOrOwnerGroupVisibility(View.VISIBLE)
+            setClientOrProfessionalGroupVisibility(View.VISIBLE)
         }
     }
 
@@ -175,9 +175,9 @@ class LoginActivity : AppCompatActivity() {
                 EMAIL_AND_PASSWORD_LOGIN
             )
         }
-        tvChooseClientOrOwnerAgain.setOnClickListener {
+        tvChooseClientOrProfessionalAgain.setOnClickListener {
             setBtnsLoginGroupVisibility(View.GONE)
-            setClientOrOwnerGroupVisibility(View.VISIBLE)
+            setClientOrProfessionalGroupVisibility(View.VISIBLE)
             showLoginByGoogleOrFacebook()
         }
     }
@@ -193,12 +193,12 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun ownerSignInUsingEmailAndPassword() {
+    private fun professionalSignInUsingEmailAndPassword() {
         authByEmail.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
-                    redirectOwnerFlow(authByEmail.currentUser?.displayName)
+                    redirectProfessionalFlow(authByEmail.currentUser?.displayName)
                 } else {
                     showToast(applicationContext, R.string.incorrect_information)
                 }
@@ -353,10 +353,10 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun redirectOwnerFlow(professionalName: String?) {
+    private fun redirectProfessionalFlow(professionalName: String?) {
         val intent = Intent(
             this,
-            OwnerActivity::class.java
+            ProfessionalActivity::class.java
         ).putExtra(PROFESSIONAL_NAME, professionalName)
         startActivity(intent)
     }
@@ -406,8 +406,8 @@ class LoginActivity : AppCompatActivity() {
 
     private fun isProfessionalLogged() = authByEmail.currentUser != null
 
-    private fun setClientOrOwnerGroupVisibility(typeVisibility: Int) {
-        binding.clientOrOwnerGroup.visibility = typeVisibility
+    private fun setClientOrProfessionalGroupVisibility(typeVisibility: Int) {
+        binding.clientOrProfessionalGroup.visibility = typeVisibility
     }
 
     private fun showNoInternet() {

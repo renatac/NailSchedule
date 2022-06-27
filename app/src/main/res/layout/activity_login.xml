@@ -75,7 +75,7 @@
                 app:layout_constraintTop_toBottomOf="@id/tv_before_can_do_login" />
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btn_owner"
+                android:id="@+id/btn_professional"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_16dp"
@@ -83,7 +83,7 @@
                 android:background="@color/white"
                 android:elevation="@dimen/_22sp"
                 android:padding="@dimen/_16dp"
-                android:text="@string/btn_owner"
+                android:text="@string/btn_professional"
                 android:textColor="@color/purple_500"
                 android:textStyle="bold"
                 app:layout_constraintStart_toEndOf="@id/vertical_guideline"
@@ -94,13 +94,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:constraint_referenced_ids="btn_facebook_sign_in,btn_google_sign_in, tv_client_or_owner_again" />
+                app:constraint_referenced_ids="btn_facebook_sign_in,btn_google_sign_in, tv_client_or_professional_again" />
 
             <androidx.constraintlayout.widget.Group
-                android:id="@+id/client_or_owner_group"
+                android:id="@+id/client_or_professional_group"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:constraint_referenced_ids="tv_before_can_do_login, btn_client, btn_owner" />
+                app:constraint_referenced_ids="tv_before_can_do_login, btn_client, btn_professional" />
 
             <com.facebook.login.widget.LoginButton
                 android:id="@+id/btn_facebook_sign_in"
@@ -122,12 +122,12 @@
                 app:layout_constraintTop_toBottomOf="@id/btn_facebook_sign_in" />
 
             <TextView
-                android:id="@+id/tv_client_or_owner_again"
+                android:id="@+id/tv_client_or_professional_again"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_16dp"
                 android:layout_marginTop="@dimen/_24dp"
-                android:text="@string/client_or_owner_again"
+                android:text="@string/client_or_professional_again"
                 android:textColor="@color/purple_700"
                 android:textSize="@dimen/_20sp"
                 android:textStyle="bold"
@@ -224,12 +224,12 @@
                 android:textSize="@dimen/_20sp" />
 
             <TextView
-                android:id="@+id/tv_choose_client_or_owner_again"
+                android:id="@+id/tv_choose_client_or_professional_again"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/_16dp"
                 android:layout_marginTop="@dimen/_24dp"
-                android:text="@string/client_or_owner_again"
+                android:text="@string/client_or_professional_again"
                 android:textColor="@color/purple_700"
                 android:textSize="@dimen/_20sp"
                 android:textStyle="bold" />

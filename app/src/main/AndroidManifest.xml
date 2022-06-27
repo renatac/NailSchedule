@@ -24,7 +24,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NailSchedule">
 
-        <activity android:name=".view.activities.view.owner.OwnerActivity"
+        <activity android:name=".view.activities.view.professional.ProfessionalActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:screenOrientation="portrait"/>
         <activity
