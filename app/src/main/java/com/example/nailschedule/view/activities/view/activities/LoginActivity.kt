@@ -63,7 +63,6 @@ class LoginActivity : AppCompatActivity() {
         const val GOOGLE_SIGN_IN_VALUE = 1
         const val VIEW_FLIPPER_GOOGLE_OR_FACEBOOK = 0
         const val VIEW_FLIPPER_EMAIL_AND_PASSWORD = 1
-        const val PROFESSIONAL_NAME = "professional_name"
 
         @SuppressLint("StaticFieldLeak")
         @Volatile
@@ -154,7 +153,7 @@ class LoginActivity : AppCompatActivity() {
         }
         btnProfessional.setOnClickListener {
             if (isProfessionalLogged()) {
-                redirectProfessionalFlow(authByEmail.currentUser?.displayName)
+                redirectProfessionalFlow()
             } else {
                 setBtnAccessListener()
                 showLoginByEmailOrPassword()
@@ -198,7 +197,7 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
-                    redirectProfessionalFlow(authByEmail.currentUser?.displayName)
+                    redirectProfessionalFlow()
                 } else {
                     showToast(applicationContext, R.string.incorrect_information)
                 }
@@ -353,12 +352,8 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun redirectProfessionalFlow(professionalName: String?) {
-        val intent = Intent(
-            this,
-            ProfessionalActivity::class.java
-        ).putExtra(PROFESSIONAL_NAME, professionalName)
-        startActivity(intent)
+    private fun redirectProfessionalFlow() {
+        startActivity( Intent(this, ProfessionalActivity::class.java))
     }
 
     private fun redirectToBottomNavigation() {

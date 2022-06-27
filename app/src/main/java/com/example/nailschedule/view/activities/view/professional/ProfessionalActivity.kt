@@ -18,7 +18,6 @@ import com.example.nailschedule.view.activities.utils.showLoginScreen
 import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.activities.BottomNavigationActivity
-import com.example.nailschedule.view.activities.view.activities.LoginActivity.Companion.PROFESSIONAL_NAME
 import com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
@@ -82,7 +81,7 @@ class ProfessionalActivity : AppCompatActivity(),
         )
         val headerView = binding.navView.getHeaderView(0)
         val navHeaderTvName = headerView.findViewById(R.id.nav_header_tv_name) as TextView
-        navHeaderTvName.text = recoverProfessionalName()
+        navHeaderTvName.text = applicationContext.getString(R.string.professional_profile)
         binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
     }
@@ -168,9 +167,6 @@ class ProfessionalActivity : AppCompatActivity(),
             adapter = professionalScheduleAdapter
         }
     }
-
-    private fun recoverProfessionalName() = intent.extras?.getString(PROFESSIONAL_NAME)
-            ?: applicationContext.getString(R.string.professional_profile)
 
     private fun setupCalendarViewDatesMinAndMax() = binding.apply {
         calendarView.minDate = System.currentTimeMillis()
