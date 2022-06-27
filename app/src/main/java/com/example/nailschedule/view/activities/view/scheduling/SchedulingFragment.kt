@@ -560,7 +560,7 @@ class SchedulingFragment : Fragment() {
             ) {
                 val user = User(
                     name = name!!, service = service!!, date = date!!,
-                    time = time!!, uriString = uriString!!, isMarked = true
+                    time = time!!, uriString = uriString!!
                 )
                 val currentDate = SimpleDateFormat("dd-MM-yyyy").format(Date())
                 val currentHour = SimpleDateFormat("HH:mm").format(Date())
