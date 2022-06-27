@@ -17,6 +17,7 @@ import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showLoginScreen
 import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.ConnectivityViewModel
+import com.example.nailschedule.view.activities.view.activities.BottomNavigationActivity
 import com.example.nailschedule.view.activities.view.activities.LoginActivity.Companion.PROFESSIONAL_NAME
 import com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment
 import com.google.android.material.navigation.NavigationView
@@ -62,6 +63,10 @@ class OwnerActivity : AppCompatActivity(),
         setupToolbar()
         setupAdapter()
         hideRefresh()
+    }
+
+    private fun showNoIntern() {
+        showToast(this@OwnerActivity, R.string.no_internet)
     }
 
     private fun setupDrawerLayout() {
@@ -117,9 +122,11 @@ class OwnerActivity : AppCompatActivity(),
                                     showUnscheduledLabel()
                                 }
                             }
+                    } else if (it.second == BottomNavigationActivity.LOG_OUT) {
+                        signOut()
                     }
-                } else {
-                    showToast(this, R.string.no_internet)
+                }else {
+                    showNoIntern()
                 }
             })
     }
@@ -249,6 +256,13 @@ class OwnerActivity : AppCompatActivity(),
         )
     }
 
+    private fun logOut() {
+        connectivityViewModel.checkForInternet(
+            applicationContext,
+            BottomNavigationActivity.LOG_OUT
+        )
+    }
+
     private fun showProgress() {
         binding.progressOwner.visibility = View.VISIBLE
     }
@@ -279,7 +293,7 @@ class OwnerActivity : AppCompatActivity(),
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.log_off -> {
-                signOut()
+                logOut()
             }
             else -> {
                 showLoginScreen(this)

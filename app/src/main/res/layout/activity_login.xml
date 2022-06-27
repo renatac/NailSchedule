@@ -199,13 +199,17 @@
                 android:hint="@string/password"
                 android:textColor="@color/black"
                 android:textSize="@dimen/_20sp"
+                app:passwordToggleEnabled="true"
+                app:passwordToggleTint="@color/purple_700"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/txt_email">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:ems="6"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
