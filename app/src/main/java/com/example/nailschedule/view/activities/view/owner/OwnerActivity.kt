@@ -1,5 +1,6 @@
 package com.example.nailschedule.view.activities.view.owner
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,7 @@ import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.*
 
 class OwnerActivity : AppCompatActivity() {
 
@@ -35,11 +37,19 @@ class OwnerActivity : AppCompatActivity() {
         connectivityViewModel =
             ViewModelProvider(this).get(ConnectivityViewModel::class.java)
         setContentView(binding.root)
+        setupRefresh()
+        initialSetup()
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun initialSetup() {
+        ownerScheduleAdapter.clearItemsList()
+        setupCalendarViewDatesMinAndMax()
+        setCalendarListener()
         setupObserver()
         setupToolbar()
         setupAdapter()
-        setupCalendarViewDatesMinAndMax()
-        setCalendarListener()
+        hideRefresh()
     }
 
     private fun setupObserver() {
@@ -218,4 +228,15 @@ class OwnerActivity : AppCompatActivity() {
     private fun hideBtnDeleteSchedule() {
         binding.btnDeleteSchedule.visibility = View.GONE
     }
+
+    private fun setupRefresh() {
+        binding.ownerSwipeRefreshLayout.setOnRefreshListener {
+            initialSetup()
+        }
+    }
+
+    private fun hideRefresh() {
+        binding.ownerSwipeRefreshLayout.isRefreshing = false
+    }
+
 }

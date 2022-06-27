@@ -6,171 +6,185 @@
     android:layout_height="match_parent"
     tools:context=".view.activities.view.owner.OwnerActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/owner_swipeRefresh_Layout"
         android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/purple_700"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:titleTextColor="@color/white" />
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:scrollbarSize="4dp"
-        android:scrollbarThumbVertical="@android:color/darker_gray"
-        android:scrollbars="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
+        android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#ffffff"
-            android:paddingBottom="@dimen/_16dp">
+            android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/tv_owner_title"
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_16dp"
-                android:layout_marginTop="@dimen/_16dp"
-                android:text="@string/owner_title"
-                android:textColor="@color/purple_500"
-                android:textSize="@dimen/_24sp"
+                android:layout_height="0dp"
+                android:background="@color/purple_700"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.ActionBar"
+                app:titleTextColor="@color/white" />
 
-            <CalendarView
-                android:id="@+id/calendar_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_owner_title" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_schedules"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_16dp"
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
                 android:scrollbarSize="4dp"
                 android:scrollbarThumbVertical="@android:color/darker_gray"
                 android:scrollbars="vertical"
-                android:visibility="visible"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/calendar_view"
-                tools:itemCount="6"
-                tools:listitem="@layout/item_hour" />
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/card_view_user"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/_16dp"
-                android:paddingBottom="@dimen/_16dp"
-                android:visibility="gone"
-                app:cardCornerRadius="@dimen/_16dp"
-                app:cardElevation="@dimen/_8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/calendar_view">
+                app:layout_constraintTop_toBottomOf="@id/toolbar">
 
-                <LinearLayout
-                    android:id="@+id/ll_user_info"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:layout_height="match_parent"
+                    android:background="#ffffff"
+                    android:paddingBottom="@dimen/_16dp">
 
-                    <com.google.android.material.progressindicator.CircularProgressIndicator
-                        android:id="@+id/progress_owner"
+                    <TextView
+                        android:id="@+id/tv_owner_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/_16dp"
+                        android:layout_marginTop="@dimen/_16dp"
+                        android:text="@string/owner_title"
+                        android:textColor="@color/purple_500"
+                        android:textSize="@dimen/_24sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <CalendarView
+                        android:id="@+id/calendar_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        app:trackColor="@color/purple_500"
-                        android:visibility="gone"/>
+                        android:layout_marginTop="@dimen/_16dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_owner_title" />
 
-                    <ImageView
-                        android:id="@+id/iv_close"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:layout_marginHorizontal="@dimen/_24dp"
-                        android:layout_marginTop="@dimen/_24dp"
-                        android:src="@drawable/ic_close" />
-
-                    <TextView
-                        android:id="@+id/tv_user_time"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_schedules"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_24sp"
-                        android:layout_marginEnd="@dimen/_16sp"
-                        android:layout_marginBottom="@dimen/_16sp"
-                        android:textColor="@color/purple_700"
-                        android:textSize="@dimen/_22sp"
-                        tools:text="@string/user_time" />
+                        android:layout_marginHorizontal="@dimen/_16dp"
+                        android:scrollbarSize="4dp"
+                        android:scrollbarThumbVertical="@android:color/darker_gray"
+                        android:scrollbars="vertical"
+                        android:visibility="visible"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/calendar_view"
+                        tools:itemCount="6"
+                        tools:listitem="@layout/item_hour" />
 
-                    <TextView
-                        android:id="@+id/tv_user_name"
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/card_view_user"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_24sp"
-                        android:layout_marginEnd="@dimen/_16sp"
-                        android:layout_marginBottom="@dimen/_16sp"
-                        android:textColor="@color/purple_700"
-                        android:textSize="@dimen/_22sp"
-                        tools:text="@string/user_name" />
-
-                    <TextView
-                        android:id="@+id/tv_user_service"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/_24sp"
-                        android:layout_marginEnd="@dimen/_16sp"
-                        android:layout_marginBottom="@dimen/_16sp"
-                        android:textColor="@color/purple_700"
-                        android:textSize="@dimen/_22sp"
-                        tools:text="@string/user_service" />
-
-                    <TextView
-                        android:id="@+id/tv_unscheduled_time"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/_16dp"
+                        android:paddingBottom="@dimen/_16dp"
                         android:visibility="gone"
-                        android:layout_marginStart="@dimen/_24sp"
-                        android:layout_marginEnd="@dimen/_16sp"
-                        android:layout_marginBottom="@dimen/_16sp"
-                        android:textColor="@color/red"
-                        android:textSize="@dimen/_22sp"
-                        tools:text="@string/user_service" />
+                        app:cardCornerRadius="@dimen/_16dp"
+                        app:cardElevation="@dimen/_8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/calendar_view">
 
-                    <Button
-                        android:id="@+id/btn_delete_schedule"
-                        android:layout_width="200dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginBottom="@dimen/_24dp"
-                        android:gravity="center_horizontal"
-                        android:padding="@dimen/_16dp"
-                        android:text="@string/delete_schedule"
-                        android:textColor="@color/purple_700" />
+                        <LinearLayout
+                            android:id="@+id/ll_user_info"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
 
-                </LinearLayout>
+                            <com.google.android.material.progressindicator.CircularProgressIndicator
+                                android:id="@+id/progress_owner"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:visibility="gone"
+                                app:trackColor="@color/purple_500" />
 
-            </androidx.cardview.widget.CardView>
+                            <ImageView
+                                android:id="@+id/iv_close"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="end"
+                                android:layout_marginHorizontal="@dimen/_24dp"
+                                android:layout_marginTop="@dimen/_24dp"
+                                android:src="@drawable/ic_close" />
+
+                            <TextView
+                                android:id="@+id/tv_user_time"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/_24sp"
+                                android:layout_marginEnd="@dimen/_16sp"
+                                android:layout_marginBottom="@dimen/_16sp"
+                                android:textColor="@color/purple_700"
+                                android:textSize="@dimen/_22sp"
+                                tools:text="@string/user_time" />
+
+                            <TextView
+                                android:id="@+id/tv_user_name"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/_24sp"
+                                android:layout_marginEnd="@dimen/_16sp"
+                                android:layout_marginBottom="@dimen/_16sp"
+                                android:textColor="@color/purple_700"
+                                android:textSize="@dimen/_22sp"
+                                tools:text="@string/user_name" />
+
+                            <TextView
+                                android:id="@+id/tv_user_service"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/_24sp"
+                                android:layout_marginEnd="@dimen/_16sp"
+                                android:layout_marginBottom="@dimen/_16sp"
+                                android:textColor="@color/purple_700"
+                                android:textSize="@dimen/_22sp"
+                                tools:text="@string/user_service" />
+
+                            <TextView
+                                android:id="@+id/tv_unscheduled_time"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/_24sp"
+                                android:layout_marginEnd="@dimen/_16sp"
+                                android:layout_marginBottom="@dimen/_16sp"
+                                android:textColor="@color/red"
+                                android:textSize="@dimen/_22sp"
+                                android:visibility="gone"
+                                tools:text="@string/user_service" />
+
+                            <Button
+                                android:id="@+id/btn_delete_schedule"
+                                android:layout_width="200dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginBottom="@dimen/_24dp"
+                                android:gravity="center_horizontal"
+                                android:padding="@dimen/_16dp"
+                                android:text="@string/delete_schedule"
+                                android:textColor="@color/purple_700" />
+
+                        </LinearLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.core.widget.NestedScrollView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

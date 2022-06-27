@@ -55,4 +55,6 @@ class OwnerAdapter(val btnListener: (info: String)-> Unit)
             }
         }
     }
+
+    fun clearList() = availableTimeList.clear()
 }

@@ -72,6 +72,8 @@ class SchedulingFragment : Fragment() {
 
     private lateinit var originalList: List<String>
 
+    private var isPreviousHourDeleted = false
+
     companion object {
         fun newInstance() = SchedulingFragment()
         const val DELETE_ALL_DATA = "delete_all_data"
@@ -166,8 +168,12 @@ class SchedulingFragment : Fragment() {
                                             timeListOk = deleteCurrentDayHour(timeListOk)
                                         }
                                         val listToAdapter = mutableListOf<String>()
-                                        if(timeListOk.size == 1) {
+                                        if (timeListOk.size == 1) {
                                             listToAdapter.add(timeListOk[0])
+                                            showToast(
+                                                requireContext(),
+                                                R.string.data_without_available_hour
+                                            )
                                         } else {
                                             timeListOk.forEach { time ->
                                                 if (time.contains(";false")) {
@@ -196,15 +202,20 @@ class SchedulingFragment : Fragment() {
                                         val timeList = it["timeList"] as List<*>
                                         if (previousDt.toString() == calendarUser!!.date) {
                                             currentTimeList!!.forEach { t ->
-                                                if (t.contains(previousTm.toString())) {
+                                                if (t.contains(previousTm.toString()) && t.contains(
+                                                        ";true"
+                                                    )
+                                                ) {
                                                     val finalIndex = t.indexOf(";true")
-                                                    val timeNew = t.substring(0,finalIndex)
+                                                    val timeNew = t.substring(0, finalIndex)
                                                     previousTimeList.add(timeNew.plus(";false"))
-                                                } else if(t.contains(";true")) {
-                                                    previousTimeList.add(t.plus(downloadUser.toString())
-                                                        .replace("User(",";")
-                                                        .replace(")","")
-                                                        .replace(",",";"))
+                                                } else if (t.contains(";true")) {
+                                                    previousTimeList.add(
+                                                        t.plus(downloadUser.toString())
+                                                            .replace("User(", ";")
+                                                            .replace(")", "")
+                                                            .replace(",", ";")
+                                                    )
                                                 } else {
                                                     previousTimeList.add(t)
                                                 }
@@ -215,9 +226,12 @@ class SchedulingFragment : Fragment() {
                                             )
                                         } else {
                                             timeList.forEach { t ->
-                                                if (t.toString().contains(previousTm.toString())) {
+                                                if (t.toString().contains(previousTm.toString()) &&
+                                                    t.toString().contains(";true")
+                                                ) {
                                                     val finalIndex = t.toString().indexOf(";true")
-                                                    val timeNew = t.toString().substring(0,finalIndex)
+                                                    val timeNew =
+                                                        t.toString().substring(0, finalIndex)
                                                     previousTimeList.add(timeNew.plus(";false"))
                                                 } else {
                                                     previousTimeList.add(t.toString())
@@ -230,10 +244,14 @@ class SchedulingFragment : Fragment() {
                                             val currentTimeListWithUser = mutableListOf<String>()
                                             currentTimeList!!.forEach { t ->
                                                 if (t.contains(";true")) {
-                                                    currentTimeListWithUser.add(t.plus(downloadUser.toString()
-                                                        .replace("User(",";")
-                                                        .replace(")","")
-                                                        .replace(",",";")))
+                                                    currentTimeListWithUser.add(
+                                                        t.plus(
+                                                            downloadUser.toString()
+                                                                .replace("User(", ";")
+                                                                .replace(")", "")
+                                                                .replace(",", ";")
+                                                        )
+                                                    )
                                                 } else {
                                                     currentTimeListWithUser.add(t)
                                                 }
@@ -257,6 +275,7 @@ class SchedulingFragment : Fragment() {
                                 .document(date!!).get()
                                 .addOnSuccessListener { documentSnapshot ->
                                     documentSnapshot.data?.let { it ->
+                                        //About new date chosen
                                         var canUseTime = false
                                         val timeList = it["timeList"] as MutableList<*>
                                         val timeMutableList = mutableListOf<String>()
@@ -278,6 +297,8 @@ class SchedulingFragment : Fragment() {
                                                 timeMutableList.add(t.toString())
                                             }
                                         }
+
+                                        //About previous date chosen
                                         var previousDate = ""
                                         var previousTime = ""
 
@@ -288,33 +309,19 @@ class SchedulingFragment : Fragment() {
                                                     documentSnapshot.data?.let {
                                                         previousDate = it["date"] as String
                                                         previousTime = it["time"] as String
-                                                        setupBottom(previousDate, previousTime)
-                                                        setBtnSaveVisibility(GONE)
-                                                        setBottomVisibility(VISIBLE)
-                                                    } ?: run {
-                                                        addOrUpdateUserAtFirestoreDatabase(
-                                                            timeMutableList,
-                                                            downloadUser!!
-                                                        )
-                                                        val timeMutableListWithUser = mutableListOf<String>()
-                                                        timeMutableList.forEach { t ->
-                                                            if(t.contains(";true")) {
-                                                                timeMutableListWithUser.add(
-                                                                    t.plus(downloadUser.toString()
-                                                                        .replace("User(",";")
-                                                                        .replace(")","")
-                                                                        .replace(",",";")))
-                                                            } else {
-                                                                timeMutableListWithUser.add(t)
-                                                            }
+                                                        //when the scheduled time was excluded, so I deal like
+                                                        // a normal addition
+                                                        if (isPreviousHourDeleted) {
+                                                            addNewUserAndCalendarField(
+                                                                timeMutableList
+                                                            )
+                                                        } else {
+                                                            setupBottom(previousDate, previousTime)
+                                                            setBtnSaveVisibility(GONE)
+                                                            setBottomVisibility(VISIBLE)
                                                         }
-                                                        addOrUpdateCalendarFieldAtFirestoreDatabase(
-                                                            timeMutableListWithUser,
-                                                            date!!
-                                                        )
-                                                        clearFields()
-                                                        setBottomVisibility(GONE)
-                                                        setBtnSaveVisibility(VISIBLE)
+                                                    } ?: run {
+                                                        addNewUserAndCalendarField(timeMutableList)
                                                     }
                                                 }.addOnFailureListener {
                                                     showToast(
@@ -345,11 +352,15 @@ class SchedulingFragment : Fragment() {
                                         val timeMutableList = mutableListOf<String>()
                                         originalList.forEach { t ->
                                             if (it.toString().contains(time.toString())) {
-                                                timeMutableList.add(t.replace(";false", ";true")
-                                                    .plus(downloadUser.toString()
-                                                    .replace("User(",";")
-                                                    .replace(")","")
-                                                    .replace(",",";")))
+                                                timeMutableList.add(
+                                                    t.replace(";false", ";true")
+                                                        .plus(
+                                                            downloadUser.toString()
+                                                                .replace("User(", ";")
+                                                                .replace(")", "")
+                                                                .replace(",", ";")
+                                                        )
+                                                )
                                             } else {
                                                 timeMutableList.add(t)
                                             }
@@ -357,12 +368,15 @@ class SchedulingFragment : Fragment() {
                                         originalList.filter { it.contains(time.toString()) }
                                         val timeMutableListWithUser = mutableListOf<String>()
                                         timeMutableList.forEach { t ->
-                                            if(t.contains(";true")) {
+                                            if (t.contains(";true")) {
                                                 timeMutableListWithUser.add(
-                                                    t.plus(downloadUser.toString()
-                                                        .replace("User(",";")
-                                                        .replace(")","")
-                                                        .replace(",",";")))
+                                                    t.plus(
+                                                        downloadUser.toString()
+                                                            .replace("User(", ";")
+                                                            .replace(")", "")
+                                                            .replace(",", ";")
+                                                    )
+                                                )
                                             } else {
                                                 timeMutableListWithUser.add(t)
                                             }
@@ -399,6 +413,36 @@ class SchedulingFragment : Fragment() {
                     showToast(requireContext(), R.string.no_internet)
                 }
             })
+    }
+
+    private fun addNewUserAndCalendarField(timeMutableList: MutableList<String>) {
+        addOrUpdateUserAtFirestoreDatabase(
+            timeMutableList,
+            downloadUser!!
+        )
+        val timeMutableListWithUser =
+            mutableListOf<String>()
+        timeMutableList.forEach { t ->
+            if (t.contains(";true")) {
+                timeMutableListWithUser.add(
+                    t.plus(
+                        downloadUser.toString()
+                            .replace("User(", ";")
+                            .replace(")", "")
+                            .replace(",", ";")
+                    )
+                )
+            } else {
+                timeMutableListWithUser.add(t)
+            }
+        }
+        addOrUpdateCalendarFieldAtFirestoreDatabase(
+            timeMutableListWithUser,
+            date!!
+        )
+        clearFields()
+        setBottomVisibility(GONE)
+        setBtnSaveVisibility(VISIBLE)
     }
 
     private fun initializeEmail() {
@@ -525,9 +569,9 @@ class SchedulingFragment : Fragment() {
 
                 if ((currentDate == date) &&
                     ((currentHourToInt <= 15) && (timeToInt <= currentHourToInt + 2)
-                    || (currentHourToInt > 15))) {
-                    showToast(requireContext(), R.string.q)
-                    //showToast(requireContext(), R.string.unavailable_time)
+                            || (currentHourToInt > 15))
+                ) {
+                    showToast(requireContext(), R.string.unavailable_time)
                 } else {
                     downloadForFirebaseFirestore(user)
                 }
@@ -569,9 +613,10 @@ class SchedulingFragment : Fragment() {
                 }
             }
         }
-            timeList.removeAll(hoursLessThan2)
-            return timeList
-        }
+        isPreviousHourDeleted = !hoursLessThan2.filter { it.contains("true;") }.isNullOrEmpty()
+        timeList.removeAll(hoursLessThan2)
+        return timeList
+    }
 
     private fun setupSpinnerWithFirebaseFirestoreDownload() {
         connectivityViewModel.checkForInternet(requireContext(), SETUP_SPINNER)
