@@ -88,6 +88,7 @@
     <string name="empty_email">Preencha o Nome</string>
     <string name="empty_password">Preencha o Nome</string>
     <string name="incorrect_information">Você é um proprietário? Alguma informação está incorreta.</string>
+    <string name="professional_profile">Perfil profissional</string>
 
     <!-- Menu nav -->
     <string name="logout">Deslogar</string>

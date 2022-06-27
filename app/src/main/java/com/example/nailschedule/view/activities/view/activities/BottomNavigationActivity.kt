@@ -26,12 +26,14 @@ import com.facebook.login.LoginManager
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 
 class BottomNavigationActivity : AppCompatActivity(),
     NavigationView.OnNavigationItemSelectedListener {
 
-    private lateinit var activityBottomNavigationBinding: ActivityBottomNavigationBinding
+    private lateinit var binding: ActivityBottomNavigationBinding
     private lateinit var navController: NavController
     private lateinit var appBarConfiguration: AppBarConfiguration
 
@@ -47,15 +49,15 @@ class BottomNavigationActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        activityBottomNavigationBinding = ActivityBottomNavigationBinding.inflate(layoutInflater)
-        setContentView(activityBottomNavigationBinding.root)
-        val bottomNavigationView: BottomNavigationView = activityBottomNavigationBinding.bottomNavView
+        binding = ActivityBottomNavigationBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        val bottomNavigationView: BottomNavigationView = binding.bottomNavView
         connectivityViewModel =
             ViewModelProvider(this).get(ConnectivityViewModel::class.java)
 
         setupObserver()
 
-        val navigationView: NavigationView = activityBottomNavigationBinding.navView
+        val navigationView: NavigationView = binding.navView
         navigationView.setNavigationItemSelectedListener(this)
 
         navController = findNavController(R.id.nav_host_fragment_activity_bottom_navigation)
@@ -65,16 +67,16 @@ class BottomNavigationActivity : AppCompatActivity(),
             setOf(
                 R.id.navigation_gallery, R.id.navigation_scheduling, R.id.navigation_scheduled
             ),
-            activityBottomNavigationBinding.drawerLayout
+            binding.drawerLayout
         )
 
         val toggle = ActionBarDrawerToggle(
             this,
-            activityBottomNavigationBinding.drawerLayout,
+            binding.drawerLayout,
             R.string.open_drawer,
             R.string.close_drawer
         )
-        activityBottomNavigationBinding.drawerLayout.addDrawerListener(toggle)
+        binding.drawerLayout.addDrawerListener(toggle)
 
         toggle.syncState()
 
@@ -101,10 +103,12 @@ class BottomNavigationActivity : AppCompatActivity(),
                         //It separates if it's Facebook or Google
                         if (isLoggedInFacebook()) {
                             LoginManager.getInstance().logOut()
+                            Firebase.auth.signOut()
                             showLoginScreen(this)
                         } else {
                             LoginActivity.googleSignInClientGetInstance(this).signOut()
                                 .addOnCompleteListener(this, OnCompleteListener<Void?> {
+                                    Firebase.auth.signOut()
                                     showLoginScreen(this)
                                 })
                         }
@@ -117,7 +121,7 @@ class BottomNavigationActivity : AppCompatActivity(),
 
     override fun onBackPressed() {
         Log.i("test", "onBackPressed: ")
-        activityBottomNavigationBinding.apply {
+        binding.apply {
             if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.closeDrawer(GravityCompat.START)
             } else {
@@ -152,7 +156,7 @@ class BottomNavigationActivity : AppCompatActivity(),
     }
 
     private fun setupNavHeaderElements() {
-        val headerView = activityBottomNavigationBinding.navView.getHeaderView(0)
+        val headerView = binding.navView.getHeaderView(0)
         val navHeaderTvName = headerView.findViewById(R.id.nav_header_tv_name) as TextView
         displayName?.let { navHeaderTvName.text = displayName }
         val navHeaderIv = headerView.findViewById(R.id.nav_header_iv) as ImageView
@@ -173,7 +177,7 @@ class BottomNavigationActivity : AppCompatActivity(),
                 finishAffinity()
             }
         }
-        activityBottomNavigationBinding.drawerLayout.closeDrawer(GravityCompat.START)
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
 

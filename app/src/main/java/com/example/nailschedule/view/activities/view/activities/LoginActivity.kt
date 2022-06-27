@@ -63,7 +63,8 @@ class LoginActivity : AppCompatActivity() {
         const val GOOGLE_SIGN_IN_VALUE = 1
         const val VIEW_FLIPPER_GOOGLE_OR_FACEBOOK = 0
         const val VIEW_FLIPPER_EMAIL_AND_PASSWORD = 1
-        const val OWNER_NAME = "owner_name"
+        const val PROFESSIONAL_NAME = "professional_name"
+        const val AUTH_BY_EMAIL = "auth_by_email"
 
         @SuppressLint("StaticFieldLeak")
         @Volatile
@@ -153,10 +154,14 @@ class LoginActivity : AppCompatActivity() {
             setBtnsLoginGroupVisibility(View.VISIBLE)
         }
         btnOwner.setOnClickListener {
-            setClientOrOwnerGroupVisibility(View.GONE)
-            setBtnsLoginGroupVisibility(View.GONE)
-            setBtnAccessListener()
-            showLoginByEmailOrPassword()
+            if(isProfessionalLogged()) {
+                redirectOwnerFlow(authByEmail.currentUser?.displayName)
+            } else {
+                setBtnAccessListener()
+                showLoginByEmailOrPassword()
+                setClientOrOwnerGroupVisibility(View.GONE)
+                setBtnsLoginGroupVisibility(View.GONE)
+            }
         }
         tvClientOrOwnerAgain.setOnClickListener {
             setBtnsLoginGroupVisibility(View.GONE)
@@ -194,8 +199,7 @@ class LoginActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
-                    val userName = authByEmail.currentUser?.displayName
-                    redirectOwnerFlow(userName)
+                    redirectOwnerFlow(authByEmail.currentUser?.displayName)
                 } else {
                     showToast(applicationContext, R.string.incorrect_information)
                 }
@@ -350,12 +354,11 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun redirectOwnerFlow(userName: String?) {
+    private fun redirectOwnerFlow(professionalName: String?) {
         val intent = Intent(
             this,
             OwnerActivity::class.java
-        )
-        intent.putExtra(OWNER_NAME, userName)
+        ).putExtra(PROFESSIONAL_NAME, professionalName)
         startActivity(intent)
     }
 
@@ -399,6 +402,8 @@ class LoginActivity : AppCompatActivity() {
     private fun setBtnsLoginGroupVisibility(typeVisibility: Int) {
         binding.btnsLoginGroup.visibility = typeVisibility
     }
+
+    private fun isProfessionalLogged() = authByEmail.currentUser != null
 
     private fun setClientOrOwnerGroupVisibility(typeVisibility: Int) {
         binding.clientOrOwnerGroup.visibility = typeVisibility

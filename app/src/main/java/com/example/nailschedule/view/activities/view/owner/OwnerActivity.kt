@@ -2,21 +2,32 @@ package com.example.nailschedule.view.activities.view.owner
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityOwnerBinding
 import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
+import com.example.nailschedule.view.activities.utils.showLoginScreen
 import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.ConnectivityViewModel
+import com.example.nailschedule.view.activities.view.activities.LoginActivity.Companion.PROFESSIONAL_NAME
 import com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment
+import com.google.android.material.navigation.NavigationView
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import java.util.*
 
-class OwnerActivity : AppCompatActivity() {
+
+class OwnerActivity : AppCompatActivity(),
+    NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var connectivityViewModel: ConnectivityViewModel
     private lateinit var binding: ActivityOwnerBinding
@@ -34,11 +45,12 @@ class OwnerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityOwnerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         connectivityViewModel =
             ViewModelProvider(this).get(ConnectivityViewModel::class.java)
-        setContentView(binding.root)
         setupRefresh()
         initialSetup()
+        setupDrawerLayout()
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -50,6 +62,24 @@ class OwnerActivity : AppCompatActivity() {
         setupToolbar()
         setupAdapter()
         hideRefresh()
+    }
+
+    private fun setupDrawerLayout() {
+        val navigationView: NavigationView = binding.navView
+        navigationView.setNavigationItemSelectedListener(this)
+
+        val toggle = ActionBarDrawerToggle(
+            this,
+            binding.drawerLayout,
+            binding.toolbar,
+            R.string.open_drawer,
+            R.string.close_drawer
+        )
+        val headerView = binding.navView.getHeaderView(0)
+        val navHeaderTvName = headerView.findViewById(R.id.nav_header_tv_name) as TextView
+        navHeaderTvName.text = recoverProfessionalName()
+        binding.drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
     }
 
     private fun setupObserver() {
@@ -107,7 +137,6 @@ class OwnerActivity : AppCompatActivity() {
         toolbar.apply {
             title = getString(R.string.general_schedule)
             setSupportActionBar(this)
-            supportActionBar?.setDisplayHomeAsUpEnabled(true)
         }
     }
 
@@ -132,6 +161,9 @@ class OwnerActivity : AppCompatActivity() {
             adapter = ownerScheduleAdapter
         }
     }
+
+    private fun recoverProfessionalName() = intent.extras?.getString(PROFESSIONAL_NAME)
+            ?: applicationContext.getString(R.string.professional_profile)
 
     private fun setupCalendarViewDatesMinAndMax() = binding.apply {
         calendarView.minDate = System.currentTimeMillis()
@@ -239,4 +271,21 @@ class OwnerActivity : AppCompatActivity() {
         binding.ownerSwipeRefreshLayout.isRefreshing = false
     }
 
+    private fun signOut() {
+        Firebase.auth.signOut()
+        showLoginScreen(this)
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.log_off -> {
+                signOut()
+            }
+            else -> {
+                showLoginScreen(this)
+            }
+        }
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
+        return true
+    }
 }
