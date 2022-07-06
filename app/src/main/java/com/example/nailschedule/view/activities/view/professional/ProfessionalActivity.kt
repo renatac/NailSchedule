@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityProfessionalBinding
 import com.example.nailschedule.view.activities.data.model.Time
-import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showLoginScreen
 import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.ConnectivityViewModel
@@ -33,14 +32,11 @@ class ProfessionalActivity : AppCompatActivity(),
     private lateinit var binding: ActivityProfessionalBinding
     private var date: String? = null
     private var time: String? = null
+    private var email: String? = null
 
     private val professionalScheduleAdapter: ProfessionalAdapter by lazy {
         ProfessionalAdapter(::seeSchedule)
     }
-
-    private val email = SharedPreferencesHelper.read(
-        SharedPreferencesHelper.EXTRA_EMAIL, ""
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +50,6 @@ class ProfessionalActivity : AppCompatActivity(),
 
     @SuppressLint("SimpleDateFormat")
     private fun initialSetup() {
-        professionalScheduleAdapter.clearItemsList()
         setupCalendarViewDatesMinAndMax()
         setCalendarListener()
         setupObserver()
@@ -65,7 +60,8 @@ class ProfessionalActivity : AppCompatActivity(),
     }
 
     private fun showNoIntern() {
-        showToast(this@ProfessionalActivity, R.string.no_internet)
+        showToast(this@ProfessionalActivity,
+            R.string.no_internet)
     }
 
     private fun setupDrawerLayout() {
@@ -92,9 +88,6 @@ class ProfessionalActivity : AppCompatActivity(),
                 if (it.first) {
                     showProgress()
                     if (it.second == ScheduledFragment.USER_DATA_DELETION) {
-                        FirebaseFirestore.getInstance().collection("users")
-                            .document(email!!).delete()
-
                         val previousTimeList = mutableListOf<String>()
                         FirebaseFirestore.getInstance().collection("calendarField")
                             .document(date!!).get().addOnSuccessListener { documentSnapshot ->
@@ -112,13 +105,13 @@ class ProfessionalActivity : AppCompatActivity(),
                                         }
                                     }
                                     val hoursList = Time(previousTimeList)
-                                    FirebaseFirestore.getInstance().collection("calendarField")
-                                        .document(date!!).set(hoursList)
+                                    updateCalendarField(hoursList)
                                     hideProgress()
                                     hideBtnDeleteSchedule()
                                     getAvailableTimeList()
                                     showToast(this, R.string.scheduled_deleted)
                                     showUnscheduledLabel()
+                                    deleteUser()
                                 }
                             }
                     } else if (it.second == BottomNavigationActivity.LOG_OUT) {
@@ -128,6 +121,16 @@ class ProfessionalActivity : AppCompatActivity(),
                     showNoIntern()
                 }
             })
+    }
+
+    private fun updateCalendarField(hoursList: Time) {
+        FirebaseFirestore.getInstance().collection("calendarField")
+            .document(date!!).set(hoursList)
+    }
+
+    private fun deleteUser() {
+        FirebaseFirestore.getInstance().collection("users")
+            .document(email!!).delete()
     }
 
     private fun showUnscheduledLabel() = binding.tvUnscheduledTime.apply {
@@ -148,15 +151,24 @@ class ProfessionalActivity : AppCompatActivity(),
 
     private fun setCalendarListener() {
         binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            val monthOk = month + 1
-            date = if (monthOk <= 9) {
-                "$dayOfMonth-0${monthOk}-$year"
-            } else {
-                "$dayOfMonth-${monthOk}-$year"
-            }
+            saveDate(dayOfMonth, month, year)
             getAvailableTimeList()
             hideCardView()
             showRecycler()
+        }
+    }
+
+    private fun saveDate(dayOfMonth: Int, month: Int, year: Int) {
+        val monthOk = month + 1
+        val day = if (dayOfMonth <= 9) {
+            "0$dayOfMonth"
+        } else {
+            dayOfMonth
+        }
+        date = if (monthOk <= 9) {
+            "$day-0${monthOk}-$year"
+        } else {
+            "$day-${monthOk}-$year"
         }
     }
 
@@ -204,6 +216,7 @@ class ProfessionalActivity : AppCompatActivity(),
         setBtnListener()
         hideRecycler()
         showCardView()
+        showBtnDeleteSchedule()
         setupUserInfo(info)
     }
 
@@ -243,6 +256,7 @@ class ProfessionalActivity : AppCompatActivity(),
         btnDeleteSchedule.setOnClickListener {
             deleteFirebaseFirestoreData()
         }
+        email = list[7].trim().removePrefix("email=")
     }
 
     private fun deleteFirebaseFirestoreData() {
@@ -269,6 +283,10 @@ class ProfessionalActivity : AppCompatActivity(),
 
     private fun hideBtnDeleteSchedule() {
         binding.btnDeleteSchedule.visibility = View.GONE
+    }
+
+    private fun showBtnDeleteSchedule() {
+        binding.btnDeleteSchedule.visibility = View.VISIBLE
     }
 
     private fun setupRefresh() {

@@ -35,7 +35,6 @@ class GalleryFragment : Fragment() {
     private var uriList: List<Uri>? = null
     private var areAllItems: Boolean? = null
 
-    //private lateinit var homeViewModel: HomeViewModel
     private var _binding: FragmentGalleryBinding? = null
 
     private lateinit var connectivityViewModel: ConnectivityViewModel
@@ -158,6 +157,7 @@ class GalleryFragment : Fragment() {
                         selectedUri?.let { uri ->
                             ref.putFile(uri)
                         }
+                        showRecyclerView()
                     } else if (it.second == DELETE) {
                         printMessageAboutExclusion()
                         if (areAllItems!!) {
@@ -173,14 +173,16 @@ class GalleryFragment : Fragment() {
                             selectedUriList?.forEach { uri ->
                                 val uriString = uri.toString()
                                 val initialIndex = uriString.indexOf("_")
-                                val finalIndexOk = uriString.lastIndexOf("_")
+                                val finalIndexOk = uriString.lastIndexOf("_") + 1
                                 if (initialIndex != -1 && finalIndexOk != -1) {
                                     val filename = uriString.substring(initialIndex, finalIndexOk)
+                                        .replace("%20", " ").replace("%3A", ":")
                                     storage.child("/images")
                                         .child("/$email/$filename")
                                         .delete()
                                 }
                             }
+                            showRecyclerView()
                         }
                     }
                 } else {
@@ -224,6 +226,7 @@ class GalleryFragment : Fragment() {
                         selectedUri?.let {
                             galleryAdapter.setItemList(it)
                             showRecyclerView()
+                            showTrash()
                             uploadPhotoToCloudStorage()
                         }
                     } catch (e: Exception) {
@@ -264,6 +267,10 @@ class GalleryFragment : Fragment() {
 
     private fun hideTrash() {
         binding.ivDelete.visibility = View.GONE
+    }
+
+    private fun showTrash() {
+        binding.ivDelete.visibility = View.VISIBLE
     }
 
     private fun showRecyclerView() {

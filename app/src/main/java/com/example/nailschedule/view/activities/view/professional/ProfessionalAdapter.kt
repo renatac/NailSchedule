@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ItemHourBinding
 
-class ProfessionalAdapter(val btnListener: (info: String)-> Unit)
+class ProfessionalAdapter(private val onBtnSeeScheduleClicked: (info: String)-> Unit)
 : RecyclerView.Adapter<ProfessionalAdapter.MyViewHolder>() {
     private var availableTimeList: ArrayList<String> = arrayListOf()
 
@@ -41,7 +41,7 @@ class ProfessionalAdapter(val btnListener: (info: String)-> Unit)
         RecyclerView.ViewHolder(binding.root) {
         fun bind(info: String) = binding.apply {
             btnSeeSchedule.setOnClickListener {
-                btnListener.invoke(info)
+                onBtnSeeScheduleClicked.invoke(info)
             }
             val hour = "${info.subSequence(0, 5)} h"
             tvHour.text = hour

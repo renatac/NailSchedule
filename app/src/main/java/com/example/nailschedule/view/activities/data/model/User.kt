@@ -6,4 +6,5 @@ data class User(
     val date: String,
     val time: String,
     val uriString: String,
+    val email: String
 )
