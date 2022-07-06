@@ -12,12 +12,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityProfessionalBinding
+import com.example.nailschedule.view.activities.viewmodels.CalendarFieldViewModel
 import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.utils.showLoginScreen
 import com.example.nailschedule.view.activities.utils.showToast
-import com.example.nailschedule.view.activities.view.ConnectivityViewModel
+import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.activities.BottomNavigationActivity
-import com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -29,24 +29,41 @@ class ProfessionalActivity : AppCompatActivity(),
     NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var connectivityViewModel: ConnectivityViewModel
+    private lateinit var calendarFieldViewModel: CalendarFieldViewModel
+
     private lateinit var binding: ActivityProfessionalBinding
     private var date: String? = null
     private var time: String? = null
     private var email: String? = null
 
+    private var timeList: List<String>? = null
+    private var action: ActionEnum? = null
+
     private val professionalScheduleAdapter: ProfessionalAdapter by lazy {
         ProfessionalAdapter(::seeSchedule)
     }
 
+    companion object {
+        const val USER_SCHEDULE_DELETION = "user_schedule_deletion"
+        const val SETUP_ADAPTER = "setup_adapter"
+        const val SIX_DAYS_AT_MILLIS = 518400000
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProfessionalBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        connectivityViewModel =
-            ViewModelProvider(this).get(ConnectivityViewModel::class.java)
+        setupViewModels()
         setupRefresh()
         initialSetup()
     }
+
+    private fun setupViewModels() {
+        connectivityViewModel =
+            ViewModelProvider(this).get(ConnectivityViewModel::class.java)
+        calendarFieldViewModel =
+            ViewModelProvider(this)[CalendarFieldViewModel::class.java]
+    }
+
 
     @SuppressLint("SimpleDateFormat")
     private fun initialSetup() {
@@ -60,8 +77,10 @@ class ProfessionalActivity : AppCompatActivity(),
     }
 
     private fun showNoIntern() {
-        showToast(this@ProfessionalActivity,
-            R.string.no_internet)
+        showToast(
+            this@ProfessionalActivity,
+            R.string.no_internet
+        )
     }
 
     private fun setupDrawerLayout() {
@@ -83,41 +102,67 @@ class ProfessionalActivity : AppCompatActivity(),
     }
 
     private fun setupObserver() {
+        calendarFieldViewModel.calendarField.observe(this, { calendarField ->
+            timeList = calendarField?.timeList
+            when (action) {
+                ActionEnum.IS_DELETION -> {
+                    val previousTimeList = mutableListOf<String>()
+                    calendarField.timeList.forEach { t ->
+                        if (t.contains(time!!)) {
+                            val finalIndex = t.indexOf(";true")
+                            val timeNew = t.substring(0, finalIndex)
+                            previousTimeList.add(timeNew.plus(";false"))
+                        } else {
+                            previousTimeList.add(t)
+                        }
+                    }
+                    val hoursList = Time(previousTimeList)
+                    updateCalendarField(hoursList)
+                    hideProgress()
+                    hideBtnDeleteSchedule()
+                    with(professionalScheduleAdapter) {
+                        clearItemsList()
+                        previousTimeList.removeAt(0)
+                        setItemsList(previousTimeList)
+                    }
+                    showUnscheduledLabel()
+                    deleteUser()
+                }
+                ActionEnum.IS_SETUP_ADAPTER -> {
+                    val mutableTimeList = mutableListOf<String>()
+                    timeList?.forEachIndexed { index, t ->
+                        if (index != 0) {
+                            mutableTimeList.add(t)
+                        }
+                    } ?: run {
+                        showToast(this, R.string.all_free)
+                    }
+                    with(professionalScheduleAdapter) {
+                        clearItemsList()
+                        setItemsList(mutableTimeList)
+                    }
+                }
+            }
+        })
+
         connectivityViewModel.hasInternet.observe(this,
             {
                 if (it.first) {
                     showProgress()
-                    if (it.second == ScheduledFragment.USER_DATA_DELETION) {
-                        val previousTimeList = mutableListOf<String>()
-                        FirebaseFirestore.getInstance().collection("calendarField")
-                            .document(date!!).get().addOnSuccessListener { documentSnapshot ->
-                                documentSnapshot.data?.let {
-                                    val timeList = it["timeList"] as List<*>
-                                    timeList.forEach { t ->
-                                        with(t.toString()) {
-                                            if (this.contains(time!!)) {
-                                                val finalIndex = this.indexOf(";true")
-                                                val timeNew = this.substring(0, finalIndex)
-                                                previousTimeList.add(timeNew.plus(";false"))
-                                            } else {
-                                                previousTimeList.add(this)
-                                            }
-                                        }
-                                    }
-                                    val hoursList = Time(previousTimeList)
-                                    updateCalendarField(hoursList)
-                                    hideProgress()
-                                    hideBtnDeleteSchedule()
-                                    getAvailableTimeList()
-                                    showToast(this, R.string.scheduled_deleted)
-                                    showUnscheduledLabel()
-                                    deleteUser()
-                                }
-                            }
-                    } else if (it.second == BottomNavigationActivity.LOG_OUT) {
-                        signOut()
+                    when (it.second) {
+                        USER_SCHEDULE_DELETION -> {
+                            action = ActionEnum.IS_DELETION
+                            calendarFieldViewModel.getCalendarFieldData(date!!)
+                        }
+                        SETUP_ADAPTER -> {
+                            action = ActionEnum.IS_SETUP_ADAPTER
+                            calendarFieldViewModel.getCalendarFieldData(date!!)
+                        }
+                        BottomNavigationActivity.LOG_OUT -> {
+                            signOut()
+                        }
                     }
-                }else {
+                } else {
                     showNoIntern()
                 }
             })
@@ -182,32 +227,15 @@ class ProfessionalActivity : AppCompatActivity(),
 
     private fun setupCalendarViewDatesMinAndMax() = binding.apply {
         calendarView.minDate = System.currentTimeMillis()
-        val sixDaysAtMillis = 518400000
-        val aWeekAfter = System.currentTimeMillis() + sixDaysAtMillis
+        val aWeekAfter = System.currentTimeMillis() + SIX_DAYS_AT_MILLIS
         calendarView.maxDate = aWeekAfter
     }
 
     private fun getAvailableTimeList() {
-        val mutableTimeList = mutableListOf<String>()
-        FirebaseFirestore.getInstance().collection("calendarField")
-            .document(date!!).get().addOnSuccessListener { documentSnapshot ->
-                documentSnapshot.data?.let {
-                    val timeList = it["timeList"] as List<*>
-                    timeList.forEachIndexed { index, time ->
-                        time?.let { t ->
-                            if (index != 0) {
-                                mutableTimeList.add(t.toString())
-                            }
-                        }
-                    }
-                } ?: run {
-                    showToast(this, R.string.all_free)
-                }
-                with(professionalScheduleAdapter) {
-                    clearItemsList()
-                    setItemsList(mutableTimeList)
-                }
-            }
+       connectivityViewModel.checkForInternet(
+            applicationContext,
+            SETUP_ADAPTER
+        )
     }
 
     private fun seeSchedule(info: String) = binding.apply {
@@ -216,6 +244,7 @@ class ProfessionalActivity : AppCompatActivity(),
         setBtnListener()
         hideRecycler()
         showCardView()
+        hideProgress()
         showBtnDeleteSchedule()
         setupUserInfo(info)
     }
@@ -262,7 +291,7 @@ class ProfessionalActivity : AppCompatActivity(),
     private fun deleteFirebaseFirestoreData() {
         connectivityViewModel.checkForInternet(
             applicationContext,
-            ScheduledFragment.USER_DATA_DELETION
+            USER_SCHEDULE_DELETION
         )
     }
 

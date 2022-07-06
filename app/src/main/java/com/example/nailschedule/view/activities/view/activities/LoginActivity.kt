@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityLoginBinding
 import com.example.nailschedule.view.activities.utils.*
-import com.example.nailschedule.view.activities.view.ConnectivityViewModel
+import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.professional.ProfessionalActivity
 import com.facebook.AccessToken
 import com.facebook.CallbackManager

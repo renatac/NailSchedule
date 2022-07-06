@@ -15,7 +15,7 @@ import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
-import com.example.nailschedule.view.activities.view.ConnectivityViewModel
+import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.scheduling.SchedulingFragment
 import com.google.firebase.firestore.FirebaseFirestore
 

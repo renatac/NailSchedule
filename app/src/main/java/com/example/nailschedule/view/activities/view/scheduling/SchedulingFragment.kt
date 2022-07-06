@@ -29,7 +29,7 @@ import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper.MIN_DATE
 import com.example.nailschedule.view.activities.utils.isEmptyField
 import com.example.nailschedule.view.activities.utils.isNotEmptyField
-import com.example.nailschedule.view.activities.view.ConnectivityViewModel
+import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*

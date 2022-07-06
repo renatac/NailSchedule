@@ -18,7 +18,7 @@ import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentGalleryBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showToast
-import com.example.nailschedule.view.activities.view.ConnectivityViewModel
+import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
 import com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment
 import com.google.firebase.ktx.Firebase

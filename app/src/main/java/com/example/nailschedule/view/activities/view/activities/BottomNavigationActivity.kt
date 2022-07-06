@@ -21,7 +21,7 @@ import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
 import com.example.nailschedule.view.activities.utils.showLoginScreen
 import com.example.nailschedule.view.activities.utils.showToast
-import com.example.nailschedule.view.activities.view.ConnectivityViewModel
+import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.facebook.login.LoginManager
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView

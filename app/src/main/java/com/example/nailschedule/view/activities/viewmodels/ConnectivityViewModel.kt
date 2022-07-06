@@ -1,4 +1,4 @@
-package com.example.nailschedule.view.activities.view
+package com.example.nailschedule.view.activities.viewmodels
 
 import android.content.Context
 import android.net.ConnectivityManager
