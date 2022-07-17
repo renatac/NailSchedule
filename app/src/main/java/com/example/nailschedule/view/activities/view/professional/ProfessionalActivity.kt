@@ -12,15 +12,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityProfessionalBinding
-import com.example.nailschedule.view.activities.viewmodels.CalendarFieldViewModel
 import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.utils.showLoginScreen
 import com.example.nailschedule.view.activities.utils.showToast
-import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.activities.BottomNavigationActivity
+import com.example.nailschedule.view.activities.viewmodels.CalendarFieldViewModel
+import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
+import com.example.nailschedule.view.activities.viewmodels.UsersViewModel
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import java.util.*
 
@@ -30,6 +30,7 @@ class ProfessionalActivity : AppCompatActivity(),
 
     private lateinit var connectivityViewModel: ConnectivityViewModel
     private lateinit var calendarFieldViewModel: CalendarFieldViewModel
+    private lateinit var usersViewModel: UsersViewModel
 
     private lateinit var binding: ActivityProfessionalBinding
     private var date: String? = null
@@ -44,10 +45,12 @@ class ProfessionalActivity : AppCompatActivity(),
     }
 
     companion object {
-        const val USER_SCHEDULE_DELETION = "user_schedule_deletion"
+        const val CALENDAR_FIELD_AND_USER_DELETION = "calendar_field_and_user_deletion"
         const val SETUP_ADAPTER = "setup_adapter"
+        const val USER_DELETION = "user_deletion"
         const val SIX_DAYS_AT_MILLIS = 518400000
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProfessionalBinding.inflate(layoutInflater)
@@ -62,6 +65,8 @@ class ProfessionalActivity : AppCompatActivity(),
             ViewModelProvider(this).get(ConnectivityViewModel::class.java)
         calendarFieldViewModel =
             ViewModelProvider(this)[CalendarFieldViewModel::class.java]
+        usersViewModel =
+            ViewModelProvider(this)[UsersViewModel::class.java]
     }
 
 
@@ -102,6 +107,9 @@ class ProfessionalActivity : AppCompatActivity(),
     }
 
     private fun setupObserver() {
+        usersViewModel.users.observe(this, { user ->
+
+        })
         calendarFieldViewModel.calendarField.observe(this, { calendarField ->
             timeList = calendarField?.timeList
             when (action) {
@@ -122,7 +130,7 @@ class ProfessionalActivity : AppCompatActivity(),
                     hideBtnDeleteSchedule()
                     with(professionalScheduleAdapter) {
                         clearItemsList()
-                        val list = previousTimeList.subList(1,(previousTimeList.size-1))
+                        val list = previousTimeList.subList(1, (previousTimeList.size - 1))
                         setItemsList(list)
                     }
                     showUnscheduledLabel()
@@ -150,13 +158,16 @@ class ProfessionalActivity : AppCompatActivity(),
                 if (it.first) {
                     showProgress()
                     when (it.second) {
-                        USER_SCHEDULE_DELETION -> {
+                        CALENDAR_FIELD_AND_USER_DELETION -> {
                             action = ActionEnum.IS_DELETION
                             calendarFieldViewModel.getCalendarFieldData(date!!)
                         }
                         SETUP_ADAPTER -> {
                             action = ActionEnum.IS_SETUP_ADAPTER
                             calendarFieldViewModel.getCalendarFieldData(date!!)
+                        }
+                        USER_DELETION -> {
+                            usersViewModel.deleteUser(email!!)
                         }
                         BottomNavigationActivity.LOG_OUT -> {
                             signOut()
@@ -169,8 +180,10 @@ class ProfessionalActivity : AppCompatActivity(),
     }
 
     private fun deleteUser() {
-        FirebaseFirestore.getInstance().collection("users")
-            .document(email!!).delete()
+        connectivityViewModel.checkForInternet(
+            applicationContext,
+            USER_DELETION
+        )
     }
 
     private fun showUnscheduledLabel() = binding.tvUnscheduledTime.apply {
@@ -227,7 +240,7 @@ class ProfessionalActivity : AppCompatActivity(),
     }
 
     private fun getAvailableTimeList() {
-       connectivityViewModel.checkForInternet(
+        connectivityViewModel.checkForInternet(
             applicationContext,
             SETUP_ADAPTER
         )
@@ -278,15 +291,15 @@ class ProfessionalActivity : AppCompatActivity(),
             list[3].trim().removePrefix("service=")
         )
         btnDeleteSchedule.setOnClickListener {
-            deleteFirebaseFirestoreData()
+            deleteFirebaseUserAndCalendarField()
         }
         email = list[7].trim().removePrefix("email=")
     }
 
-    private fun deleteFirebaseFirestoreData() {
+    private fun deleteFirebaseUserAndCalendarField() {
         connectivityViewModel.checkForInternet(
             applicationContext,
-            USER_SCHEDULE_DELETION
+            CALENDAR_FIELD_AND_USER_DELETION
         )
     }
 
