@@ -107,9 +107,6 @@ class ProfessionalActivity : AppCompatActivity(),
     }
 
     private fun setupObserver() {
-        usersViewModel.users.observe(this, { user ->
-
-        })
         calendarFieldViewModel.calendarField.observe(this, { calendarField ->
             timeList = calendarField?.timeList
             when (action) {

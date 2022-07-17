@@ -13,11 +13,11 @@ import com.example.nailschedule.databinding.FragmentScheduledBinding
 import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
-import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
-import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.scheduling.SchedulingFragment
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.nailschedule.view.activities.viewmodels.CalendarFieldViewModel
+import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
+import com.example.nailschedule.view.activities.viewmodels.UsersViewModel
 
 
 class ScheduledFragment : Fragment() {
@@ -25,6 +25,8 @@ class ScheduledFragment : Fragment() {
     private var _binding: FragmentScheduledBinding? = null
 
     private lateinit var connectivityViewModel: ConnectivityViewModel
+    private lateinit var calendarFieldViewModel: CalendarFieldViewModel
+    private lateinit var usersViewModel: UsersViewModel
 
     private var user: User? = null
 
@@ -51,8 +53,16 @@ class ScheduledFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setupViewModel()
+    }
+
+    private fun setupViewModel() {
         connectivityViewModel =
-            ViewModelProvider(this).get(ConnectivityViewModel::class.java)
+            ViewModelProvider(this)[ConnectivityViewModel::class.java]
+        calendarFieldViewModel =
+            ViewModelProvider(this)[CalendarFieldViewModel::class.java]
+        usersViewModel =
+            ViewModelProvider(this)[UsersViewModel::class.java]
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,67 +84,46 @@ class ScheduledFragment : Fragment() {
     }
 
     private fun setupObserver() {
+        usersViewModel.users.observe(viewLifecycleOwner, { user ->
+            this.user = user
+            date = user?.date
+            time = user?.time
+            if (user == null) {
+                showEmptyState()
+            } else {
+                setupFields()
+                setupListeners()
+                showScheduled()
+            }
+        })
+
+        calendarFieldViewModel.calendarField.observe(viewLifecycleOwner, { calendarField ->
+            val timeList = calendarField?.timeList
+            val previousTimeList = mutableListOf<String>()
+            timeList?.forEach { t ->
+                if (t.contains(time!!)) {
+                    val finalIndex = t.indexOf(";true")
+                    val timeNew = t.substring(0, finalIndex)
+                    previousTimeList.add(timeNew.plus(";false"))
+                } else {
+                    previousTimeList.add(t)
+                }
+            }
+            val hoursList = Time(previousTimeList)
+            calendarFieldViewModel.updateCalendarField(date!!, hoursList)
+            showEmptyState()
+        })
+
         connectivityViewModel.hasInternet.observe(viewLifecycleOwner,
             {
                 if (it.first) {
                     showProgress()
                     hideRefresh()
                     if (it.second == USER_DATA_DOWNLOAD) {
-                        FirebaseFirestore.getInstance().collection("users")
-                            .document(email!!).get()
-                            .addOnSuccessListener { documentSnapshot ->
-                                documentSnapshot.data?.let {
-                                    print(this)
-                                    user = User(
-                                        it["name"] as String,
-                                        it["service"] as String,
-                                        it["date"] as String,
-                                        it["time"] as String,
-                                        it["uriString"] as String,
-                                        it["email"] as String,
-                                    )
-                                    date = user?.date
-                                    time = user?.time
-                                }
-                                if (user == null) {
-                                    showEmptyState()
-                                } else {
-                                    setupFields()
-                                    setupListeners()
-                                    showScheduled()
-                                }
-                            }
-                            .addOnFailureListener { exception ->
-                                print(exception)
-                                showEmptyState()
-                                showToast(requireContext(), R.string.error_scheduling)
-                            }
-                    } else if(it.second == USER_DATA_DELETION) {
-                        FirebaseFirestore.getInstance().collection("users")
-                            .document(email!!).delete()
-
-                        val previousTimeList = mutableListOf<String>()
-                        FirebaseFirestore.getInstance().collection("calendarField")
-                            .document(date!!).get().addOnSuccessListener { documentSnapshot ->
-                                documentSnapshot.data?.let {
-                                    val timeList = it["timeList"] as List<*>
-                                    timeList.forEach { t->
-                                        with(t.toString()) {
-                                            if (this.contains(time!!)) {
-                                                val finalIndex = this.indexOf(";true")
-                                                val timeNew = this.substring(0, finalIndex)
-                                                previousTimeList.add(timeNew.plus(";false"))
-                                            } else {
-                                                previousTimeList.add(this)
-                                            }
-                                        }
-                                    }
-                                    val hoursList = Time(previousTimeList)
-                                    FirebaseFirestore.getInstance().collection("calendarField")
-                                        .document( date!!).set(hoursList)
-                                    showEmptyState()
-                                }
-                            }
+                        usersViewModel.getUserData(requireContext(), email!!)
+                    } else if (it.second == USER_DATA_DELETION) {
+                        usersViewModel.deleteUser(email!!)
+                        calendarFieldViewModel.getCalendarFieldData(date!!)
                     }
                 } else {
                     hideRefresh()
@@ -182,7 +171,9 @@ class ScheduledFragment : Fragment() {
         saveAtSharedPreferences()
         parentFragmentManager
             .beginTransaction()
-            .add(R.id.container_scheduled, SchedulingFragment.newInstance(), "schedulingFragment")
+            .add(R.id.container_scheduled,
+                SchedulingFragment.newInstance(),
+                "schedulingFragment")
             .commit()
     }
 

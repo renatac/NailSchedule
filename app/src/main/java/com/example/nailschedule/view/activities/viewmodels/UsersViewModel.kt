@@ -1,5 +1,6 @@
 package com.example.nailschedule.view.activities.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,10 +15,10 @@ class UsersViewModel: ViewModel() {
     // private val _posts = MutableLiveData<List<Post>>()
     // val posts: LiveData<List<Post>> = _posts
 
-    fun getUserData(email: String) {
+    fun getUserData(context: Context, email: String) {
         viewModelScope.launch {
             _users.value = FirebaseUserService
-                .getUserData(email)
+                .getUserData(context, email)
             // _posts.value = FirebaseProfileService.getPosts()
         }
     }
