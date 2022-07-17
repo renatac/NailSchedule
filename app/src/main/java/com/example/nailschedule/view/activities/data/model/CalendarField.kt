@@ -16,7 +16,7 @@ data class CalendarField(
             try {
                 val timeList = get("timeList") as List<*>
                 val mutableTimeList = mutableListOf<String>()
-                timeList.forEachIndexed { index, time ->
+                timeList.forEach { time ->
                     time?.let { t ->
                         mutableTimeList.add(t.toString())
                     }

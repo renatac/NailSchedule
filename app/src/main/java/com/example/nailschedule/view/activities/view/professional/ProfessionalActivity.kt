@@ -107,7 +107,7 @@ class ProfessionalActivity : AppCompatActivity(),
             when (action) {
                 ActionEnum.IS_DELETION -> {
                     val previousTimeList = mutableListOf<String>()
-                    calendarField.timeList.forEach { t ->
+                    timeList?.forEach { t ->
                         if (t.contains(time!!)) {
                             val finalIndex = t.indexOf(";true")
                             val timeNew = t.substring(0, finalIndex)
@@ -117,13 +117,13 @@ class ProfessionalActivity : AppCompatActivity(),
                         }
                     }
                     val hoursList = Time(previousTimeList)
-                    updateCalendarField(hoursList)
+                    calendarFieldViewModel.updateCalendarField(date!!, hoursList)
                     hideProgress()
                     hideBtnDeleteSchedule()
                     with(professionalScheduleAdapter) {
                         clearItemsList()
-                        previousTimeList.removeAt(0)
-                        setItemsList(previousTimeList)
+                        val list = previousTimeList.subList(1,(previousTimeList.size-1))
+                        setItemsList(list)
                     }
                     showUnscheduledLabel()
                     deleteUser()
@@ -166,11 +166,6 @@ class ProfessionalActivity : AppCompatActivity(),
                     showNoIntern()
                 }
             })
-    }
-
-    private fun updateCalendarField(hoursList: Time) {
-        FirebaseFirestore.getInstance().collection("calendarField")
-            .document(date!!).set(hoursList)
     }
 
     private fun deleteUser() {

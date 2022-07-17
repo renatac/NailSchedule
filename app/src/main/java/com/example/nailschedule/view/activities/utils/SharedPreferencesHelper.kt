@@ -7,7 +7,7 @@ import android.content.SharedPreferences
 object SharedPreferencesHelper {
     private var mSharedPref: SharedPreferences? = null
     const val EXTRA_DISPLAY_NAME = "extra_display_name"
-    const val EXTRA_PHOTO_URL = "extra_photo_url"
+    const val EXTRA_PHOTO_URL = "extra_photo_uerl"
     const val EXTRA_EMAIL = "extra_email"
     const val GOOGLE_ACCESS_TOKEN = "google_access_token"
     const val GOOGLE_TOKEN_ID = "google_token_id"
