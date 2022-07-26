@@ -10,6 +10,14 @@ import com.example.nailschedule.view.activities.utils.showLoginScreen
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
 
+    companion object {
+        const val FOUR_THOUSAND = 4000L
+        const val THOUSAND_FIFTEEN = 1500L
+        const val THREE_HUNDRED_AND_SIXTY = 360f
+        const val ONE = 1f
+        const val HALF = 0.5f
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
@@ -19,17 +27,17 @@ class SplashActivity : AppCompatActivity() {
 
     private fun createAnimation() {
         Handler(Looper.getMainLooper()).postDelayed({
-            showLoginScreen(this)}, 4000)
+            showLoginScreen(this)}, FOUR_THOUSAND)
 
         binding.llSplash.animate().apply {
-            duration = 1500
-            translationYBy(360f)
-            alpha(0.5f)
+            duration = THOUSAND_FIFTEEN
+            translationYBy(THREE_HUNDRED_AND_SIXTY)
+            alpha(HALF)
         }.withEndAction {
             binding.llSplash.animate().apply {
-                duration = 1500
-                alpha(1f)
-                translationYBy(360f)
+                duration = THOUSAND_FIFTEEN
+                alpha(ONE)
+                translationYBy(THREE_HUNDRED_AND_SIXTY)
             }
         }
     }

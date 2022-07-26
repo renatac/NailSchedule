@@ -1,5 +1,6 @@
 package com.example.nailschedule.view.activities.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,14 +13,11 @@ import kotlinx.coroutines.launch
 class CalendarFieldViewModel : ViewModel() {
     private val _calendarField = MutableLiveData<CalendarField>()
     val calendarField: LiveData<CalendarField> = _calendarField
-   // private val _posts = MutableLiveData<List<Post>>()
-   // val posts: LiveData<List<Post>> = _posts
 
-    fun getCalendarFieldData(date: String) {
+    fun getCalendarFieldData(context: Context, date: String) {
         viewModelScope.launch {
             _calendarField.value = FirebaseCalendarFieldService
-                .getCalendarFieldData(date)
-           // _posts.value = FirebaseProfileService.getPosts()
+                .getCalendarFieldData(context, date)
         }
     }
 
@@ -27,10 +25,13 @@ class CalendarFieldViewModel : ViewModel() {
         viewModelScope.launch {
              FirebaseCalendarFieldService
                 .updateCalendarFieldData(date, hoursList)
-            // _posts.value = FirebaseProfileService.getPosts()
         }
     }
 
-
-    //Rest of your viewmodel
+    fun deleteCalendarField(date: String) {
+        viewModelScope.launch {
+            FirebaseCalendarFieldService
+                .deleteCalendarFieldData(date)
+        }
+    }
 }

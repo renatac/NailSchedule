@@ -13,7 +13,7 @@ data class CalendarField(
 
     companion object {
         fun DocumentSnapshot.toCalendarField(date: String): CalendarField? {
-            try {
+            return try {
                 val timeList = get("timeList") as List<*>
                 val mutableTimeList = mutableListOf<String>()
                 timeList.forEach { time ->
@@ -21,13 +21,10 @@ data class CalendarField(
                         mutableTimeList.add(t.toString())
                     }
                 }
-                return CalendarField(date, timeList = mutableTimeList)
+                CalendarField(date, timeList = mutableTimeList)
             } catch (e: Exception) {
                 Log.e(TAG, "Error converting calendarField", e)
-                //FirebaseCrashlytics.getInstance().log("Error converting user profile")
-                //FirebaseCrashlytics.getInstance().setCustomKey("userId", id)
-                //FirebaseCrashlytics.getInstance().recordException(e)
-                return null
+                null
             }
         }
         private const val TAG = "CalendarField"

@@ -20,9 +20,6 @@ object FirebaseUserService {
         } catch (e: Exception) {
             Log.e(TAG, "Error getting User details", e)
             showToast(context, R.string.error_scheduling)
-            //FirebaseCrashlytics.getInstance().log("Error getting user details")
-            //FirebaseCrashlytics.getInstance().setCustomKey("user id", xpertSlug)
-            //FirebaseCrashlytics.getInstance().recordException(e)
             null
         }
     }
@@ -34,9 +31,17 @@ object FirebaseUserService {
                 .document(email).delete()
         } catch (e: Exception) {
             Log.e(TAG, "Error getting calendarField details", e)
-            //FirebaseCrashlytics.getInstance().log("Error getting user details")
-            //FirebaseCrashlytics.getInstance().setCustomKey("user id", xpertSlug)
-            //FirebaseCrashlytics.getInstance().recordException(e)
+            null
+        }
+    }
+
+    fun updateUser(email: String, user: User): Task<Void>? {
+        val db = FirebaseFirestore.getInstance()
+        return try {
+            db.collection("users")
+                .document(email).set(user)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting calendarField details", e)
             null
         }
     }

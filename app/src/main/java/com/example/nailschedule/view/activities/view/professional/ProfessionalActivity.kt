@@ -38,7 +38,7 @@ class ProfessionalActivity : AppCompatActivity(),
     private var email: String? = null
 
     private var timeList: List<String>? = null
-    private var action: ActionEnum? = null
+    private var professionalAction: ProfessionalActionEnum? = null
 
     private val professionalScheduleAdapter: ProfessionalAdapter by lazy {
         ProfessionalAdapter(::seeSchedule)
@@ -109,8 +109,8 @@ class ProfessionalActivity : AppCompatActivity(),
     private fun setupObserver() {
         calendarFieldViewModel.calendarField.observe(this, { calendarField ->
             timeList = calendarField?.timeList
-            when (action) {
-                ActionEnum.IS_DELETION -> {
+            when (professionalAction) {
+                ProfessionalActionEnum.IS_DELETION -> {
                     val previousTimeList = mutableListOf<String>()
                     timeList?.forEach { t ->
                         if (t.contains(time!!)) {
@@ -133,7 +133,7 @@ class ProfessionalActivity : AppCompatActivity(),
                     showUnscheduledLabel()
                     deleteUser()
                 }
-                ActionEnum.IS_SETUP_ADAPTER -> {
+                ProfessionalActionEnum.IS_SETUP_ADAPTER -> {
                     val mutableTimeList = mutableListOf<String>()
                     timeList?.forEachIndexed { index, t ->
                         if (index != 0) {
@@ -156,12 +156,12 @@ class ProfessionalActivity : AppCompatActivity(),
                     showProgress()
                     when (it.second) {
                         CALENDAR_FIELD_AND_USER_DELETION -> {
-                            action = ActionEnum.IS_DELETION
-                            calendarFieldViewModel.getCalendarFieldData(date!!)
+                            professionalAction = ProfessionalActionEnum.IS_DELETION
+                            calendarFieldViewModel.getCalendarFieldData(this, date!!)
                         }
                         SETUP_ADAPTER -> {
-                            action = ActionEnum.IS_SETUP_ADAPTER
-                            calendarFieldViewModel.getCalendarFieldData(date!!)
+                            professionalAction = ProfessionalActionEnum.IS_SETUP_ADAPTER
+                            calendarFieldViewModel.getCalendarFieldData(this, date!!)
                         }
                         USER_DELETION -> {
                             usersViewModel.deleteUser(email!!)

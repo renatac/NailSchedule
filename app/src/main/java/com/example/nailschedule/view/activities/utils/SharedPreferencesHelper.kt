@@ -28,10 +28,6 @@ object SharedPreferencesHelper {
         return mSharedPref?.getString(key, defValue)
     }
 
-    fun read(key: String, defValue: Int): Int? {
-        return mSharedPref?.getInt(key, defValue)
-    }
-
     fun write(key: String, value: String?) {
         val prefsEditor = mSharedPref?.edit()
         prefsEditor?.putString(key, value)

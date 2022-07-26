@@ -26,9 +26,6 @@ data class User(
                 User(name, service, date, time, uriString, email)
             } catch (e: Exception) {
                 Log.e(TAG, "Error converting User", e)
-                //FirebaseCrashlytics.getInstance().log("Error converting user profile")
-                //FirebaseCrashlytics.getInstance().setCustomKey("userId", id)
-                //FirebaseCrashlytics.getInstance().recordException(e)
                 null
             }
         }

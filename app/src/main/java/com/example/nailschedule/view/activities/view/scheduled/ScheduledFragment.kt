@@ -13,6 +13,8 @@ import com.example.nailschedule.databinding.FragmentScheduledBinding
 import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
+import com.example.nailschedule.view.activities.utils.semicolonFalse
+import com.example.nailschedule.view.activities.utils.semicolonTrue
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
 import com.example.nailschedule.view.activities.view.scheduling.SchedulingFragment
 import com.example.nailschedule.view.activities.viewmodels.CalendarFieldViewModel
@@ -36,6 +38,7 @@ class ScheduledFragment : Fragment() {
 
     private var date: String? = null
     private var time: String? = null
+
 
     companion object {
         const val EXTRA_URI_STRING = "extra_uri_string"
@@ -102,9 +105,9 @@ class ScheduledFragment : Fragment() {
             val previousTimeList = mutableListOf<String>()
             timeList?.forEach { t ->
                 if (t.contains(time!!)) {
-                    val finalIndex = t.indexOf(";true")
+                    val finalIndex = t.indexOf(semicolonTrue)
                     val timeNew = t.substring(0, finalIndex)
-                    previousTimeList.add(timeNew.plus(";false"))
+                    previousTimeList.add(timeNew.plus(semicolonFalse))
                 } else {
                     previousTimeList.add(t)
                 }
@@ -123,7 +126,7 @@ class ScheduledFragment : Fragment() {
                         usersViewModel.getUserData(requireContext(), email!!)
                     } else if (it.second == USER_DATA_DELETION) {
                         usersViewModel.deleteUser(email!!)
-                        calendarFieldViewModel.getCalendarFieldData(date!!)
+                        calendarFieldViewModel.getCalendarFieldData(requireContext(), date!!)
                     }
                 } else {
                     hideRefresh()
