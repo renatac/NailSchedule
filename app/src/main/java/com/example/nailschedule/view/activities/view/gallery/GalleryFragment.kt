@@ -18,13 +18,11 @@ import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentGalleryBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.showToast
-import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
 import com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
+import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
+import com.example.nailschedule.view.activities.viewmodels.StorageViewModel
 import com.google.firebase.storage.StorageReference
-import com.google.firebase.storage.ktx.storage
 import java.util.*
 
 
@@ -38,8 +36,7 @@ class GalleryFragment : Fragment() {
     private var _binding: FragmentGalleryBinding? = null
 
     private lateinit var connectivityViewModel: ConnectivityViewModel
-
-    private lateinit var storage: StorageReference
+    private lateinit var storageViewModel: StorageViewModel
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -48,6 +45,8 @@ class GalleryFragment : Fragment() {
     private lateinit var startForResult: ActivityResultLauncher<Intent>
 
     private var selectedUri: Uri? = null
+
+    private var galleryActionEnum: GalleryActionEnum? = null
 
     private val galleryAdapter: GalleryAdapter by lazy {
         GalleryAdapter(::onShortClick, ::hideTrash, ::deletePhotosFromCloudStorage)
@@ -66,7 +65,6 @@ class GalleryFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerForActivityResult()
-        getFirebaseStoreReference()
         setupGalleryViewModel()
         getUserEmail()
     }
@@ -74,10 +72,8 @@ class GalleryFragment : Fragment() {
     private fun setupGalleryViewModel() {
         connectivityViewModel =
             ViewModelProvider(this).get(ConnectivityViewModel::class.java)
-    }
-
-    private fun getFirebaseStoreReference() {
-        storage = Firebase.storage.reference
+        storageViewModel =
+            ViewModelProvider(this).get(StorageViewModel::class.java)
     }
 
     private fun getUserEmail() {
@@ -102,21 +98,49 @@ class GalleryFragment : Fragment() {
     private fun initialSetup() {
         galleryAdapter.clearList()
         downloadPhotosFromCloudStorage()
+        setupClickListeners()
         setupAdapter()
     }
 
-    private fun setupObservers() {
-        with(binding) {
-            btnSelectPhoto.setOnClickListener {
-                selectPhoto()
-            }
-            btnAddPhotos.setOnClickListener {
-                selectPhoto()
-            }
-            ivDelete.setOnClickListener {
-                galleryAdapter.clickToRemove()
-            }
+    private fun setupClickListeners() = binding.apply {
+        btnSelectPhoto.setOnClickListener {
+            selectPhoto()
         }
+        btnAddPhotos.setOnClickListener {
+            selectPhoto()
+        }
+        ivDelete.setOnClickListener {
+            galleryAdapter.clickToRemove()
+        }
+    }
+
+    private fun setupObservers() {
+        storageViewModel.listResult.observe(viewLifecycleOwner, { listResult ->
+            listResult?.let {
+                when (galleryActionEnum) {
+                    GalleryActionEnum.DOWNLOAD -> {
+                        if (listResult.items.size != 0) {
+                            listResult.items.forEach {
+                                it.downloadUrl.addOnSuccessListener { uri ->
+                                    connectivityViewModel.hasPhoto.value = true
+                                    galleryAdapter.setItemList(uri)
+                                }.addOnFailureListener { exception ->
+                                    print(exception)
+                                }
+                            }
+                        } else {
+                            showEmptyState()
+                        }
+                    }
+                    GalleryActionEnum.DELETE_ALL_ITEMS -> {
+                        listResult.items.forEach { storageReference ->
+                            storageViewModel.deleteImageReference(storageReference)
+                        }
+                        showEmptyState()
+                    }
+                }
+            }
+        })
 
         connectivityViewModel.hasInternet.observe(viewLifecycleOwner,
             {
@@ -131,44 +155,20 @@ class GalleryFragment : Fragment() {
                                 showEmptyState()
                             }
                         })
-                        storage.child("/images")
-                            .child("/$email")
-                            .listAll()
-                            .addOnSuccessListener { listResult ->
-                                if (listResult.items.size != 0) {
-                                    listResult.items.forEach {
-                                        it.downloadUrl.addOnSuccessListener { uri ->
-                                            connectivityViewModel.hasPhoto.value = true
-                                            galleryAdapter.setItemList(uri)
-                                        }.addOnFailureListener { exception ->
-                                            print(exception)
-                                        }
-                                    }
-                                } else {
-                                    showEmptyState()
-                                }
-                            }.addOnFailureListener { exception ->
-                                print(exception)
-                            }
-                    } else if(it.second == UPLOAD) {
+                        galleryActionEnum = GalleryActionEnum.DOWNLOAD
+                        storageViewModel.getImagesList(requireContext(), email!!)
+                    } else if (it.second == UPLOAD) {
                         val filename = "_${Date()}_"
-                        val ref = FirebaseStorage.getInstance()
-                            .getReference("images/${email}/${filename}")
+                        val refOneImage = storageViewModel.getImageReference(requireContext(), email!!, filename)
                         selectedUri?.let { uri ->
-                            ref.putFile(uri)
+                            refOneImage?.putFile(uri)
                         }
                         showRecyclerView()
                     } else if (it.second == DELETE) {
                         printMessageAboutExclusion()
                         if (areAllItems!!) {
-                            storage.child("/images")
-                                .child("/$email")
-                                .listAll().addOnSuccessListener { listResult ->
-                                    listResult.items.forEach { storageReference ->
-                                        storageReference.delete()
-                                    }
-                                }
-                            showEmptyState()
+                            galleryActionEnum = GalleryActionEnum.DELETE_ALL_ITEMS
+                            storageViewModel.getImagesList(requireContext(), email!!)
                         } else {
                             selectedUriList?.forEach { uri ->
                                 val uriString = uri.toString()
@@ -177,9 +177,7 @@ class GalleryFragment : Fragment() {
                                 if (initialIndex != -1 && finalIndexOk != -1) {
                                     val filename = uriString.substring(initialIndex, finalIndexOk)
                                         .replace("%20", " ").replace("%3A", ":")
-                                    storage.child("/images")
-                                        .child("/$email/$filename")
-                                        .delete()
+                                    storageViewModel.deleteChildImage("$email/$filename")
                                 }
                             }
                             showRecyclerView()

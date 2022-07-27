@@ -29,6 +29,8 @@
     <string name="select_the_hour">->Selecione a hora</string>
     <string name="successful_scheduling">Agendamento salvo com sucesso!!!</string>
     <string name="error_scheduling">Erro ao tentar salvar o usuário. Por favor, tente novamente.</string>
+    <string name="error_storage">Erro ao tentar recuperar imagem. Por favor, arraste de cima da tela para baixo para que seja feita novamente a atualização da mesma.</string>
+    <string name="error_storage_reference">Erro ao recuperar referência da imagem. Por favor, arraste de cima da tela para baixo para que seja feita novamente a atualização da mesma.</string>
     <string name="save">Salvar</string>
     <string name="confirm">Confirmar</string>
     <string name="cancel">Cancelar</string>
