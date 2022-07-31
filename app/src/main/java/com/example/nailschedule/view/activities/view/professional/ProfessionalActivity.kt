@@ -22,7 +22,6 @@ import com.example.nailschedule.view.activities.viewmodels.UsersViewModel
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import java.util.*
 
 
 class ProfessionalActivity : AppCompatActivity(),
@@ -125,11 +124,9 @@ class ProfessionalActivity : AppCompatActivity(),
                         val hoursList = Time(previousTimeList)
                         calendarFieldViewModel.updateCalendarField(date, hoursList)
                         hideBtnDeleteSchedule()
-                        with(professionalScheduleAdapter) {
-                            clearItemsList()
-                            val list = previousTimeList.subList(1, (previousTimeList.size - 1))
-                            setItemsList(list)
-                        }
+                        val list = previousTimeList.subList(1, (previousTimeList.size - 1))
+                        val professionalList = list.map { timeAvailability(it) }
+                        professionalScheduleAdapter.submitList(professionalList)
                         showUnscheduledLabel()
                         deleteUser()
                     }
@@ -143,10 +140,8 @@ class ProfessionalActivity : AppCompatActivity(),
                     } ?: run {
                         showToast(this, R.string.all_free)
                     }
-                    with(professionalScheduleAdapter) {
-                        clearItemsList()
-                        setItemsList(mutableTimeList)
-                    }
+                    val professionalList = mutableTimeList.map { timeAvailability(it) }
+                    professionalScheduleAdapter.submitList(professionalList)
                 }
             }
         })

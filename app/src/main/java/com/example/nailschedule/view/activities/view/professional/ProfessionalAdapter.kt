@@ -3,13 +3,14 @@ package com.example.nailschedule.view.activities.view.professional
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ItemHourBinding
 
 class ProfessionalAdapter(private val onBtnSeeScheduleClicked: (info: String)-> Unit)
-: RecyclerView.Adapter<ProfessionalAdapter.MyViewHolder>() {
-    private var availableTimeList: ArrayList<String> = arrayListOf()
+: ListAdapter<timeAvailability, ProfessionalAdapter.MyViewHolder>(ProfessionalDiffCallback) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -22,30 +23,18 @@ class ProfessionalAdapter(private val onBtnSeeScheduleClicked: (info: String)-> 
     )
 
     override fun onBindViewHolder(holder: ProfessionalAdapter.MyViewHolder, position: Int) {
-        holder.bind(availableTimeList[position])
-    }
-
-    override fun getItemCount() = availableTimeList.size
-
-    fun setItemsList(timeList: List<String>) {
-        availableTimeList.addAll(timeList)
-        notifyDataSetChanged()
-    }
-
-    fun clearItemsList() {
-        availableTimeList.clear()
-        notifyDataSetChanged()
+        holder.bind(currentList[position])
     }
 
     inner class MyViewHolder(private val binding: ItemHourBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(info: String) = binding.apply {
+        fun bind(timeAvailability: timeAvailability) = binding.apply {
             btnSeeSchedule.setOnClickListener {
-                onBtnSeeScheduleClicked.invoke(info)
+                onBtnSeeScheduleClicked.invoke(timeAvailability.time)
             }
-            val hour = "${info.subSequence(0, 5)} h"
+            val hour = "${timeAvailability.time.subSequence(0, 5)} h"
             tvHour.text = hour
-            if (info.subSequence(5, info.length) == ";false") {
+            if (timeAvailability.time.subSequence(5, timeAvailability.time.length) == ";false") {
                 tvAvailability.text = binding.root.context.getString(R.string.available)
                 btnSeeSchedule.isVisible = false
                 tvAvailability.isVisible = true
@@ -56,5 +45,11 @@ class ProfessionalAdapter(private val onBtnSeeScheduleClicked: (info: String)-> 
         }
     }
 
-    fun clearList() = availableTimeList.clear()
+    object ProfessionalDiffCallback: DiffUtil.ItemCallback<timeAvailability>() {
+        override fun areItemsTheSame(oldItem: timeAvailability, newItem: timeAvailability) = true
+
+        override fun areContentsTheSame(oldItem: timeAvailability, newItem: timeAvailability): Boolean {
+            return oldItem == newItem
+        }
+    }
 }
