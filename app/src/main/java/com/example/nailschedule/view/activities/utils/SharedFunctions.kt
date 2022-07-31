@@ -33,7 +33,7 @@ fun isNotEmptyField(field: String?): Boolean {
     return field != null && field.isNotBlank() && field.isNotEmpty()
 }
 
-fun isEmptyField(field: String?): Boolean {
+fun isEmptyBlankOrNullField(field: String?): Boolean {
     return field == null || field.isBlank() || field.isEmpty()
 }
 
@@ -44,3 +44,7 @@ fun String.hasSemicolonTrue() = this.contains(";true")
 fun String.hasFalseSemicolon() = this.contains("false;")
 
 fun String.hasSemicolonFalse() = this.contains(";false")
+
+fun String.Companion.empty(): String {
+    return ""
+}

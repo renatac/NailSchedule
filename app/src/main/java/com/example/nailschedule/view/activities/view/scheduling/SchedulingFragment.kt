@@ -9,8 +9,6 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -18,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
@@ -53,18 +52,15 @@ class SchedulingFragment : Fragment() {
 
     private var timeListOk = mutableListOf<String>()
 
-    private var name: String? = null
-    private var service: String? = null
-    private var date: String? = null
+    private var name = String.empty()
+    private var service = String.empty()
+    private var date = String.empty()
     private var time: String? = null
-    private var pos: Int = 0
+    private var uriString = String.empty()
+    private var email = String.empty()
 
-    private var uriString: String? = null
-
-    private var email: String? = null
-
-    private var previousDt: String? = null
-    private var previousTm: String? = null
+    private var previousDt = String.empty()
+    private var previousTm = String.empty()
     private var currentTimeList: MutableList<String>? = null
     private var calendarUser: User? = null
     private var downloadUser: User? = null
@@ -78,11 +74,11 @@ class SchedulingFragment : Fragment() {
 
     private var schedulingActionEnum: SchedulingActionEnum? = null
 
-    private var dtMinusOne = ""
+    private var dtMinusOne = String.empty()
 
     //About previous date chosen
-    private var previousDate = ""
-    private var previousTime = ""
+    private var previousDate = String.empty()
+    private var previousTime = String.empty()
 
     private var timeMutableList = mutableListOf<String>()
 
@@ -177,7 +173,7 @@ class SchedulingFragment : Fragment() {
                         if (isAddOrUpdateCalendarField && timeListOk.size > 1) {
                             addOrUpdateCalendarFieldAtFirestoreDatabase(
                                 timeListOk,
-                                date!!
+                                date
                             )
                         }
                     }
@@ -186,54 +182,65 @@ class SchedulingFragment : Fragment() {
                     val previousTimeList = mutableListOf<String>()
                     calendarField?.let {
                         val timeList = it.timeList
-                        if (previousDt.toString() == calendarUser!!.date) {
-                            currentTimeList!!.forEach { t ->
-                                if (t.contains(previousTm.toString()) && t.hasSemicolonTrue()) {
-                                    val finalIndex = t.indexOf(semicolonTrue)
-                                    val timeNew = t.substring(0, finalIndex)
-                                    previousTimeList.add(timeNew.plus(semicolonFalse))
-                                } else if (t.contains(time!!) && t.hasSemicolonTrue()) {
-                                    previousTimeList.add(replaceUserStr(t.plus(downloadUser.toString())))
-                                } else {
-                                    previousTimeList.add(t)
+                        calendarUser?.let { calendarUser ->
+                            if (previousDt == calendarUser.date) {
+                                currentTimeList?.let { currentTimeList ->
+                                    currentTimeList.forEach { t ->
+                                        if (t.contains(previousTm) && t.hasSemicolonTrue()) {
+                                            val finalIndex = t.indexOf(semicolonTrue)
+                                            val timeNew = t.substring(0, finalIndex)
+                                            previousTimeList.add(timeNew.plus(semicolonFalse))
+                                        } else if (time?.let { time -> t.contains(time) } == true && t.hasSemicolonTrue()) {
+                                            previousTimeList.add(replaceUserStr(t.plus(downloadUser.toString())))
+                                        } else {
+                                            previousTimeList.add(t)
+                                        }
+                                    }
+                                    addOrUpdateUserAtFirestoreDatabase(
+                                        previousTimeList,
+                                        calendarUser
+                                    )
+                                }
+                            } else {
+                                timeList.forEach { t ->
+                                    if (t.contains(previousTm) && t.hasSemicolonTrue()) {
+                                        val finalIndex = t.indexOf(semicolonTrue)
+                                        val timeNew =
+                                            t.substring(0, finalIndex)
+                                        previousTimeList.add(timeNew.plus(semicolonFalse))
+                                    } else {
+                                        previousTimeList.add(t)
+                                    }
+                                }
+                                addOrUpdateCalendarFieldAtFirestoreDatabase(
+                                    previousTimeList,
+                                    previousDt
+                                )
+                                currentTimeList?.let { currentTimeList ->
+                                    val currentTimeListWithUser = mutableListOf<String>()
+                                    currentTimeList.forEach { t ->
+                                        if (t.hasSemicolonTrue()) {
+                                            currentTimeListWithUser.add(
+                                                t.plus(
+                                                    replaceUserStr(
+                                                        downloadUser.toString()
+                                                    )
+                                                )
+                                            )
+                                        } else {
+                                            currentTimeListWithUser.add(t)
+                                        }
+                                    }
+                                    addOrUpdateUserAtFirestoreDatabase(
+                                        currentTimeListWithUser,
+                                        calendarUser
+                                    )
                                 }
                             }
-                            addOrUpdateUserAtFirestoreDatabase(
-                                previousTimeList,
-                                calendarUser!!
-                            )
-                        } else {
-                            timeList.forEach { t ->
-                                if (t.contains(previousTm.toString()) && t.hasSemicolonTrue()) {
-                                    val finalIndex = t.indexOf(semicolonTrue)
-                                    val timeNew =
-                                        t.substring(0, finalIndex)
-                                    previousTimeList.add(timeNew.plus(semicolonFalse))
-                                } else {
-                                    previousTimeList.add(t)
-                                }
-                            }
-                            addOrUpdateCalendarFieldAtFirestoreDatabase(
-                                previousTimeList,
-                                previousDt!!
-                            )
-                            val currentTimeListWithUser =
-                                mutableListOf<String>()
-                            currentTimeList!!.forEach { t ->
-                                if (t.hasSemicolonTrue()) {
-                                    currentTimeListWithUser.add(t.plus(replaceUserStr(downloadUser.toString())))
-                                } else {
-                                    currentTimeListWithUser.add(t)
-                                }
-                            }
-                            addOrUpdateUserAtFirestoreDatabase(
-                                currentTimeListWithUser,
-                                calendarUser!!
-                            )
+                            clearFields()
+                            setBottomVisibility(false)
+                            setBtnSaveVisibility(true)
                         }
-                        clearFields()
-                        setBottomVisibility(GONE)
-                        setBtnSaveVisibility(VISIBLE)
                     }
                 }
                 SchedulingActionEnum.CALENDAR_DOWNLOAD -> {
@@ -244,7 +251,7 @@ class SchedulingFragment : Fragment() {
                         timeMutableList = mutableListOf()
                         timeList.forEach { t ->
                             var canSchedule = false
-                            if (t.contains(time.toString()) && t.hasSemicolonFalse()) {
+                            if ((time?.let { time -> t.contains(time) } == true) && t.hasSemicolonFalse()) {
                                 canUseTime = true
                                 canSchedule = true
                             }
@@ -257,7 +264,7 @@ class SchedulingFragment : Fragment() {
 
                         if (canUseTime) {
                             schedulingActionEnum = SchedulingActionEnum.USER_DOWNLOAD
-                            usersViewModel.getUserData(requireContext(), email!!)
+                            usersViewModel.getUserData(requireContext(), email)
                         } else {
                             showToast(
                                 requireContext(),
@@ -266,23 +273,25 @@ class SchedulingFragment : Fragment() {
                         }
 
                         binding.btnConfirm.setOnClickListener {
-                            getFirebaseFirestoreCalendarField(
-                                previousDate,
-                                previousTime,
-                                timeMutableList,
-                                downloadUser!!
-                            )
+                            downloadUser?.let { downloadUser ->
+                                getFirebaseFirestoreCalendarField(
+                                    previousDate,
+                                    previousTime,
+                                    timeMutableList,
+                                    downloadUser
+                                )
+                            }
                         }
 
                         binding.btnCancel.setOnClickListener {
                             clearFields()
-                            setBottomVisibility(GONE)
-                            setBtnSaveVisibility(VISIBLE)
+                            setBottomVisibility(false)
+                            setBtnSaveVisibility(true)
                         }
                     } ?: run {
                         val timeMutableList = mutableListOf<String>()
                         originalList.forEach { t ->
-                            if (t.contains(time.toString())) {
+                            if (time?.let { time -> t.contains(time) } == true) {
                                 timeMutableList.add(
                                     t.replace(semicolonFalse, semicolonTrue)
                                         .plus(replaceUserStr(downloadUser.toString()))
@@ -301,10 +310,12 @@ class SchedulingFragment : Fragment() {
                                 timeMutableListWithUser.add(t)
                             }
                         }
-                        addOrUpdateUserAtFirestoreDatabase(
-                            timeMutableListWithUser,
-                            downloadUser!!
-                        )
+                        downloadUser?.let {
+                            addOrUpdateUserAtFirestoreDatabase(
+                                timeMutableListWithUser,
+                                downloadUser!!
+                            )
+                        }
                     }
                 }
                 else -> {}
@@ -316,7 +327,7 @@ class SchedulingFragment : Fragment() {
                 SchedulingActionEnum.DELETE_ALL_DATA -> {
                     val userDate = user.date
                     if (userDate == dtMinusOne) {
-                        usersViewModel.deleteUser(email!!)
+                        usersViewModel.deleteUser(email)
                     }
                 }
                 SchedulingActionEnum.USER_DOWNLOAD -> {
@@ -334,8 +345,8 @@ class SchedulingFragment : Fragment() {
                                 previousDate,
                                 previousTime
                             )
-                            setBtnSaveVisibility(GONE)
-                            setBottomVisibility(VISIBLE)
+                            setBtnSaveVisibility(false)
+                            setBottomVisibility(true)
                         }
                     } ?: run {
                         addNewUserAndCalendarField(
@@ -343,7 +354,8 @@ class SchedulingFragment : Fragment() {
                         )
                     }
                 }
-                else -> {}
+                else -> {
+                }
             }
         })
 
@@ -360,23 +372,23 @@ class SchedulingFragment : Fragment() {
                                 dtMinusOne = f.format(now.time)
                                 schedulingActionEnum = SchedulingActionEnum.DELETE_ALL_DATA
                                 calendarFieldViewModel.deleteCalendarField(dtMinusOne)
-                                usersViewModel.getUserData(requireContext(), email!!)
+                                usersViewModel.getUserData(requireContext(), email)
                             }
                         }
                         SETUP_SPINNER -> {
                             schedulingActionEnum = SchedulingActionEnum.SETUP_SPINNER
-                            calendarFieldViewModel.getCalendarFieldData(requireContext(), date!!)
+                            calendarFieldViewModel.getCalendarFieldData(requireContext(), date)
                         }
                         CALENDAR_FIELD -> {
                             schedulingActionEnum = SchedulingActionEnum.CALENDAR_FIELD
                             calendarFieldViewModel.getCalendarFieldData(
                                 requireContext(),
-                                previousDt!!
+                                previousDt
                             )
                         }
                         DOWNLOAD -> {
                             schedulingActionEnum = SchedulingActionEnum.CALENDAR_DOWNLOAD
-                            calendarFieldViewModel.getCalendarFieldData(requireContext(), date!!)
+                            calendarFieldViewModel.getCalendarFieldData(requireContext(), date)
                         }
                         ADD_OR_UPDATE_CALENDAR_FIELD -> {
                             val time = Time(hourList!!)
@@ -384,7 +396,7 @@ class SchedulingFragment : Fragment() {
                                 .document(dateCalendarFieldAddOrUpdate!!).set(time)
                         }
                         USER_ADD_OR_UPDATE -> {
-                            usersViewModel.updateUser(requireContext(), email!!, addOrUpdateUser!!)
+                            usersViewModel.updateUser(requireContext(), email, addOrUpdateUser!!)
                         }
                     }
                 } else {
@@ -405,7 +417,7 @@ class SchedulingFragment : Fragment() {
         val timeMutableListWithUser =
             mutableListOf<String>()
         timeMutableList.forEach { t ->
-            if (t.contains(time!!) && t.hasSemicolonTrue()) {
+            if ((time?.let { time -> t.contains(time) } == true) && t.hasSemicolonTrue()) {
                 timeMutableListWithUser.add(t.plus(replaceUserStr(downloadUser.toString())))
             } else {
                 timeMutableListWithUser.add(t)
@@ -413,17 +425,17 @@ class SchedulingFragment : Fragment() {
         }
         addOrUpdateCalendarFieldAtFirestoreDatabase(
             timeMutableListWithUser,
-            date!!
+            date
         )
         clearFields()
-        setBottomVisibility(GONE)
-        setBtnSaveVisibility(VISIBLE)
+        setBottomVisibility(false)
+        setBtnSaveVisibility(true)
     }
 
     private fun initializeEmail() {
         email = SharedPreferencesHelper.read(
             SharedPreferencesHelper.EXTRA_EMAIL, ""
-        )
+        ).orEmpty()
     }
 
     private fun initializeAdapter(list: List<String>) {
@@ -465,11 +477,11 @@ class SchedulingFragment : Fragment() {
     }
 
     private fun hideSpinner() {
-        binding.spinner.visibility = GONE
+        binding.spinner.isVisible = false
     }
 
     private fun showSpinner() {
-        binding.spinner.visibility = VISIBLE
+        binding.spinner.isVisible = true
     }
 
     @SuppressLint("WrongConstant", "ClickableViewAccessibility", "SimpleDateFormat")
@@ -510,7 +522,6 @@ class SchedulingFragment : Fragment() {
                 if (spinner.selectedItem.toString() != requireContext()
                         .getString(R.string.select_the_hour)
                 ) {
-                    pos = position
                     time = spinner.selectedItem.toString()
                 }
             }
@@ -527,8 +538,8 @@ class SchedulingFragment : Fragment() {
                 isNotEmptyField(time) && isNotEmptyField(uriString)
             ) {
                 val user = User(
-                    name = name!!, service = service!!, date = date!!,
-                    time = time!!, uriString = uriString!!, email = email!!
+                    name = name, service = service, date = date,
+                    time = time.orEmpty(), uriString = uriString, email = email
                 )
                 val currentDate = SimpleDateFormat(patternDate).format(Date())
                 val currentHour = SimpleDateFormat(patternTime).format(Date())
@@ -613,19 +624,20 @@ class SchedulingFragment : Fragment() {
         tvRemark.apply {
             text = requireContext().getString(
                 R.string.message_about_remark,
-                userTime, userDate
+                userTime,
+                userDate
             )
         }
     }
 
-    private fun setBottomVisibility(visibility: Int) = binding.apply {
-        tvRemark.visibility = visibility
-        btnConfirm.visibility = visibility
-        btnCancel.visibility = visibility
+    private fun setBottomVisibility(visibility: Boolean) = binding.apply {
+        tvRemark.isVisible = visibility
+        btnConfirm.isVisible = visibility
+        btnCancel.isVisible = visibility
     }
 
-    private fun setBtnSaveVisibility(visibility: Int) {
-        binding.btnSave.visibility = visibility
+    private fun setBtnSaveVisibility(visibility: Boolean) {
+        binding.btnSave.isVisible = visibility
     }
 
     private fun addOrUpdateCalendarFieldAtFirestoreDatabase(
@@ -645,7 +657,7 @@ class SchedulingFragment : Fragment() {
         hourAddOrUpdateList: List<String>,
         addOrUpdateUser: User
     ) {
-        addOrUpdateCalendarFieldAtFirestoreDatabase(hourAddOrUpdateList, date!!)
+        addOrUpdateCalendarFieldAtFirestoreDatabase(hourAddOrUpdateList, date)
         this.addOrUpdateUser = addOrUpdateUser
         connectivityViewModel.checkForInternet(
             requireContext(),
@@ -658,7 +670,7 @@ class SchedulingFragment : Fragment() {
         txtName.editText?.setText("")
         txtService.editText?.setText("")
         calendarView.clearFocus()
-        uriString = null
+        uriString = String.empty()
         hideSpinner()
         showOptionsToSelectPhoto()
     }
@@ -669,23 +681,23 @@ class SchedulingFragment : Fragment() {
 
     private fun printEmptyField() {
         when {
-            isEmptyField(name) -> {
+            isEmptyBlankOrNullField(name) -> {
                 showToast(requireContext(), R.string.empty_name)
             }
-            isEmptyField(service) -> {
+            isEmptyBlankOrNullField(service) -> {
                 showToast(requireContext(), R.string.empty_service)
             }
-            isEmptyField(date) -> {
+            isEmptyBlankOrNullField(date) -> {
                 showToast(requireContext(), R.string.empty_date)
             }
-            isEmptyField(time) -> {
+            isEmptyBlankOrNullField(time) -> {
                 if (timeListOk.size == 1) {
                     showToast(requireContext(), R.string.data_without_available_hour)
                 } else {
                     showToast(requireContext(), R.string.empty_time)
                 }
             }
-            isEmptyField(uriString) -> {
+            isEmptyBlankOrNullField(uriString) -> {
                 showToast(requireContext(), R.string.empty_photo)
             }
         }
@@ -716,15 +728,15 @@ class SchedulingFragment : Fragment() {
     }
 
     private fun showPhoto() = binding.apply {
-        btnChoosePhoneGallery.visibility = GONE
-        tvInformationPhotoChange.visibility = VISIBLE
-        ivPhoto.visibility = VISIBLE
+        btnChoosePhoneGallery.isVisible = false
+        tvInformationPhotoChange.isVisible = true
+        ivPhoto.isVisible = true
     }
 
     private fun showOptionsToSelectPhoto() = binding.apply {
-        tvInformationPhotoChange.visibility = GONE
-        ivPhoto.visibility = GONE
-        btnChoosePhoneGallery.visibility = VISIBLE
+        tvInformationPhotoChange.isVisible = false
+        ivPhoto.isVisible = false
+        btnChoosePhoneGallery.isVisible = true
     }
 
     override fun onDestroyView() {

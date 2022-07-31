@@ -58,8 +58,10 @@ class ConnectivityViewModel : ViewModel() {
             connectivityManager.activeNetworkInfo?.let {
                 val networkInfo =
                     connectivityManager.activeNetworkInfo
-                @Suppress("DEPRECATION")
-                _hasInternet.value = Pair(networkInfo?.isConnected!!, str)
+                networkInfo?.isConnected?.let { isConnected ->
+                    @Suppress("DEPRECATION")
+                    _hasInternet.value = Pair(isConnected, str)
+                }
             }?: run {
                 _hasInternet.value = Pair(false, str)
             }

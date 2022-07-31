@@ -11,18 +11,19 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentGalleryBinding
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
+import com.example.nailschedule.view.activities.utils.empty
 import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
 import com.example.nailschedule.view.activities.view.scheduled.ScheduledFragment
 import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.example.nailschedule.view.activities.viewmodels.StorageViewModel
-import com.google.firebase.storage.StorageReference
 import java.util.*
 
 
@@ -31,7 +32,7 @@ class GalleryFragment : Fragment() {
     private var email: String? = null
     private var selectedUriList: List<Uri>? = null
     private var uriList: List<Uri>? = null
-    private var areAllItems: Boolean? = null
+    private var areAllItems = false
 
     private var _binding: FragmentGalleryBinding? = null
 
@@ -78,7 +79,7 @@ class GalleryFragment : Fragment() {
 
     private fun getUserEmail() {
         email = SharedPreferencesHelper.read(
-            SharedPreferencesHelper.EXTRA_EMAIL, ""
+            SharedPreferencesHelper.EXTRA_EMAIL, String.empty()
         )
     }
 
@@ -147,40 +148,47 @@ class GalleryFragment : Fragment() {
                 if (it.first) {
                     showProgress()
                     hideRefresh()
-                    if (it.second == DOWNLOAD) {
-                        connectivityViewModel.hasPhoto.observe(viewLifecycleOwner, {
-                            if (connectivityViewModel.hasPhoto.value!!) {
-                                showRecyclerView()
-                            } else {
-                                showEmptyState()
-                            }
-                        })
-                        galleryActionEnum = GalleryActionEnum.DOWNLOAD
-                        storageViewModel.getImagesList(requireContext(), email!!)
-                    } else if (it.second == UPLOAD) {
-                        val filename = "_${Date()}_"
-                        val refOneImage = storageViewModel.getImageReference(requireContext(), email!!, filename)
-                        selectedUri?.let { uri ->
-                            refOneImage?.putFile(uri)
-                        }
-                        showRecyclerView()
-                    } else if (it.second == DELETE) {
-                        printMessageAboutExclusion()
-                        if (areAllItems!!) {
-                            galleryActionEnum = GalleryActionEnum.DELETE_ALL_ITEMS
-                            storageViewModel.getImagesList(requireContext(), email!!)
-                        } else {
-                            selectedUriList?.forEach { uri ->
-                                val uriString = uri.toString()
-                                val initialIndex = uriString.indexOf("_")
-                                val finalIndexOk = uriString.lastIndexOf("_") + 1
-                                if (initialIndex != -1 && finalIndexOk != -1) {
-                                    val filename = uriString.substring(initialIndex, finalIndexOk)
-                                        .replace("%20", " ").replace("%3A", ":")
-                                    storageViewModel.deleteChildImage("$email/$filename")
+                    email?.let { email ->
+                        if (it.second == DOWNLOAD) {
+                            connectivityViewModel.hasPhoto.observe(viewLifecycleOwner, {
+                                if (connectivityViewModel.hasPhoto.value == true) {
+                                    showRecyclerView()
+                                } else {
+                                    showEmptyState()
                                 }
+                            })
+                            galleryActionEnum = GalleryActionEnum.DOWNLOAD
+                            storageViewModel.getImagesList(requireContext(), email)
+                        } else if (it.second == UPLOAD) {
+                            val filename = "_${Date()}_"
+                            val refOneImage = storageViewModel.getImageReference(
+                                requireContext(),
+                                email,
+                                filename
+                            )
+                            selectedUri?.let { uri ->
+                                refOneImage?.putFile(uri)
                             }
                             showRecyclerView()
+                        } else if (it.second == DELETE) {
+                            printMessageAboutExclusion()
+                            if (areAllItems) {
+                                galleryActionEnum = GalleryActionEnum.DELETE_ALL_ITEMS
+                                storageViewModel.getImagesList(requireContext(), email)
+                            } else {
+                                selectedUriList?.forEach { uri ->
+                                    val uriString = uri.toString()
+                                    val initialIndex = uriString.indexOf("_")
+                                    val finalIndexOk = uriString.lastIndexOf("_") + 1
+                                    if (initialIndex != -1 && finalIndexOk != -1) {
+                                        val filename =
+                                            uriString.substring(initialIndex, finalIndexOk)
+                                                .replace("%20", " ").replace("%3A", ":")
+                                        storageViewModel.deleteChildImage("$email/$filename")
+                                    }
+                                }
+                                showRecyclerView()
+                            }
                         }
                     }
                 } else {
@@ -264,11 +272,11 @@ class GalleryFragment : Fragment() {
     }
 
     private fun hideTrash() {
-        binding.ivDelete.visibility = View.GONE
+        binding.ivDelete.isVisible = false
     }
 
     private fun showTrash() {
-        binding.ivDelete.visibility = View.VISIBLE
+        binding.ivDelete.isVisible = true
     }
 
     private fun showRecyclerView() {
@@ -285,13 +293,13 @@ class GalleryFragment : Fragment() {
 
     private fun printMessageAboutExclusion() {
         when {
-            selectedUriList!!.isEmpty() -> {
+            selectedUriList?.isEmpty() == true -> {
                 showToast(requireContext(), R.string.no_selected_photo)
             }
-            selectedUriList!!.size == 1 -> {
+            selectedUriList?.size == 1 -> {
                 showToast(requireContext(), R.string.photo_deleted)
             }
-            uriList?.size == selectedUriList!!.size -> {
+            uriList?.size == selectedUriList?.size -> {
                 showToast(requireContext(), R.string.all_photos_deleted)
             }
             else -> {

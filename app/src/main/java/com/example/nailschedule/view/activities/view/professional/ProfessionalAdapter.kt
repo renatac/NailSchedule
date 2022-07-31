@@ -1,8 +1,8 @@
 package com.example.nailschedule.view.activities.view.professional
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ItemHourBinding
@@ -47,11 +47,11 @@ class ProfessionalAdapter(private val onBtnSeeScheduleClicked: (info: String)-> 
             tvHour.text = hour
             if (info.subSequence(5, info.length) == ";false") {
                 tvAvailability.text = binding.root.context.getString(R.string.available)
-                btnSeeSchedule.visibility = View.GONE
-                tvAvailability.visibility = View.VISIBLE
+                btnSeeSchedule.isVisible = false
+                tvAvailability.isVisible = true
             } else {
-                btnSeeSchedule.visibility = View.VISIBLE
-                tvAvailability.visibility = View.GONE
+                btnSeeSchedule.isVisible = true
+                tvAvailability.isVisible = false
             }
         }
     }

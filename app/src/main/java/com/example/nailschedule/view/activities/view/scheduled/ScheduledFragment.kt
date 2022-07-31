@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
@@ -13,6 +14,7 @@ import com.example.nailschedule.databinding.FragmentScheduledBinding
 import com.example.nailschedule.view.activities.data.model.Time
 import com.example.nailschedule.view.activities.data.model.User
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
+import com.example.nailschedule.view.activities.utils.empty
 import com.example.nailschedule.view.activities.utils.semicolonFalse
 import com.example.nailschedule.view.activities.utils.semicolonTrue
 import com.example.nailschedule.view.activities.view.activities.PhotoActivity
@@ -33,7 +35,7 @@ class ScheduledFragment : Fragment() {
     private var user: User? = null
 
     private val email = SharedPreferencesHelper.read(
-        SharedPreferencesHelper.EXTRA_EMAIL, ""
+        SharedPreferencesHelper.EXTRA_EMAIL, String.empty()
     )
 
     private var date: String? = null
@@ -104,7 +106,7 @@ class ScheduledFragment : Fragment() {
             val timeList = calendarField?.timeList
             val previousTimeList = mutableListOf<String>()
             timeList?.forEach { t ->
-                if (t.contains(time!!)) {
+                if (time?.let { t.contains(it)} == true) {
                     val finalIndex = t.indexOf(semicolonTrue)
                     val timeNew = t.substring(0, finalIndex)
                     previousTimeList.add(timeNew.plus(semicolonFalse))
@@ -113,8 +115,10 @@ class ScheduledFragment : Fragment() {
                 }
             }
             val hoursList = Time(previousTimeList)
-            calendarFieldViewModel.updateCalendarField(date!!, hoursList)
-            showEmptyState()
+            date?.let { date ->
+                calendarFieldViewModel.updateCalendarField(date, hoursList)
+                showEmptyState()
+            }
         })
 
         connectivityViewModel.hasInternet.observe(viewLifecycleOwner,
@@ -122,11 +126,15 @@ class ScheduledFragment : Fragment() {
                 if (it.first) {
                     showProgress()
                     hideRefresh()
-                    if (it.second == USER_DATA_DOWNLOAD) {
-                        usersViewModel.getUserData(requireContext(), email!!)
-                    } else if (it.second == USER_DATA_DELETION) {
-                        usersViewModel.deleteUser(email!!)
-                        calendarFieldViewModel.getCalendarFieldData(requireContext(), date!!)
+                    email?.let { email ->
+                        if (it.second == USER_DATA_DOWNLOAD) {
+                            usersViewModel.getUserData(requireContext(), email)
+                        } else if (it.second == USER_DATA_DELETION) {
+                            usersViewModel.deleteUser(email)
+                            date?.let { date ->
+                                calendarFieldViewModel.getCalendarFieldData(requireContext(), date)
+                            }
+                        }
                     }
                 } else {
                     hideRefresh()
@@ -181,8 +189,8 @@ class ScheduledFragment : Fragment() {
     }
 
     private fun hideButtons() = binding.apply {
-        btnEdit.visibility = View.GONE
-        btnDelete.visibility = View.GONE
+        btnEdit.isVisible = false
+        btnDelete.isVisible = false
     }
 
     private fun saveAtSharedPreferences() = binding.apply {

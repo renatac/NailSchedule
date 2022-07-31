@@ -17,10 +17,7 @@ import androidx.navigation.ui.NavigationUI
 import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityBottomNavigationBinding
-import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
-import com.example.nailschedule.view.activities.utils.isLoggedInFacebook
-import com.example.nailschedule.view.activities.utils.showLoginScreen
-import com.example.nailschedule.view.activities.utils.showToast
+import com.example.nailschedule.view.activities.utils.*
 import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.facebook.login.LoginManager
 import com.google.android.gms.tasks.OnCompleteListener
@@ -143,15 +140,15 @@ class BottomNavigationActivity : AppCompatActivity(),
 
     private fun getExtras() {
         displayName = SharedPreferencesHelper.read(
-            SharedPreferencesHelper.EXTRA_DISPLAY_NAME, ""
+            SharedPreferencesHelper.EXTRA_DISPLAY_NAME, String.empty()
         )
         photoUrl = Uri.parse(
             SharedPreferencesHelper.read(
-                SharedPreferencesHelper.EXTRA_PHOTO_URL, ""
+                SharedPreferencesHelper.EXTRA_PHOTO_URL, String.empty()
             )
         )
         email = SharedPreferencesHelper.read(
-            SharedPreferencesHelper.EXTRA_EMAIL, ""
+            SharedPreferencesHelper.EXTRA_EMAIL, String.empty()
         )
     }
 

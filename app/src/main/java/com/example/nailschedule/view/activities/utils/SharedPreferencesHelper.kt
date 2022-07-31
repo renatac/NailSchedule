@@ -33,15 +33,4 @@ object SharedPreferencesHelper {
         prefsEditor?.putString(key, value)
         prefsEditor?.apply()
     }
-
-    fun write(key: String, value: Boolean) {
-        val prefsEditor = mSharedPref!!.edit()
-        prefsEditor.putBoolean(key, value)
-        prefsEditor.apply()
-    }
-
-    fun write(key: String, value: Int?) {
-        val prefsEditor = mSharedPref!!.edit()
-        prefsEditor.putInt(key, value!!).apply()
-    }
 }

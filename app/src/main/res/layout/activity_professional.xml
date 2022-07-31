@@ -108,14 +108,6 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical">
 
-                                <com.google.android.material.progressindicator.CircularProgressIndicator
-                                    android:id="@+id/progress_professional"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="center"
-                                    android:visibility="gone"
-                                    app:trackColor="@color/purple_500" />
-
                                 <ImageView
                                     android:id="@+id/iv_close"
                                     android:layout_width="wrap_content"

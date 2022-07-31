@@ -3,11 +3,11 @@ package com.example.nailschedule.view.activities.view.professional
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nailschedule.R
@@ -113,7 +113,7 @@ class ProfessionalActivity : AppCompatActivity(),
                 ProfessionalActionEnum.IS_DELETION -> {
                     val previousTimeList = mutableListOf<String>()
                     timeList?.forEach { t ->
-                        if (t.contains(time!!)) {
+                        if (time?.let { time -> t.contains(time) } == true) {
                             val finalIndex = t.indexOf(";true")
                             val timeNew = t.substring(0, finalIndex)
                             previousTimeList.add(timeNew.plus(";false"))
@@ -121,17 +121,18 @@ class ProfessionalActivity : AppCompatActivity(),
                             previousTimeList.add(t)
                         }
                     }
-                    val hoursList = Time(previousTimeList)
-                    calendarFieldViewModel.updateCalendarField(date!!, hoursList)
-                    hideProgress()
-                    hideBtnDeleteSchedule()
-                    with(professionalScheduleAdapter) {
-                        clearItemsList()
-                        val list = previousTimeList.subList(1, (previousTimeList.size - 1))
-                        setItemsList(list)
+                    date?.let { date ->
+                        val hoursList = Time(previousTimeList)
+                        calendarFieldViewModel.updateCalendarField(date, hoursList)
+                        hideBtnDeleteSchedule()
+                        with(professionalScheduleAdapter) {
+                            clearItemsList()
+                            val list = previousTimeList.subList(1, (previousTimeList.size - 1))
+                            setItemsList(list)
+                        }
+                        showUnscheduledLabel()
+                        deleteUser()
                     }
-                    showUnscheduledLabel()
-                    deleteUser()
                 }
                 ProfessionalActionEnum.IS_SETUP_ADAPTER -> {
                     val mutableTimeList = mutableListOf<String>()
@@ -153,18 +154,23 @@ class ProfessionalActivity : AppCompatActivity(),
         connectivityViewModel.hasInternet.observe(this,
             {
                 if (it.first) {
-                    showProgress()
                     when (it.second) {
                         CALENDAR_FIELD_AND_USER_DELETION -> {
-                            professionalAction = ProfessionalActionEnum.IS_DELETION
-                            calendarFieldViewModel.getCalendarFieldData(this, date!!)
+                            date?.let { date ->
+                                professionalAction = ProfessionalActionEnum.IS_DELETION
+                                calendarFieldViewModel.getCalendarFieldData(this, date)
+                            }
                         }
                         SETUP_ADAPTER -> {
-                            professionalAction = ProfessionalActionEnum.IS_SETUP_ADAPTER
-                            calendarFieldViewModel.getCalendarFieldData(this, date!!)
+                            date?.let { date ->
+                                professionalAction = ProfessionalActionEnum.IS_SETUP_ADAPTER
+                                calendarFieldViewModel.getCalendarFieldData(this, date)
+                            }
                         }
                         USER_DELETION -> {
-                            usersViewModel.deleteUser(email!!)
+                            email?.let { email ->
+                                usersViewModel.deleteUser(email)
+                            }
                         }
                         BottomNavigationActivity.LOG_OUT -> {
                             signOut()
@@ -185,11 +191,11 @@ class ProfessionalActivity : AppCompatActivity(),
 
     private fun showUnscheduledLabel() = binding.tvUnscheduledTime.apply {
         text = getString(R.string.scheduled_deleted)
-        visibility = View.VISIBLE
+        isVisible = true
     }
 
     private fun hideUnscheduledLabel() {
-        binding.tvUnscheduledTime.visibility = View.GONE
+        binding.tvUnscheduledTime.isVisible = false
     }
 
     private fun setupToolbar() = binding.apply {
@@ -249,7 +255,6 @@ class ProfessionalActivity : AppCompatActivity(),
         setBtnListener()
         hideRecycler()
         showCardView()
-        hideProgress()
         showBtnDeleteSchedule()
         setupUserInfo(info)
     }
@@ -262,19 +267,19 @@ class ProfessionalActivity : AppCompatActivity(),
     }
 
     private fun hideCardView() {
-        binding.cardViewUser.visibility = View.GONE
+        binding.cardViewUser.isVisible = false
     }
 
     private fun showCardView() {
-        binding.cardViewUser.visibility = View.VISIBLE
+        binding.cardViewUser.isVisible = true
     }
 
     private fun hideRecycler() {
-        binding.rvSchedules.visibility = View.GONE
+        binding.rvSchedules.isVisible = false
     }
 
     private fun showRecycler() {
-        binding.rvSchedules.visibility = View.VISIBLE
+        binding.rvSchedules.isVisible = true
     }
 
     private fun setupUserInfo(info: String) = binding.apply {
@@ -307,20 +312,12 @@ class ProfessionalActivity : AppCompatActivity(),
         )
     }
 
-    private fun showProgress() {
-        binding.progressProfessional.visibility = View.VISIBLE
-    }
-
-    private fun hideProgress() {
-        binding.progressProfessional.visibility = View.GONE
-    }
-
     private fun hideBtnDeleteSchedule() {
-        binding.btnDeleteSchedule.visibility = View.GONE
+        binding.btnDeleteSchedule.isVisible = false
     }
 
     private fun showBtnDeleteSchedule() {
-        binding.btnDeleteSchedule.visibility = View.VISIBLE
+        binding.btnDeleteSchedule.isVisible = true
     }
 
     private fun setupRefresh() {

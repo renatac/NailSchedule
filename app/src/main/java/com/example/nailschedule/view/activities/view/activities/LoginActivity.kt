@@ -6,18 +6,18 @@ import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityLoginBinding
 import com.example.nailschedule.view.activities.utils.*
-import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.example.nailschedule.view.activities.view.professional.ProfessionalActivity
+import com.example.nailschedule.view.activities.viewmodels.ConnectivityViewModel
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
@@ -52,8 +52,8 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var viewModel: ConnectivityViewModel
 
-    private var email = ""
-    private var password = ""
+    private var email = String.empty()
+    private var password = String.empty()
 
     companion object {
         const val GOOGLE_LOGIN = "google_login"
@@ -148,8 +148,8 @@ class LoginActivity : AppCompatActivity() {
     private fun setListeners() = binding.apply {
         showLoginByGoogleOrFacebook()
         btnClient.setOnClickListener {
-            setClientOrProfessionalGroupVisibility(View.GONE)
-            setBtnsLoginGroupVisibility(View.VISIBLE)
+            setClientOrProfessionalGroupVisibility(false)
+            setBtnsLoginGroupVisibility(true)
         }
         btnProfessional.setOnClickListener {
             if (isProfessionalLogged()) {
@@ -157,13 +157,13 @@ class LoginActivity : AppCompatActivity() {
             } else {
                 setBtnAccessListener()
                 showLoginByEmailOrPassword()
-                setClientOrProfessionalGroupVisibility(View.GONE)
-                setBtnsLoginGroupVisibility(View.GONE)
+                setClientOrProfessionalGroupVisibility(false)
+                setBtnsLoginGroupVisibility(false)
             }
         }
         tvClientOrProfessionalAgain.setOnClickListener {
-            setBtnsLoginGroupVisibility(View.GONE)
-            setClientOrProfessionalGroupVisibility(View.VISIBLE)
+            setBtnsLoginGroupVisibility(false)
+            setClientOrProfessionalGroupVisibility(true)
         }
     }
 
@@ -175,18 +175,18 @@ class LoginActivity : AppCompatActivity() {
             )
         }
         tvChooseClientOrProfessionalAgain.setOnClickListener {
-            setBtnsLoginGroupVisibility(View.GONE)
-            setClientOrProfessionalGroupVisibility(View.VISIBLE)
+            setBtnsLoginGroupVisibility(false)
+            setClientOrProfessionalGroupVisibility(true)
             showLoginByGoogleOrFacebook()
         }
     }
 
     private fun printEmptyField() {
         when {
-            isEmptyField(email) -> {
+            isEmptyBlankOrNullField(email) -> {
                 showToast(applicationContext, R.string.empty_email)
             }
-            isEmptyField(password) -> {
+            isEmptyBlankOrNullField(password) -> {
                 showToast(applicationContext, R.string.empty_password)
             }
         }
@@ -248,54 +248,55 @@ class LoginActivity : AppCompatActivity() {
                         SharedPreferencesHelper.GOOGLE_TOKEN_ID,
                         task.result.idToken
                     )
-
-                    val googleSignInResult =
-                        Auth.GoogleSignInApi.getSignInResultFromIntent(result.data!!)
-                    if (googleSignInResult.isSuccess) {
-                        val account: GoogleSignInAccount? = googleSignInResult.signInAccount
-                        saveHeaderNavDataInSharedPreferences(
-                            account?.displayName.toString(),
-                            account?.photoUrl.toString(),
-                            account?.email.toString()
-                        )
-                        val runnable = Runnable {
-                            try {
-                                val scope = "oauth2:" + Scopes.EMAIL + " " + Scopes.PROFILE
-                                val accessToken = GoogleAuthUtil.getToken(
-                                    applicationContext,
-                                    account?.account,
-                                    scope,
-                                    Bundle()
-                                )
-                                SharedPreferencesHelper.write(
-                                    SharedPreferencesHelper.GOOGLE_ACCESS_TOKEN,
-                                    accessToken
-                                )
-
-                                val accountGoogle =
-                                    GoogleSignIn.getSignedInAccountFromIntent(result.data).result
-                                accountGoogle?.let { googleSignInAccount ->
-                                    credential = GoogleAuthProvider.getCredential(
-                                        googleSignInAccount.idToken, accessToken
+                    result.data?.let { dataIntent ->
+                        val googleSignInResult =
+                            Auth.GoogleSignInApi.getSignInResultFromIntent(dataIntent)
+                        if (googleSignInResult?.isSuccess == true) {
+                            val account: GoogleSignInAccount? = googleSignInResult.signInAccount
+                            saveHeaderNavDataInSharedPreferences(
+                                account?.displayName.toString(),
+                                account?.photoUrl.toString(),
+                                account?.email.toString()
+                            )
+                            val runnable = Runnable {
+                                try {
+                                    val scope = "oauth2:" + Scopes.EMAIL + " " + Scopes.PROFILE
+                                    val accessToken = GoogleAuthUtil.getToken(
+                                        applicationContext,
+                                        account?.account,
+                                        scope,
+                                        Bundle()
                                     )
-                                }
+                                    SharedPreferencesHelper.write(
+                                        SharedPreferencesHelper.GOOGLE_ACCESS_TOKEN,
+                                        accessToken
+                                    )
 
-                                //Login With Google
-                                FirebaseAuth.getInstance()
-                                    .signInWithCredential(credential!!)
-                                    .addOnSuccessListener {
-                                        handleSignInResult(task)
-                                    }.addOnFailureListener {
-                                        println(it)
+                                    val accountGoogle =
+                                        GoogleSignIn.getSignedInAccountFromIntent(result.data).result
+                                    accountGoogle?.let { googleSignInAccount ->
+                                        credential = GoogleAuthProvider.getCredential(
+                                            googleSignInAccount.idToken, accessToken
+                                        )
                                     }
-
-                            } catch (e: IOException) {
-                                e.printStackTrace();
-                            } catch (e: GoogleAuthException) {
-                                e.printStackTrace()
+                                    credential?.let { authCredential ->
+                                        //Login With Google
+                                        FirebaseAuth.getInstance()
+                                            .signInWithCredential(authCredential)
+                                            .addOnSuccessListener {
+                                                handleSignInResult(task)
+                                            }.addOnFailureListener {
+                                                println(it)
+                                            }
+                                    }
+                                } catch (e: IOException) {
+                                    e.printStackTrace();
+                                } catch (e: GoogleAuthException) {
+                                    e.printStackTrace()
+                                }
                             }
+                            AsyncTask.execute(runnable)
                         }
-                        AsyncTask.execute(runnable)
                     }
                 }
             }
@@ -353,7 +354,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun redirectProfessionalFlow() {
-        startActivity( Intent(this, ProfessionalActivity::class.java))
+        startActivity(Intent(this, ProfessionalActivity::class.java))
     }
 
     private fun redirectToBottomNavigation() {
@@ -373,7 +374,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun loadUserProfile(newAccessToken: AccessToken?) {
-        val credential = FacebookAuthProvider.getCredential(newAccessToken?.token ?: "")
+        val credential = FacebookAuthProvider.getCredential(newAccessToken?.token ?: String.empty())
         FirebaseAuth.getInstance().signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
@@ -395,14 +396,14 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
-    private fun setBtnsLoginGroupVisibility(typeVisibility: Int) {
-        binding.btnsLoginGroup.visibility = typeVisibility
+    private fun setBtnsLoginGroupVisibility(typeVisibility: Boolean) {
+        binding.btnsLoginGroup.isVisible = typeVisibility
     }
 
     private fun isProfessionalLogged() = authByEmail.currentUser != null
 
-    private fun setClientOrProfessionalGroupVisibility(typeVisibility: Int) {
-        binding.clientOrProfessionalGroup.visibility = typeVisibility
+    private fun setClientOrProfessionalGroupVisibility(typeVisibility: Boolean) {
+        binding.clientOrProfessionalGroup.isVisible = typeVisibility
     }
 
     private fun showNoInternet() {
