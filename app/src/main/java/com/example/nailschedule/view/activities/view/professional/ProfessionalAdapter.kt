@@ -8,9 +8,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ItemHourBinding
+import com.example.nailschedule.view.activities.data.model.TimeAvailability
 
-class ProfessionalAdapter(private val onBtnSeeScheduleClicked: (info: String)-> Unit)
-: ListAdapter<timeAvailability, ProfessionalAdapter.MyViewHolder>(ProfessionalDiffCallback) {
+class ProfessionalAdapter(private val onBtnSeeScheduleClicked: (info: String) -> Unit) :
+    ListAdapter<TimeAvailability, ProfessionalAdapter.MyViewHolder>(ProfessionalDiffCallback) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -28,7 +29,7 @@ class ProfessionalAdapter(private val onBtnSeeScheduleClicked: (info: String)-> 
 
     inner class MyViewHolder(private val binding: ItemHourBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(timeAvailability: timeAvailability) = binding.apply {
+        fun bind(timeAvailability: TimeAvailability) = binding.apply {
             btnSeeSchedule.setOnClickListener {
                 onBtnSeeScheduleClicked.invoke(timeAvailability.time)
             }
@@ -45,10 +46,14 @@ class ProfessionalAdapter(private val onBtnSeeScheduleClicked: (info: String)-> 
         }
     }
 
-    object ProfessionalDiffCallback: DiffUtil.ItemCallback<timeAvailability>() {
-        override fun areItemsTheSame(oldItem: timeAvailability, newItem: timeAvailability) = true
+    object ProfessionalDiffCallback : DiffUtil.ItemCallback<TimeAvailability>() {
+        override fun areItemsTheSame(oldItem: TimeAvailability, newItem: TimeAvailability) =
+            oldItem.time == newItem.time
 
-        override fun areContentsTheSame(oldItem: timeAvailability, newItem: timeAvailability): Boolean {
+        override fun areContentsTheSame(
+            oldItem: TimeAvailability,
+            newItem: TimeAvailability
+        ): Boolean {
             return oldItem == newItem
         }
     }

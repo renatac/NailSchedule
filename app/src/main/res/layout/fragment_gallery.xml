@@ -134,7 +134,7 @@
                 app:layout_constraintTop_toTopOf="@id/btn_add_photos" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_home"
+                android:id="@+id/recycler_gallery"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginVertical="@dimen/_8dp"

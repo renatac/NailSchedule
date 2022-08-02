@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ActivityProfessionalBinding
 import com.example.nailschedule.view.activities.data.model.Time
+import com.example.nailschedule.view.activities.data.model.TimeAvailability
 import com.example.nailschedule.view.activities.utils.showLoginScreen
 import com.example.nailschedule.view.activities.utils.showToast
 import com.example.nailschedule.view.activities.view.activities.BottomNavigationActivity
@@ -22,6 +24,7 @@ import com.example.nailschedule.view.activities.viewmodels.UsersViewModel
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import java.util.*
 
 
 class ProfessionalActivity : AppCompatActivity(),
@@ -68,14 +71,13 @@ class ProfessionalActivity : AppCompatActivity(),
             ViewModelProvider(this)[UsersViewModel::class.java]
     }
 
-
     @SuppressLint("SimpleDateFormat")
     private fun initialSetup() {
+        setupAdapter()
         setupCalendarViewDatesMinAndMax()
         setCalendarListener()
         setupObserver()
         setupToolbar()
-        setupAdapter()
         hideRefresh()
         setupDrawerLayout()
     }
@@ -125,7 +127,7 @@ class ProfessionalActivity : AppCompatActivity(),
                         calendarFieldViewModel.updateCalendarField(date, hoursList)
                         hideBtnDeleteSchedule()
                         val list = previousTimeList.subList(1, (previousTimeList.size - 1))
-                        val professionalList = list.map { timeAvailability(it) }
+                        val professionalList = list.map { TimeAvailability(it) }
                         professionalScheduleAdapter.submitList(professionalList)
                         showUnscheduledLabel()
                         deleteUser()
@@ -138,9 +140,9 @@ class ProfessionalActivity : AppCompatActivity(),
                             mutableTimeList.add(t)
                         }
                     } ?: run {
-                        showToast(this, R.string.all_free)
+                        showToast(this, R.string.all_free, duration = Toast.LENGTH_SHORT)
                     }
-                    val professionalList = mutableTimeList.map { timeAvailability(it) }
+                    val professionalList = mutableTimeList.map { TimeAvailability(it) }
                     professionalScheduleAdapter.submitList(professionalList)
                 }
             }
@@ -201,12 +203,16 @@ class ProfessionalActivity : AppCompatActivity(),
     }
 
     private fun setCalendarListener() {
-        binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            saveDate(dayOfMonth, month, year)
-            getAvailableTimeList()
-            hideCardView()
-            showRecycler()
+        binding.calendarView.setOnDateChangeListener { _, year: Int, month, dayOfMonth ->
+            onClickDate(dayOfMonth, month, year)
         }
+    }
+
+    private fun onClickDate(dayOfMonth: Int, month: Int, year: Int) {
+        saveDate(dayOfMonth, month, year)
+        getAvailableTimeList()
+        hideCardView()
+        showRecycler()
     }
 
     private fun saveDate(dayOfMonth: Int, month: Int, year: Int) {
@@ -318,6 +324,12 @@ class ProfessionalActivity : AppCompatActivity(),
     private fun setupRefresh() {
         binding.professionalSwipeRefreshLayout.setOnRefreshListener {
             initialSetup()
+            val calendar = Calendar.getInstance()
+            onClickDate(
+                calendar.get(Calendar.DAY_OF_MONTH),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.YEAR)
+            )
         }
     }
 

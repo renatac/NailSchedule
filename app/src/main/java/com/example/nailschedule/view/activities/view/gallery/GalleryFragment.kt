@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.FragmentGalleryBinding
+import com.example.nailschedule.view.activities.data.model.GalleryUri
 import com.example.nailschedule.view.activities.utils.SharedPreferencesHelper
 import com.example.nailschedule.view.activities.utils.empty
 import com.example.nailschedule.view.activities.utils.showToast
@@ -97,10 +98,9 @@ class GalleryFragment : Fragment() {
     }
 
     private fun initialSetup() {
-        galleryAdapter.clearList()
+        setupAdapter()
         downloadPhotosFromCloudStorage()
         setupClickListeners()
-        setupAdapter()
     }
 
     private fun setupClickListeners() = binding.apply {
@@ -121,10 +121,15 @@ class GalleryFragment : Fragment() {
                 when (galleryActionEnum) {
                     GalleryActionEnum.DOWNLOAD -> {
                         if (listResult.items.size != 0) {
+                            val uriList = arrayListOf<GalleryUri>()
                             listResult.items.forEach {
                                 it.downloadUrl.addOnSuccessListener { uri ->
-                                    connectivityViewModel.hasPhoto.value = true
-                                    galleryAdapter.setItemList(uri)
+                                    uriList.add(GalleryUri(uri))
+                                    if(uriList.size == listResult.items.size) {
+                                        galleryAdapter.submitList(uriList) {
+                                            showRecyclerView()
+                                        }
+                                    }
                                 }.addOnFailureListener { exception ->
                                     print(exception)
                                 }
@@ -150,13 +155,6 @@ class GalleryFragment : Fragment() {
                     hideRefresh()
                     email?.let { email ->
                         if (it.second == DOWNLOAD) {
-                            connectivityViewModel.hasPhoto.observe(viewLifecycleOwner, {
-                                if (connectivityViewModel.hasPhoto.value == true) {
-                                    showRecyclerView()
-                                } else {
-                                    showEmptyState()
-                                }
-                            })
                             galleryActionEnum = GalleryActionEnum.DOWNLOAD
                             storageViewModel.getImagesList(requireContext(), email)
                         } else if (it.second == UPLOAD) {
@@ -169,7 +167,7 @@ class GalleryFragment : Fragment() {
                             selectedUri?.let { uri ->
                                 refOneImage?.putFile(uri)
                             }
-                            showRecyclerView()
+                            print("Upload")
                         } else if (it.second == DELETE) {
                             printMessageAboutExclusion()
                             if (areAllItems) {
@@ -203,9 +201,10 @@ class GalleryFragment : Fragment() {
     }
 
     private fun setupAdapter() {
-        binding.recyclerHome.layoutManager =
-            GridLayoutManager(requireContext(), 2)
-        binding.recyclerHome.adapter = galleryAdapter
+        binding.recyclerGallery.apply {
+            layoutManager = GridLayoutManager(requireContext(), 2)
+            adapter = galleryAdapter
+        }
     }
 
     override fun onDestroyView() {
@@ -227,11 +226,15 @@ class GalleryFragment : Fragment() {
                     // The Task returned from this call is always completed, no need to attach
                     // a listener.
                     selectedUri = result.data?.data
-
                     try {
-                        selectedUri?.let {
-                            galleryAdapter.setItemList(it)
-                            showRecyclerView()
+                        selectedUri?.let { uriSelected ->
+                            val list: List<GalleryUri> = galleryAdapter.currentList.map { it.copy() }
+                                 .toMutableList().plus(GalleryUri(uriSelected))
+                            galleryAdapter.submitList(list) {
+                                val lastPosition = galleryAdapter.currentList.size - 1
+                                binding.recyclerGallery.scrollToPosition(lastPosition)
+                                showRecyclerView()
+                            }
                             showTrash()
                             uploadPhotoToCloudStorage()
                         }
@@ -267,10 +270,6 @@ class GalleryFragment : Fragment() {
         binding.gallerySwipeRefreshLayout.isRefreshing = false
     }
 
-    private fun showProgress() {
-        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_LOADING
-    }
-
     private fun hideTrash() {
         binding.ivDelete.isVisible = false
     }
@@ -279,16 +278,20 @@ class GalleryFragment : Fragment() {
         binding.ivDelete.isVisible = true
     }
 
-    private fun showRecyclerView() {
-        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_HAS_PHOTO
+    private fun showProgress() {
+        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_LOADING
+    }
+
+    private fun showNoIntern() {
+        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_NO_INTERNET
     }
 
     private fun showEmptyState() {
         binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_EMPTY_STATE
     }
 
-    private fun showNoIntern() {
-        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_NO_INTERNET
+    private fun showRecyclerView() {
+        binding.galleryViewFlipper.displayedChild = VIEW_FLIPPER_HAS_PHOTO
     }
 
     private fun printMessageAboutExclusion() {
@@ -311,7 +314,7 @@ class GalleryFragment : Fragment() {
     private fun deletePhotosFromCloudStorage(
         selectedUriList: List<Uri>,
         areAllItems: Boolean,
-        uriList: ArrayList<Uri>?
+        uriList: List<Uri>?
     ) {
         this.selectedUriList = selectedUriList
         this.areAllItems = areAllItems

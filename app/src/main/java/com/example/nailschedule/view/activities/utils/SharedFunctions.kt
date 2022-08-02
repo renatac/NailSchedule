@@ -15,11 +15,11 @@ fun isLoggedInFacebook(): Boolean {
     return accessToken != null
 }
 
-fun showToast(context: Context, stringId: Int) {
+fun showToast(context: Context, stringId: Int, duration: Int = Toast.LENGTH_LONG) {
     Toast.makeText(
         context,
         context.getString(stringId),
-        Toast.LENGTH_LONG
+        duration
     ).show()
 }
 
@@ -40,8 +40,6 @@ fun isEmptyBlankOrNullField(field: String?): Boolean {
 fun String.hasTrueSemicolon() = this.contains("true;")
 
 fun String.hasSemicolonTrue() = this.contains(";true")
-
-fun String.hasFalseSemicolon() = this.contains("false;")
 
 fun String.hasSemicolonFalse() = this.contains(";false")
 

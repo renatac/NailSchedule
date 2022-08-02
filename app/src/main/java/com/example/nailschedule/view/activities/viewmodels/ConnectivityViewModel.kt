@@ -9,8 +9,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class ConnectivityViewModel : ViewModel() {
-    var hasPhoto = MutableLiveData<Boolean>()
-
     private var _hasInternet = MutableLiveData<Pair<Boolean, String>>()
     val hasInternet: LiveData<Pair<Boolean, String>>
     get() = _hasInternet

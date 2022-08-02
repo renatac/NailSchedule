@@ -4,19 +4,21 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.nailschedule.R
 import com.example.nailschedule.databinding.ItemListGalleryBinding
+import com.example.nailschedule.view.activities.data.model.GalleryUri
 
 class GalleryAdapter(
     private val onShortClick: (String) -> Unit,
     private val hideTrash: () -> Unit,
     private val deletePhotosFromCloudStorage:
-        (List<Uri>, Boolean, ArrayList<Uri>?) -> Unit
-): RecyclerView.Adapter<GalleryAdapter.MyViewHolder>() {
+        (List<Uri>, Boolean, List<Uri>?) -> Unit
+): ListAdapter<GalleryUri, GalleryAdapter.MyViewHolder>(GalleryUriDiffCallback) {
 
-    private var uriList: ArrayList<Uri>? = arrayListOf()
     private var hasLongClick = false
     private var selectedUriList: ArrayList<Uri> = arrayListOf()
 
@@ -31,20 +33,8 @@ class GalleryAdapter(
     )
 
     override fun onBindViewHolder(holder: GalleryAdapter.MyViewHolder, position: Int) {
-        holder.bind(uriList?.get(position))
+        holder.bind(currentList[position])
     }
-
-    override fun getItemCount() = uriList?.size ?: 0
-
-    fun setItemList(uri: Uri) {
-        uriList?.apply {
-            add(uri)
-            sort()
-        }
-        notifyDataSetChanged()
-    }
-
-    fun clearList() = uriList?.clear()
 
     private fun addUriSelected(uri: Uri?) {
         uri?.let { selectedUriList.add(uri) }
@@ -52,20 +42,21 @@ class GalleryAdapter(
 
     private fun removeUriSelected(uri: Uri?) {
         uri?.let { selectedUriList.remove(uri) }
-        if (uriList?.isEmpty() == true) {
+        if (currentList.isEmpty()) {
             hideTrash.invoke()
         }
     }
 
     fun clickToRemove() {
-        val areAllItems = uriList?.size == selectedUriList.size
-        deletePhotosFromCloudStorage.invoke(selectedUriList, areAllItems, uriList)
-        uriList?.removeAll(selectedUriList)
-        if (uriList?.isEmpty() == true) {
+        val areAllItems = currentList.size == selectedUriList.size
+        deletePhotosFromCloudStorage.invoke(selectedUriList, areAllItems, currentList.map {it.uri})
+        val list = currentList.map { it.copy() }.toMutableList()
+        list.removeAll(selectedUriList.map { GalleryUri(it) })
+        if (list.isEmpty()) {
             hideTrash.invoke()
         }
+        submitList(list)
         selectedUriList.clear()
-        notifyDataSetChanged()
     }
 
     private fun ensureAppearance(uri: Uri?, binding: ItemListGalleryBinding) {
@@ -109,24 +100,34 @@ class GalleryAdapter(
 
     inner class MyViewHolder(private val binding: ItemListGalleryBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(uri: Uri?) = binding.apply {
-            ensureAppearance(uri, binding)
+        fun bind(galleryUri: GalleryUri?) = binding.apply {
+            ensureAppearance(galleryUri?.uri, binding)
             with(item) {
                 setOnLongClickListener {
                     hasLongClick = true
-                    onLongClick(uri, binding)
+                    onLongClick(galleryUri?.uri, binding)
                     return@setOnLongClickListener true
                 }
                 setOnClickListener {
                     if (hasLongClick) {
-                        onLongClick(uri, binding)
+                        onLongClick(galleryUri?.uri, binding)
                     } else {
-                        shortClick(uri)
+                        shortClick(galleryUri?.uri)
                     }
                 }
             }
             //Setting the image to imageView using Glide Library
-            Glide.with(item.rootView.context).load(uri.toString()).into(ivItem)
+            Glide.with(item.rootView.context).load(galleryUri?.uri.toString()).into(ivItem)
+        }
+    }
+
+    object GalleryUriDiffCallback: DiffUtil.ItemCallback<GalleryUri>() {
+        override fun areItemsTheSame(oldItem: GalleryUri, newItem: GalleryUri): Boolean {
+            return oldItem.uri == newItem.uri
+        }
+
+        override fun areContentsTheSame(oldItem: GalleryUri, newItem: GalleryUri): Boolean {
+            return oldItem == newItem
         }
     }
 }
